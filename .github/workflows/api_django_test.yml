@@ -1,0 +1,56 @@
+name: 'domo_django_test'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  django_tests:
+    name: Run Django test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Poetry
+        run: pip install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          cache: 'poetry'
+          cache-dependency-path: poetry.lock
+          python-version: 3.10.13
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Run Django tests
+        working-directory: domo_base
+        run: |
+          poetry run python manage.py test --parallel
+        env:
+          XINT_DJANGO_SECRET_KEY: 'SECRETKEY-FOR-TEST-PLEASE-DO-NOT-USE-IN-PRODUCTION'
+          DB_NAME: postgres
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_HOST: localhost
+          DB_PORT: 5432
