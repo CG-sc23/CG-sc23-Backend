@@ -19,13 +19,11 @@ jobs:
           password: ${{ secrets.REMOTE_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            sudo su - ubuntu
-            source ~/.bashrc
-            cd /home/ubuntu/CG-sc23-Backend/
+            cd CG-sc23-Backend
             poetry shell
             cd domo
-            python manage.py makemigrations
-            python manage.py migrate
-            python manage.py collectstatic —noinput
+            poetry run manage.py makemigrations
+            poetry run manage.py migrate
+            poetry run manage.py collectstatic —noinput
             killall uwsgi
-            uwsgi --ini uwsgi.ini > /dev/null 2>&1 &
+            poetry run uwsgi --ini uwsgi.ini > /dev/null 2>&1 &
