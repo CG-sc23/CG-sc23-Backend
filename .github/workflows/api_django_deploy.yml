@@ -20,10 +20,8 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             cd CG-sc23-Backend
-            /home/ubuntu/.local/bin/poetry shell
-            cd domo
-            poetry run manage.py makemigrations
-            poetry run manage.py migrate
-            poetry run manage.py collectstatic —noinput
+            /home/ubuntu/.local/bin/poetry run domo/manage.py makemigrations
+            /home/ubuntu/.local/bin/poetry run domo/manage.py migrate
+            /home/ubuntu/.local/bin/poetry run domo/manage.py collectstatic —noinput
             killall uwsgi
-            poetry run uwsgi --ini uwsgi.ini > /dev/null 2>&1 &
+            /home/ubuntu/.local/bin/poetry run uwsgi --ini uwsgi.ini > /dev/null 2>&1 &
