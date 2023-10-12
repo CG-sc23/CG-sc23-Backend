@@ -20,7 +20,7 @@ jobs:
           REMOTE_SSH_PORT: ${{ secrets.REMOTE_SSH_PORT }}
         run: |
             sudo apt install sshpass
-            sshpass -p $REMOTE_PASSWORD -o StrictHostKeyChecking=no -p $REMOTE_SSH_PORT $REMOTE_USER@$REMOTE_HOST
+            sshpass -p $REMOTE_PASSWORD ssh -o StrictHostKeyChecking=no -p $REMOTE_SSH_PORT $REMOTE_USER@$REMOTE_HOST
             cd CG-sc23-Backend
             poetry run domo/manage.py makemigrations
             poetry run domo/manage.py migrate
