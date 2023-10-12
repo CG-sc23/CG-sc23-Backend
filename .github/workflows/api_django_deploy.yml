@@ -19,6 +19,9 @@ jobs:
           password: ${{ secrets.REMOTE_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            printenv
-            source /home/ubuntu/.bashrc
-            printenv
+            cd CG-sc23-Backend
+            poetry run domo/manage.py makemigrations
+            poetry run domo/manage.py migrate
+            poetry run domo/manage.py collectstatic --noinput
+            killall uwsgi
+            poetry run uwsgi --ini domo/uwsgi.ini &
