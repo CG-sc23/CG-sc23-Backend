@@ -21,8 +21,8 @@ jobs:
           script: |
             source /home/ubuntu/.bashrc
             cd CG-sc23-Backend
-            /home/ubuntu/.local/bin/poetry run domo/manage.py makemigrations
-            /home/ubuntu/.local/bin/poetry run domo/manage.py migrate
-            /home/ubuntu/.local/bin/poetry run domo/manage.py collectstatic --noinput
-            killall uwsgi
+#            /home/ubuntu/.local/bin/poetry run domo/manage.py makemigrations
+#            /home/ubuntu/.local/bin/poetry run domo/manage.py migrate
+#            /home/ubuntu/.local/bin/poetry run domo/manage.py collectstatic --noinput
+#            killall uwsgi
             /home/ubuntu/.local/bin/poetry run uwsgi --ini domo/uwsgi.ini &
