@@ -20,6 +20,7 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             sudo su - ubuntu
+            source ~/.bashrc
             cd /home/ubuntu/CG-sc23-Backend/
             poetry shell
             cd domo
@@ -27,4 +28,4 @@ jobs:
             python manage.py migrate
             python manage.py collectstatic —noinput
             killall uwsgi
-            uwsgi —ini uwsgi.ini > /dev/null 2>&1 &
+            uwsgi --ini uwsgi.ini > /dev/null 2>&1 &
