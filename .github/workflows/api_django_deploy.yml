@@ -19,10 +19,13 @@ jobs:
           REMOTE_SSH_KEY: ${{ secrets.REMOTE_SSH_KEY }}
           REMOTE_SSH_PORT: ${{ secrets.REMOTE_SSH_PORT }}
         run: |
-            ssh -i $REMOTE_SSH_KEY -p $REMOTE_SSH_PORT $REMOTE_USER@$REMOTE_HOST
+            echo "$REMOTE_SSH_KEY" > private_key
+            chmod 600 private_key
+            ssh -i private_key -o StrictHostKeyChecking=no -p $REMOTE_SSH_PORT $REMOTE_USER@$REMOTE_HOST << EOF
             cd CG-sc23-Backend
             poetry run domo/manage.py makemigrations
             poetry run domo/manage.py migrate
             poetry run domo/manage.py collectstatic --noinput
             killall uwsgi
             poetry run uwsgi --ini domo/uwsgi.ini &
+            EOF
