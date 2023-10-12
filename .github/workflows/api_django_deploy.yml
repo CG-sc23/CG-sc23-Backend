@@ -19,6 +19,7 @@ jobs:
           password: ${{ secrets.REMOTE_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
+            source /home/ubuntu/.bashrc
             cd CG-sc23-Backend
             /home/ubuntu/.local/bin/poetry run domo/manage.py makemigrations
             /home/ubuntu/.local/bin/poetry run domo/manage.py migrate
