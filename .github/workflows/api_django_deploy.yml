@@ -20,7 +20,7 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             cd CG-sc23-Backend
-            poetry shell
+            /home/ubuntu/.local/bin/poetry shell
             cd domo
             poetry run manage.py makemigrations
             poetry run manage.py migrate
