@@ -28,5 +28,5 @@ jobs:
             poetry run domo/manage.py migrate
             poetry run domo/manage.py collectstatic --noinput
             killall uwsgi
-            poetry run uwsgi --ini domo/uwsgi.ini > ./cron.log 2>&1 &
+            poetry run uwsgi --ini domo/uwsgi.ini >> ./serv.log 2>&1 &
             EOF
