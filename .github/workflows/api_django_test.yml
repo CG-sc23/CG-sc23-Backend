@@ -1,4 +1,4 @@
-name: 'domo_django_test'
+name: '[DOMO] Lint & Test'
 
 on:
   push:
@@ -9,6 +9,33 @@ on:
       - main
 
 jobs:
+  black_isort:
+    name: Check Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          cache: 'poetry'
+          cache-dependency-path: poetry.lock
+          python-version: 3.10.13
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Run Black check
+        run: poetry run black --diff --check .
+
+      - name: Run isort check
+        run: poetry run isort --profile black --skip-glob="**/migrations" --diff --check .
+
   django_tests:
     name: Run Django test
     runs-on: ubuntu-latest
