@@ -1,4 +1,4 @@
-name: 'domo_django_deploy'
+name: '[DOMO] Deploy'
 
 on:
   push:
