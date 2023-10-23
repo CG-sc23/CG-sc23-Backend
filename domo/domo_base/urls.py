@@ -16,9 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from domo_api.views import health_check
+from domo_api.views import auth, health_check
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", health_check.check, name="health_check"),
+    path("api/auth/v1/sign-up", auth.SignUp, name="sign_up"),
+    path("api/auth/v1/sign-in", auth.SignIn, name="sign_in"),
+    path("api/auth/v1/sign-out", auth.SignOut, name="sign_out"),
 ]
