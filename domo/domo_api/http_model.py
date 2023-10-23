@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -14,9 +16,9 @@ class SignUpRequest(BaseModel):
     email: EmailStr
     name: str
     password: str
-    github_link: str | None
-    short_description: str | None
-    description: str | None
+    github_link: Optional[str] = None
+    short_description: Optional[str] = None
+    description: Optional[str] = None
 
 
 class SignInRequest(BaseModel):
