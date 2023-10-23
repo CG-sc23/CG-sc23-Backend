@@ -21,7 +21,7 @@ from domo_api.views import auth, health_check
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", health_check.check, name="health_check"),
-    path("api/auth/v1/sign-up", auth.SignUp, name="sign_up"),
-    path("api/auth/v1/sign-in", auth.SignIn, name="sign_in"),
-    path("api/auth/v1/sign-out", auth.SignOut, name="sign_out"),
+    path("api/auth/v1/sign-up", auth.SignUp.as_view(), name="sign_up"),
+    path("api/auth/v1/sign-in", auth.SignIn.as_view(), name="sign_in"),
+    path("api/auth/v1/sign-out", auth.SignOut.as_view(), name="sign_out"),
 ]
