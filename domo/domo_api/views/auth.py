@@ -50,8 +50,7 @@ class SignUp(APIView):
                 if request_data.description
                 else None,
             )
-        except Exception as e:
-            print(e)
+        except:
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error creating user"
@@ -87,9 +86,9 @@ class SignIn(APIView):
         else:
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Invalid request."
+                    success=False, reason="Email or Password is incorrect."
                 ).model_dump(),
-                status=400,
+                status=401,
             )
 
 
