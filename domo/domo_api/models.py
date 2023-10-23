@@ -35,7 +35,6 @@ class UserManager(BaseUserManager):
         )
 
         user.is_superuser = True
-        user.is_admin = True
         user.save(using=self._db)
         return user
 
@@ -46,8 +45,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
 
     email = models.EmailField(max_length=320)
-
-    password = models.CharField()
 
     name = models.CharField(max_length=20)
 
@@ -62,9 +59,3 @@ class User(AbstractBaseUser, PermissionsMixin):
     rating = models.FloatField(default=0.0)
 
     created_at = models.DateTimeField()
-
-    is_active = models.BooleanField(default=True)
-
-    is_superuser = models.BooleanField(default=False)
-
-    is_admin = models.BooleanField(default=False)
