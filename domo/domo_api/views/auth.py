@@ -9,10 +9,11 @@ from domo_api.http_model import (
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import Token, User
+from domo_api.models import User
 from domo_base import settings
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
 
@@ -31,7 +32,7 @@ class SignUp(APIView):
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Invalid request."
-                ).model_dump_json(),
+                ).model_dump(),
                 status=400,
             )
 
@@ -39,7 +40,7 @@ class SignUp(APIView):
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="User with this email already exists"
-                ).model_dump_json(),
+                ).model_dump(),
                 status=400,
             )
         # Create user
@@ -58,15 +59,16 @@ class SignUp(APIView):
                 if request_data.description
                 else None,
             )
-        except:
+        except Exception as e:
+            print(e)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error creating user"
-                ).model_dump_json(),
+                ).model_dump(),
                 status=500,
             )
         return JsonResponse(
-            SimpleSuccessResponse(success=True).model_dump_json(),
+            SimpleSuccessResponse(success=True).model_dump(),
             status=201,
         )
 
@@ -82,7 +84,7 @@ class SignIn(APIView):
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Invalid request."
-                ).model_dump_json(),
+                ).model_dump(),
                 status=400,
             )
         user = authenticate(email=auth_info.email, password=auth_info.password)
@@ -90,12 +92,12 @@ class SignIn(APIView):
             Token.objects.filter(user=user).delete()
             token, _ = Token.objects.get_or_create(user=user)
             response_data = SignInResponse(success=True, token=token.key)
-            return JsonResponse(response_data.model_dump_json(), status=200)
+            return JsonResponse(response_data.model_dump(), status=200)
         else:
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Invalid request."
-                ).model_dump_json(),
+                ).model_dump(),
                 status=400,
             )
 
@@ -106,5 +108,5 @@ class SignOut(APIView):
     def post(self, request):
         request.auth.delete()
         return JsonResponse(
-            SimpleSuccessResponse(success=True).model_dump_json(),
+            SimpleSuccessResponse(success=True).model_dump(),
         )
