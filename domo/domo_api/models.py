@@ -45,6 +45,7 @@ class UserManager(BaseUserManager):
             password=password,
         )
 
+        user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
         return user
@@ -73,9 +74,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     created_at = models.DateTimeField()
 
+    is_active = models.BooleanField(default=True)
+
+    is_staff = models.BooleanField(default=False)
+
+    is_superuser = models.BooleanField(default=False)
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name"]
 
-    @property
-    def is_staff(self):
-        return self.is_superuser
+    def __str__(self):
+        return self.email

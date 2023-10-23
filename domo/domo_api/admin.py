@@ -8,8 +8,10 @@ class UserAdmin(admin.ModelAdmin):
     list_display = (
         "email",
         "name",
-        "github_link",
+        "is_active",
         "short_description",
+        "description",
+        "github_link",
         "created_at",
         "is_staff",
     )
@@ -29,10 +31,19 @@ class UserAdmin(admin.ModelAdmin):
                     "grade",
                     "like",
                     "rating",
+                    "is_active",
                 )
             },
         ),
-        ("Permissions", {"fields": ("is_superuser",)}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_staff",
+                    "is_superuser",
+                )
+            },
+        ),
     )
     add_fieldsets = (
         (
