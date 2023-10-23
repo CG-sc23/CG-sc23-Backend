@@ -5,10 +5,11 @@ from django.http import JsonResponse
 from domo_api.http_model import (
     SignInRequest,
     SignInResponse,
+    SignUpRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import Token
+from domo_api.models import Token, User
 from domo_base import settings
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
@@ -22,7 +23,52 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 
 class SignUp(APIView):
-    raise NotImplementedError
+    def post(self, request):
+        # validate input
+        try:
+            request_data = SignUpRequest(**request.data)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump_json(),
+                status=400,
+            )
+
+        if User.objects.filter(email=request_data.email).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="User with this email already exists"
+                ).model_dump_json(),
+                status=400,
+            )
+        # Create user
+        try:
+            User.objects.create_user(
+                email=request_data.email,
+                password=request_data.password,
+                name=request_data.name,
+                github_link=request_data.github_link
+                if request_data.github_link
+                else None,
+                short_description=request_data.short_description
+                if request_data.short_description
+                else None,
+                description=request_data.description
+                if request_data.description
+                else None,
+            )
+        except:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error creating user"
+                ).model_dump_json(),
+                status=500,
+            )
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump_json(),
+            status=201,
+        )
 
 
 class Signin(APIView):
@@ -35,11 +81,11 @@ class Signin(APIView):
         except ValidationError:
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Email or Password is invalid"
+                    success=False, reason="Invalid request."
                 ).model_dump_json(),
                 status=400,
             )
-        user = authenticate(username=auth_info.email, password=auth_info.password)
+        user = authenticate(email=auth_info.email, password=auth_info.password)
         if user:
             Token.objects.filter(user=user).delete()
             token, _ = Token.objects.get_or_create(user=user)
@@ -48,7 +94,7 @@ class Signin(APIView):
         else:
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Email or Password is invalid"
+                    success=False, reason="Invalid request."
                 ).model_dump_json(),
                 status=400,
             )
