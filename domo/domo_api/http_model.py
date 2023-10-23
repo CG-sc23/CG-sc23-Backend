@@ -10,6 +10,15 @@ class SimpleSuccessResponse(BaseModel):
     success: bool
 
 
+class SignUpRequest(BaseModel):
+    email: EmailStr
+    name: str
+    password: str
+    github_link: str | None
+    short_description: str | None
+    description: str | None
+
+
 class SignInRequest(BaseModel):
     email: EmailStr
     password: str
