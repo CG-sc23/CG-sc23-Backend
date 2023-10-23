@@ -10,7 +10,9 @@ from domo_base import settings
 class UserManager(BaseUserManager):
     use_in_migration = True
 
-    def create_user(self, email, password, name, short_description, description):
+    def create_user(
+        self, email, password, name, short_description, description, github_link=None
+    ):
         if not email:
             raise ValueError("must have email!")
         if not password:
@@ -24,6 +26,9 @@ class UserManager(BaseUserManager):
             short_description=short_description,
             description=description,
         )
+        if github_link:
+            user.github_link = github_link
+
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -48,6 +53,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=320, unique=True)
 
     name = models.CharField(max_length=20)
+
+    github_link = models.CharField(max_length=100, null=True)
 
     short_description = models.CharField(max_length=50, null=True)
 
