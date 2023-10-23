@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework.authtoken",
+    "domo_api",
 ]
 
 MIDDLEWARE = [
@@ -83,6 +83,9 @@ DATABASES = {
         "CONN_MAX_AGE": 3600,
     }
 }
+
+AUTH_USER_MODEL = "domo_api.User"
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
