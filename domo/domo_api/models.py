@@ -18,7 +18,7 @@ class UserManager(BaseUserManager):
         if not name:
             raise ValueError("must have name!")
 
-        user = self.create_user(
+        user = self.model(
             email=self.normalize_email(email),
             name=name,
             short_description=short_description,
