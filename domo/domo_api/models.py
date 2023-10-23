@@ -75,3 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name"]
+
+    @property
+    def is_staff(self):
+        return self.is_superuser
