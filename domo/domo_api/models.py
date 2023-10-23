@@ -9,7 +9,13 @@ class UserManager(BaseUserManager):
     use_in_migration = True
 
     def create_user(
-        self, email, password, name, short_description, description, github_link=None
+        self,
+        email,
+        password,
+        name,
+        short_description=None,
+        description=None,
+        github_link=None,
     ):
         if not email:
             raise ValueError("must have email!")
@@ -68,3 +74,4 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField()
 
     USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["name"]
