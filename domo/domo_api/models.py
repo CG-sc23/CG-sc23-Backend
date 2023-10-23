@@ -25,12 +25,10 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, name, short_description, description):
+    def create_superuser(self, email, password, name):
         user = self.create_user(
             email=self.normalize_email(email),
             name=name,
-            short_description=short_description,
-            description=description,
             password=password,
         )
 
@@ -48,14 +46,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     name = models.CharField(max_length=20)
 
-    short_description = models.CharField(max_length=50)
+    short_description = models.CharField(max_length=50, null=True)
 
-    description = models.TextField()
+    description = models.TextField(null=True)
 
-    grade = models.IntegerField(default=0)
+    grade = models.IntegerField(null=True)
 
-    like = models.IntegerField(default=0)
+    like = models.IntegerField(null=True)
 
-    rating = models.FloatField(default=0.0)
+    rating = models.FloatField(null=True)
 
     created_at = models.DateTimeField()
