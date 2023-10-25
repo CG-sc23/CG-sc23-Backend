@@ -13,10 +13,10 @@ class SignUpTest(TestCase):
         self.user_data = {
             "email": "test@example.com",
             "password": "VAL1DP@sSW0Rd",
-            "name": "Test User",
+            "name": "춘식이",
             "github_link": "https://github.com/testuser",
-            "short_description": "A test user",
-            "description": "This is a description of a test user",
+            "short_description": "나는 춘식이",
+            "description": "도움이 필요한 춘식이 살려줘요",
         }
 
     def test_sign_up_success(self):

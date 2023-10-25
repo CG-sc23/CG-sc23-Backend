@@ -3,7 +3,7 @@ from django.urls import reverse
 from domo_api.models import User
 
 
-class SignInTestCase(TestCase):
+class SignInTest(TestCase):
     def setUp(self):
         # Given: 유효한 계정을 생성
         self.sign_in_url = reverse("sign_in")
