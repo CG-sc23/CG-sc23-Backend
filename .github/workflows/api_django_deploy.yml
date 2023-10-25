@@ -23,7 +23,7 @@ jobs:
             chmod 600 private_key
             ssh -i private_key -o StrictHostKeyChecking=no -p $REMOTE_SSH_PORT $REMOTE_USER@$REMOTE_HOST << EOF
             cd CG-sc23-Backend
-            git pull
+            git pull -X theirs
             poetry install --no-root
             poetry run domo/manage.py makemigrations
             poetry run domo/manage.py migrate
