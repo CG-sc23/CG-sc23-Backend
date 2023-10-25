@@ -25,7 +25,7 @@ class ProfileHandler:
 
     def upload_image(self, user_email, file):
         s3 = self.s3_client
-        file_name = f"{user_email}/profile-image.jpeg"
+        file_name = f"users/{user_email}/profile-image.jpeg"
 
         try:
             s3.upload_fileobj(file, self.aws_s3_bucket_name, file_name)
@@ -39,7 +39,7 @@ class ProfileHandler:
 
         bucket = s3.Bucket(self.aws_s3_bucket_name)
 
-        for obj in bucket.objects.filter(Prefix=f"{user_email}/"):
+        for obj in bucket.objects.filter(Prefix=f"users/{user_email}/"):
             obj.delete()
 
 
