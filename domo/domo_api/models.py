@@ -16,6 +16,7 @@ class UserManager(BaseUserManager):
         short_description=None,
         description=None,
         github_link=None,
+        has_profile_image=False,
     ):
         if not email:
             raise ValueError("must have email!")
@@ -30,6 +31,7 @@ class UserManager(BaseUserManager):
             short_description=short_description,
             description=description,
             created_at=datetime.now(tz=timezone.utc),
+            has_profile_image=has_profile_image,
         )
         if github_link:
             user.github_link = github_link
@@ -61,6 +63,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=20)
 
     github_link = models.CharField(max_length=100, null=True)
+
+    has_profile_image = models.BooleanField(default=False)
 
     short_description = models.CharField(max_length=50, null=True)
 
