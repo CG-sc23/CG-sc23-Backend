@@ -39,7 +39,7 @@ class SignUp(APIView):
         if User.objects.filter(email=request_data.email).exists():
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="User with this email already exists"
+                    success=False, reason="User with this email already exists."
                 ).model_dump(),
                 status=400,
             )
@@ -100,7 +100,7 @@ class SignUp(APIView):
                 profile_handler.delete_directory(request_data.email)
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Error creating user"
+                    success=False, reason="Error creating user."
                 ).model_dump(),
                 status=500,
             )
