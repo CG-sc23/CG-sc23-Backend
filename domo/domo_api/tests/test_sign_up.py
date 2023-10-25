@@ -42,7 +42,7 @@ class SignUpTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()["success"])
         self.assertEqual(
-            response.json()["reason"], "User with this email already exists"
+            response.json()["reason"], "User with this email already exists."
         )
 
     def test_signup_invalid_payload(self):
@@ -99,4 +99,4 @@ class SignUpTest(TestCase):
         # Then: 서버 내부 오류로 인해 회원가입이 실패한다.
         self.assertEqual(response.status_code, 500)
         self.assertFalse(response.json()["success"])
-        self.assertEqual(response.json()["reason"], "Error creating user")
+        self.assertEqual(response.json()["reason"], "Error creating user.")
