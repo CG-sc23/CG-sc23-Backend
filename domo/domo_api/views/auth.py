@@ -1,4 +1,6 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as PasswordValidationError
 from django.http import JsonResponse
 from domo_api.http_model import (
     SignInRequest,
@@ -34,6 +36,17 @@ class SignUp(APIView):
                 ).model_dump(),
                 status=400,
             )
+
+        try:
+            validate_password(request_data.password)
+        except PasswordValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Password is too weak."
+                ).model_dump(),
+                status=400,
+            )
+
         # Create user
         try:
             User.objects.create_user(
