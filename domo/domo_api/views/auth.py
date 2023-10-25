@@ -22,15 +22,25 @@ from rest_framework.views import APIView
 
 class SignUp(APIView):
     def post(self, request):
-        if isinstance(request.data, dict):
-            request_data_origin = request.data
-        else:
-            request_data_origin = {
-                k: v[0] if isinstance(v, list) else v for k, v in request.data.lists()
-            }
+        email = request.data.get("email")
+        name = request.data.get("name")
+        password = request.data.get("password")
+        github_link = request.data.get("github_link", None)
+        short_description = request.data.get("short_description", None)
+        description = request.data.get("description", None)
+
+        data_dict = {
+            "email": email,
+            "name": name,
+            "password": password,
+            "github_link": github_link,
+            "short_description": short_description,
+            "description": description,
+        }
+
         # validate input
         try:
-            request_data = SignUpRequest(**request_data_origin)
+            request_data = SignUpRequest(**data_dict)
         except ValidationError:
             return JsonResponse(
                 SimpleFailResponse(
