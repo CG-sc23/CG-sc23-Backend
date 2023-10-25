@@ -22,9 +22,12 @@ from rest_framework.views import APIView
 
 class SignUp(APIView):
     def post(self, request):
-        request_data_origin = {
-            k: v[0] if isinstance(v, list) else v for k, v in request.data.lists()
-        }
+        if isinstance(request.data, dict):
+            request_data_origin = request.data
+        else:
+            request_data_origin = {
+                k: v[0] if isinstance(v, list) else v for k, v in request.data.lists()
+            }
         # validate input
         try:
             request_data = SignUpRequest(**request_data_origin)
