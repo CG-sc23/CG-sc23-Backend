@@ -1,10 +1,18 @@
 import io
+import secrets
+from datetime import datetime, timezone
 
+import domo_base.settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as PasswordValidationError
+from django.core.mail import send_mail
 from django.http import JsonResponse
+from django.template.loader import render_to_string
 from domo_api.http_model import (
+    PasswordResetCheckRequest,
+    PasswordResetConfirmRequest,
+    PasswordResetRequest,
     SignInRequest,
     SignInResponse,
     SignUpRequest,
@@ -12,7 +20,7 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
     SocialSignUpRequest,
 )
-from domo_api.models import User
+from domo_api.models import PasswordResetToken, User
 from domo_api.s3.profile import ProfileHandler
 from PIL import Image
 from pydantic import ValidationError
@@ -272,3 +280,173 @@ class SignOut(APIView):
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
         )
+
+
+class PasswordReset(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+
+        try:
+            request_data = PasswordResetRequest(email=email)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            user = User.objects.get(email=request_data.email)
+            # TODO
+            # if user.provider != "our":
+            #     return JsonResponse(
+            #         SimpleFailResponse(
+            #             success=False, reason="User is not registered with email."
+            #         ).model_dump(),
+            #         status=400,
+            #     )
+            token = secrets.token_urlsafe(10)
+            if PasswordResetToken.objects.filter(user=user).exists():
+                PasswordResetToken.objects.filter(user=user).delete()
+            PasswordResetToken.objects.create(
+                user=user, token=token, created_at=datetime.now(tz=timezone.utc)
+            )
+            context = {
+                "current_user": user,
+                "username": user.name,
+                "email": user.email,
+                "token": token,
+            }
+            email_html_message = render_to_string(
+                "templates/password_reset_email.html", context
+            )
+            send_mail(
+                subject="Password Reset for DOMO",
+                message="",
+                from_email=domo_base.settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+                html_message=email_html_message,
+            )
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
+            )
+
+        except User.DoesNotExist:
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
+            )
+        except:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Failed to send email."
+                ).model_dump(),
+                status=500,
+            )
+
+
+class PasswordResetCheck(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        token = request.data.get("token")
+
+        try:
+            request_data = PasswordResetCheckRequest(email=email, token=token)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            password_reset_token = PasswordResetToken.objects.get(
+                user__email__iexact=request_data.email
+            )
+
+            if password_reset_token.token != request_data.token:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Invalid token."
+                    ).model_dump(),
+                    status=401,
+                )
+            # 토큰 유효 시간 == 10분
+            if (
+                datetime.now(tz=timezone.utc) - password_reset_token.created_at
+            ).total_seconds() > 600:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Token expired."
+                    ).model_dump(),
+                    status=401,
+                )
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
+            )
+        except PasswordResetToken.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason="Invalid token.").model_dump(),
+                status=401,
+            )
+        except Exception as e:
+            print(e)
+
+
+class PasswordResetConfirm(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        try:
+            request_data = PasswordResetConfirmRequest(
+                email=email, token=token, new_password=new_password
+            )
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            password_reset_token = PasswordResetToken.objects.get(
+                user__email__iexact=request_data.email
+            )
+            if password_reset_token.token != request_data.token:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Invalid token."
+                    ).model_dump(),
+                    status=401,
+                )
+            validate_password(request_data.new_password)
+
+            user = User.objects.get(email=request_data.email)
+            user.set_password(request_data.new_password)
+            user.save()
+
+            PasswordResetToken.objects.filter(user=user).delete()
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
+            )
+        except PasswordValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Password is too weak."
+                ).model_dump(),
+                status=400,
+            )
+        except PasswordResetToken.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason="Invalid token.").model_dump(),
+                status=401,
+            )
