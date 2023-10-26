@@ -17,6 +17,7 @@ class UserManager(BaseUserManager):
         description=None,
         github_link=None,
         has_profile_image=False,
+        provider="our",
     ):
         if not email:
             raise ValueError("must have email!")
@@ -32,6 +33,7 @@ class UserManager(BaseUserManager):
             description=description,
             created_at=datetime.now(tz=timezone.utc),
             has_profile_image=has_profile_image,
+            provider=provider,
         )
         if github_link:
             user.github_link = github_link
@@ -77,6 +79,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     rating = models.FloatField(null=True)
 
     created_at = models.DateTimeField()
+
+    provider = models.CharField(max_length=20, default="our")
+
+    pre_access_token = models.TextField(null=True)
 
     is_active = models.BooleanField(default=True)
 
