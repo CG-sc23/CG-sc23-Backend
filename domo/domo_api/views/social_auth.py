@@ -114,3 +114,83 @@ class Google:
                     status=500,
                 )
             return JsonResponse(response_data.model_dump(), status=200)
+
+
+class Kakao:
+    CALLBACK_URI = BASE_URL + "/api/auth/v1/social/kakao/callback/"
+
+    @staticmethod
+    def sign_in(request):
+        client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
+        return redirect(
+            f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}"
+            f"&response_type=code&redirect_uri={Kakao.CALLBACK_URI}"
+        )
+
+    @staticmethod
+    def callback(request):
+        client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
+        code = request.GET.get("code")
+
+        token_req = requests.post(
+            f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&"
+            f"client_id={client_id}&code={code}&"
+            f"redirect_uri={Kakao.CALLBACK_URI}"
+        )
+        token_req_json = token_req.json()
+
+        error = token_req_json.get("error")
+        if error:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason=error).model_dump(), status=500
+            )
+
+        access_token = token_req_json.get("access_token")
+
+        user_info_req = requests.get(
+            f"https://kapi.kakao.com/v2/user/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        user_info_req_json = user_info_req.json()
+        email = user_info_req_json.get("kakao_account").get("email")
+
+        try:
+            user = User.objects.get(email=email)
+
+            if user.provider != "kakao":
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="No matching social type."
+                    ).model_dump(),
+                    status=400,
+                )
+
+            Token.objects.filter(user=user).delete()
+            token, _ = Token.objects.get_or_create(user=user)
+            response_data = SignInResponse(success=True, token=token.key)
+            return JsonResponse(response_data.model_dump(), status=200)
+
+        except User.DoesNotExist:
+            response_data = SocialSignUpResponse(
+                success=True,
+                email=email,
+                pre_access_token=access_token,
+                provider="kakao",
+                message="Social sign-up is ready.",
+            )
+            try:
+                User.objects.create(
+                    email=email,
+                    name="NOT REGISTERED",
+                    provider="kakao",
+                    pre_access_token=access_token,
+                    created_at=datetime.now(tz=timezone.utc),
+                )
+            except:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Error pre-creating user."
+                    ).model_dump(),
+                    status=500,
+                )
+            return JsonResponse(response_data.model_dump(), status=200)
