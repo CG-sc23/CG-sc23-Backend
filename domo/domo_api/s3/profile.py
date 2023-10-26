@@ -5,23 +5,18 @@ import boto3
 
 class ProfileHandler:
     def __init__(self):
-        self.aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-        self.aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
         self.aws_s3_bucket_name = os.environ.get("AWS_S3_BUCKET_NAME")
-        self.region_name = os.environ.get("AWS_REGION_NAME")
 
-        self.s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key,
-            region_name=self.region_name,
-        )
-        self.s3_resource = boto3.resource(
-            "s3",
-            aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key,
-            region_name=self.region_name,
-        )
+        # # For Local Test
+        # self.s3_session = boto3.Session(profile_name="minio")
+        # self.s3_client = self.s3_session.client(
+        #     "s3", endpoint_url="http://127.0.0.1:9000"
+        # )
+        # self.s3_resource = self.s3_session.resource(
+        #     "s3", endpoint_url="http://127.0.0.1:9000"
+        # )
+        self.s3_client = boto3.client("s3")
+        self.s3_resource = self.s3_session.resource("s3")
 
     def upload_image(self, user_email, file):
         s3 = self.s3_client
