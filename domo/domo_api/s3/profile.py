@@ -16,7 +16,7 @@ class ProfileHandler:
         #     "s3", endpoint_url="http://127.0.0.1:9000"
         # )
         self.s3_client = boto3.client("s3")
-        self.s3_resource = self.s3_session.resource("s3")
+        self.s3_resource = boto3.resource("s3")
 
     def upload_image(self, user_email, file):
         s3 = self.s3_client
