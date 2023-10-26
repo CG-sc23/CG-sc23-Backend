@@ -32,6 +32,16 @@ urlpatterns = [
         name="google_callback",
     ),
     path(
+        "api/auth/v1/social/kakao/sign-in",
+        social_auth.Kakao.sign_in,
+        name="kakao_sign_in",
+    ),
+    path(
+        "api/auth/v1/social/kakao/callback/",
+        social_auth.Kakao.callback,
+        name="kakao_callback",
+    ),
+    path(
         "api/auth/v1/social/sign-up", auth.SocialSignUp.as_view(), name="social_sign_up"
     ),
     path("api/auth/v1/sign-up", auth.SignUp.as_view(), name="sign_up"),
