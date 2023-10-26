@@ -14,12 +14,14 @@ class UserAdmin(admin.ModelAdmin):
         "github_link",
         "created_at",
         "is_staff",
+        "provider",
+        "pre_access_token",
     )
     list_filter = ("is_superuser", "created_at")
     search_fields = ("email", "name")
     ordering = ("-created_at",)
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
+        (None, {"fields": ("email", "password", "provider", "pre_access_token")}),
         (
             "Personal Info",
             {
