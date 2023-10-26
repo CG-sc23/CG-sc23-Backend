@@ -61,7 +61,7 @@ class Google:
                 SimpleFailResponse(
                     success=False, reason="Failed to get email."
                 ).model_dump(),
-                status=500,
+                status=400,
             )
 
         ### 2-2. 성공 시 이메일 가져오기
