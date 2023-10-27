@@ -14,7 +14,6 @@ class UserManager(BaseUserManager):
         password,
         name,
         short_description=None,
-        description=None,
         github_link=None,
         has_profile_image=False,
         provider="our",
@@ -30,7 +29,6 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             name=name,
             short_description=short_description,
-            description=description,
             created_at=datetime.now(tz=timezone.utc),
             has_profile_image=has_profile_image,
             provider=provider,
@@ -69,8 +67,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     has_profile_image = models.BooleanField(default=False)
 
     short_description = models.CharField(max_length=50, null=True)
-
-    description = models.TextField(null=True)
 
     grade = models.IntegerField(null=True)
 
