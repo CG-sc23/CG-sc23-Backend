@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 from ..http_model import SignInResponse, SimpleFailResponse, SocialSignUpResponse
 from ..models import User
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://ec2-43-200-38-207.ap-northeast-2.compute.amazonaws.com"
 
 
 class Google:
