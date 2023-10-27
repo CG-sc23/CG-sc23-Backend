@@ -4,8 +4,6 @@ from datetime import datetime, timezone
 
 import domo_base.settings
 from django.contrib.auth import authenticate
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError as PasswordValidationError
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.template.loader import render_to_string
@@ -199,16 +197,6 @@ class SignUp(APIView):
                     ).model_dump(),
                     status=500,
                 )
-
-        try:
-            validate_password(request_data.password)
-        except PasswordValidationError:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Password is too weak."
-                ).model_dump(),
-                status=400,
-            )
 
         # Create user
         try:
@@ -424,8 +412,6 @@ class PasswordResetConfirm(APIView):
                     ).model_dump(),
                     status=401,
                 )
-            validate_password(request_data.new_password)
-
             user = User.objects.get(email=request_data.email)
             user.set_password(request_data.new_password)
             user.save()
@@ -434,13 +420,6 @@ class PasswordResetConfirm(APIView):
             return JsonResponse(
                 SimpleSuccessResponse(success=True).model_dump(),
                 status=200,
-            )
-        except PasswordValidationError:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Password is too weak."
-                ).model_dump(),
-                status=400,
             )
         except PasswordResetToken.DoesNotExist:
             return JsonResponse(

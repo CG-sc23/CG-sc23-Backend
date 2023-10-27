@@ -10,11 +10,11 @@ from rest_framework.authtoken.models import Token
 from ..http_model import SignInResponse, SimpleFailResponse, SocialSignUpResponse
 from ..models import User
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "https://api.domowebest.com"
 
 
 class Google:
-    CALLBACK_URI = BASE_URL + "/api/auth/v1/social/google/callback/"
+    CALLBACK_URI = BASE_URL + "/auth/v1/social/google/callback/"
 
     @staticmethod
     def sign_in(request):
@@ -81,6 +81,9 @@ class Google:
                     ).model_dump(),
                     status=400,
                 )
+            if user.name == "NOT REGISTERED":
+                user.delete()
+                raise User.DoesNotExist
 
             # 성공하면, DOMO 로그인에 사용할 토큰 생성 및 response.
             Token.objects.filter(user=user).delete()
@@ -117,7 +120,7 @@ class Google:
 
 
 class Kakao:
-    CALLBACK_URI = BASE_URL + "/api/auth/v1/social/kakao/callback/"
+    CALLBACK_URI = BASE_URL + "/auth/v1/social/kakao/callback/"
 
     @staticmethod
     def sign_in(request):
