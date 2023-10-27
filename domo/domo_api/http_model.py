@@ -47,3 +47,18 @@ class SocialSignUpResponse(BaseModel):
     message: str
     pre_access_token: str
     provider: str
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetCheckRequest(BaseModel):
+    email: EmailStr
+    token: str
+
+
+class PasswordResetConfirmRequest(BaseModel):
+    email: EmailStr
+    token: str
+    new_password: str
