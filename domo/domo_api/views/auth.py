@@ -298,14 +298,13 @@ class PasswordReset(APIView):
 
         try:
             user = User.objects.get(email=request_data.email)
-            # TODO
-            # if user.provider != "our":
-            #     return JsonResponse(
-            #         SimpleFailResponse(
-            #             success=False, reason="User is not registered with email."
-            #         ).model_dump(),
-            #         status=400,
-            #     )
+            if user.provider != "our":
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="User is not registered with email."
+                    ).model_dump(),
+                    status=400,
+                )
             token = secrets.token_urlsafe(10)
             if PasswordResetToken.objects.filter(user=user).exists():
                 PasswordResetToken.objects.filter(user=user).delete()
