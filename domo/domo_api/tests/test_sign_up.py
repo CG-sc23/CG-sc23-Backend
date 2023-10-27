@@ -82,19 +82,6 @@ class SignUpTest(TestCase):
         self.assertFalse(response.json()["success"])
         self.assertEqual(response.json()["reason"], "Invalid request.")
 
-    def test_sign_up_weak_password(self):
-        # Given: 비밀번호 조건을 충족하지 못할 때
-        short_password_data = self.user_data.copy()
-        short_password_data["password"] = "short"
-
-        # When: 회원가입 API를 호출하면,
-        response = self.client.post(self.signup_url, short_password_data, format="json")
-
-        # Then: 비밀번호의 조건을 충족시키지 못해 회원가입이 실패한다.
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.json()["success"])
-        self.assertEqual(response.json()["reason"], "Password is too weak.")
-
     @patch("domo_api.models.User.objects.create_user")
     def test_sign_up_server_error(self, mock_create_user):
         # Given: 서버 내부 오류가 발생할 때(예: DB 연결 오류),

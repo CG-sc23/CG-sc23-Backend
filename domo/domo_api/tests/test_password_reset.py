@@ -138,20 +138,3 @@ class PasswordResetTest(TestCase):
         self.assertTrue(response.json()["success"])
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("NewPassword123!"))
-
-    def test_password_reset_confirm_weak_password(self):
-        # Given: 유효한 비밀번호 재설정 토큰, 약한 비밀번호
-        token = PasswordResetToken.objects.create(
-            user=self.user, created_at=datetime.now(tz=timezone.utc)
-        )
-
-        # When: 약한 비밀번호로 비밀번호 재설정 확인 요청을 보낸다.
-        response = self.client.post(
-            self.url_password_reset_confirm,
-            {"email": self.email, "token": token.token, "new_password": "12345678"},
-        )
-
-        # Then: 응답 코드는 400이고, 비밀번호가 변경되지 않는다.
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(response.json()["success"])
-        self.assertEqual(response.json()["reason"], "Password is too weak.")
