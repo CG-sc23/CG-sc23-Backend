@@ -29,22 +29,16 @@ from rest_framework.views import APIView
 
 class SocialSignUp(APIView):
     def post(self, request):
-        email = request.data.get("email")
         name = request.data.get("name")
-        provider = request.data.get("provider")
         pre_access_token = request.data.get("pre_access_token")
         github_link = request.data.get("github_link", None)
         short_description = request.data.get("short_description", None)
-        description = request.data.get("description", None)
 
         data_dict = {
-            "email": email,
             "name": name,
-            "provider": provider,
             "pre_access_token": pre_access_token,
             "github_link": github_link,
             "short_description": short_description,
-            "description": description,
         }
 
         # validate input
@@ -58,19 +52,19 @@ class SocialSignUp(APIView):
                 status=400,
             )
 
-        if not User.objects.filter(email=request_data.email).exists():
+        if not User.objects.filter(pre_access_token=pre_access_token).exists():
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="User with this email not exists."
+                    success=False, reason="User not pre-registered."
                 ).model_dump(),
                 status=400,
             )
 
-        user = User.objects.get(email=request_data.email)
+        user = User.objects.get(pre_access_token=pre_access_token)
         if user.name != "NOT REGISTERED":
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="User with this email already registered."
+                    success=False, reason="User is already registered."
                 ).model_dump(),
                 status=400,
             )
@@ -118,9 +112,6 @@ class SocialSignUp(APIView):
                 if request_data.short_description
                 else None
             )
-            user.description = (
-                request_data.description if request_data.description else None
-            )
             user.save()
         except:
             if profile_upload_success:
@@ -144,7 +135,6 @@ class SignUp(APIView):
         password = request.data.get("password")
         github_link = request.data.get("github_link", None)
         short_description = request.data.get("short_description", None)
-        description = request.data.get("description", None)
 
         data_dict = {
             "email": email,
@@ -152,7 +142,6 @@ class SignUp(APIView):
             "password": password,
             "github_link": github_link,
             "short_description": short_description,
-            "description": description,
         }
 
         # validate input
@@ -210,9 +199,6 @@ class SignUp(APIView):
                 else None,
                 short_description=request_data.short_description
                 if request_data.short_description
-                else None,
-                description=request_data.description
-                if request_data.description
                 else None,
                 provider="our",
             )
