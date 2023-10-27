@@ -393,8 +393,6 @@ class PasswordResetCheck(APIView):
                 SimpleFailResponse(success=False, reason="Invalid token.").model_dump(),
                 status=401,
             )
-        except Exception as e:
-            print(e)
 
 
 class PasswordResetConfirm(APIView):
