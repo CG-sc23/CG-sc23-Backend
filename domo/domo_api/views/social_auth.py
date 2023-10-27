@@ -14,7 +14,7 @@ BASE_URL = "https://api.domowebest.com"
 
 
 class Google:
-    CALLBACK_URI = BASE_URL + "/api/auth/v1/social/google/callback/"
+    CALLBACK_URI = BASE_URL + "/auth/v1/social/google/callback/"
 
     @staticmethod
     def sign_in(request):
