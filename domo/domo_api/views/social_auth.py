@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 from ..http_model import SignInResponse, SimpleFailResponse, SocialSignUpResponse
 from ..models import User
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "https://api.domowebest.com"
 
 
 class Google:
