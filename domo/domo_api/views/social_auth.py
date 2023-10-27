@@ -120,7 +120,7 @@ class Google:
 
 
 class Kakao:
-    CALLBACK_URI = BASE_URL + "/api/auth/v1/social/kakao/callback/"
+    CALLBACK_URI = BASE_URL + "/auth/v1/social/kakao/callback/"
 
     @staticmethod
     def sign_in(request):
