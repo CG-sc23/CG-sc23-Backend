@@ -81,6 +81,9 @@ class Google:
                     ).model_dump(),
                     status=400,
                 )
+            if user.name == "NOT REGISTERED":
+                user.delete()
+                raise User.DoesNotExist
 
             # 성공하면, DOMO 로그인에 사용할 토큰 생성 및 response.
             Token.objects.filter(user=user).delete()
