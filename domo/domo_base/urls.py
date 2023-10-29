@@ -40,13 +40,13 @@ urlpatterns = [
         name="password_change",
     ),
     path(
-        "auth/v1/email-verify",
-        auth.PasswordResetConfirm.as_view(),
+        "auth/v1/sign-up-email-verify",
+        auth.SignUpEmailVerify.as_view(),
         name="email_verify",
     ),
     path(
-        "auth/v1/email-verify-confirm",
-        auth.PasswordResetConfirm.as_view(),
+        "auth/v1/sign-up-email-verify-confirm",
+        auth.EmailVerifyConfirm.as_view(),
         name="email_verify_confirm",
     ),
 ]

@@ -440,7 +440,7 @@ class PasswordResetConfirm(APIView):
             )
 
 
-class EmailVerify(APIView):
+class SignUpEmailVerify(APIView):
     def post(self, request):
         email = request.data.get("email")
 
@@ -454,35 +454,35 @@ class EmailVerify(APIView):
                 status=400,
             )
 
-        try:
-            user = User.objects.get(email=request_data.email)
-            if user.email == email:
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="Email already exists."
-                    ).model_dump(),
-                    status=400,
-                )
-            token = secrets.token_urlsafe(10)
-            if EmailVerifyToken.objects.filter(user=user).exists():
-                EmailVerifyToken.objects.filter(user=user).delete()
-            EmailVerifyToken.objects.create(
-                user=user, token=token, created_at=datetime.now(tz=timezone.utc)
+        # 유저가 존재하면, 이메일 보내지 말고 200
+        if User.objects.filter(email=request_data.email).exists():
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
             )
+
+        token = secrets.token_urlsafe(10)
+        if EmailVerifyToken.objects.filter(email=request_data.email).exists():
+            EmailVerifyToken.objects.filter(email=request_data.email).delete()
+        EmailVerifyToken.objects.create(
+            email=request_data.email,
+            token=token,
+            created_at=datetime.now(tz=timezone.utc),
+        )
+
+        try:
             context = {
-                "current_user": user,
-                "username": user.name,
-                "email": user.email,
+                "email": request_data.email,
                 "token": token,
             }
             email_html_message = render_to_string(
-                "templates/verify_email.html", context
+                "templates/sign_up_verify_email.html", context
             )
             send_mail(
                 subject="Verify Email account for DOMO",
                 message="",
                 from_email=domo_base.settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
+                recipient_list=[request_data.email],
                 fail_silently=False,
                 html_message=email_html_message,
             )
@@ -491,11 +491,6 @@ class EmailVerify(APIView):
                 status=200,
             )
 
-        except User.DoesNotExist:
-            return JsonResponse(
-                SimpleSuccessResponse(success=True).model_dump(),
-                status=200,
-            )
         except:
             return JsonResponse(
                 SimpleFailResponse(
@@ -521,25 +516,25 @@ class EmailVerifyConfirm(APIView):
             )
 
         try:
-            email_verify_token = EmailVerifyToken.objects.get(
-                user__email__iexact=request_data.email
-            )
-            if EmailVerifyToken.token != request_data.token:
+            email_verify_token = EmailVerifyToken.objects.get(email=request_data.email)
+            if email_verify_token.token != request_data.token:
                 return JsonResponse(
                     SimpleFailResponse(
-                        success=False, reason="Invalid token."
+                        success=False,
+                        reason="Invalid token.",
                     ).model_dump(),
                     status=401,
                 )
-            user = User.objects.get(email=request_data.email)
-
-            EmailVerifyToken.objects.filter(user=user).delete()
+            EmailVerifyToken.objects.filter(email=request_data.email).delete()
             return JsonResponse(
                 SimpleSuccessResponse(success=True).model_dump(),
                 status=200,
             )
         except EmailVerifyToken.DoesNotExist:
             return JsonResponse(
-                SimpleFailResponse(success=False, reason="Invalid token.").model_dump(),
+                SimpleFailResponse(
+                    success=False,
+                    reason="Invalid token.",
+                ).model_dump(),
                 status=401,
             )
