@@ -28,8 +28,6 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
-from domo.domo_api.http_model import EmailVerifyRequest
-
 
 class SocialSignUp(APIView):
     def post(self, request):
