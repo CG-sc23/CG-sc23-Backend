@@ -20,7 +20,6 @@ class SignUpTest(TestCase):
             "name": "춘식이",
             "github_link": "https://github.com/testuser",
             "short_description": "나는 춘식이",
-            "description": "도움이 필요한 춘식이 살려줘요",
         }
         image = Image.new("RGB", (100, 100))
         self.tmp_file = BytesIO()

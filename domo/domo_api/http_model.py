@@ -18,7 +18,6 @@ class SignUpRequest(BaseModel):
     password: str
     github_link: Optional[str] = None
     short_description: Optional[str] = None
-    description: Optional[str] = None
 
 
 class SignInRequest(BaseModel):
@@ -31,22 +30,23 @@ class SignInResponse(BaseModel):
     token: str
 
 
+class SocialSignInResponse(BaseModel):
+    success: bool
+    is_user: bool
+    token: str
+
+
 class SocialSignUpRequest(BaseModel):
-    email: EmailStr
     name: str
-    provider: str
     pre_access_token: str
     github_link: Optional[str] = None
     short_description: Optional[str] = None
-    description: Optional[str] = None
 
 
-class SocialSignUpResponse(BaseModel):
+class SocialPreSignUpResponse(BaseModel):
     success: bool
-    email: EmailStr
-    message: str
+    is_user: bool
     pre_access_token: str
-    provider: str
 
 
 class PasswordResetRequest(BaseModel):
