@@ -105,9 +105,6 @@ class PasswordResetToken(models.Model):
 
 class EmailVerifyToken(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-    )
+    email = models.EmailField(max_length=320, unique=True)
     token = models.CharField(max_length=30)
     created_at = models.DateTimeField()
