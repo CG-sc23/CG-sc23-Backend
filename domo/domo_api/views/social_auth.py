@@ -1,11 +1,15 @@
+import os
 import secrets
 from datetime import datetime, timezone
 
+import domo_base.settings
 import requests
 from django.http import JsonResponse
+from google_auth_oauthlib.flow import Flow
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
+from ..const import ReturnCode
 from ..http_model import (
     SimpleFailResponse,
     SocialPreSignUpResponse,
@@ -14,11 +18,75 @@ from ..http_model import (
 from ..models import User
 
 
+def pre_sign_up(email, social_type):
+    try:
+        user = User.objects.get(email=email)
+        if user.provider != social_type:
+            return ReturnCode.NO_MATCHING_SOCIAL_TYPE
+
+        if user.name == "NOT REGISTERED":
+            user.delete()
+            raise User.DoesNotExist
+
+        # 성공하면, DOMO 로그인에 사용할 토큰 생성 및 response.
+        Token.objects.filter(user=user).delete()
+        token, _ = Token.objects.get_or_create(user=user)
+        response_data = SocialSignInResponse(
+            success=True,
+            is_user=True,
+            token=token.key,
+        )
+        return response_data
+
+    except User.DoesNotExist:
+        # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 새로운 회원가입 준비
+        pre_access_token = secrets.token_urlsafe(32)
+        response_data = SocialPreSignUpResponse(
+            success=True,
+            is_user=False,
+            pre_access_token=pre_access_token,
+        )
+        # Create user
+        try:
+            User.objects.create(
+                email=email,
+                name="NOT REGISTERED",
+                provider="google",
+                pre_access_token=pre_access_token,
+                created_at=datetime.now(tz=timezone.utc),
+            )
+        except:
+            return ReturnCode.ERROR_PRE_CREATING_USER
+
+        return response_data
+
+
 class Google(APIView):
     def post(self, request):
-        access_token = request.data.get("access_token")
+        code = request.data.get("code")
+        flow = Flow.from_client_secrets_file(
+            f"{domo_base.settings.BASE_DIR}/domo_base/client_secret.json",
+            scopes=[
+                "openid",
+                "https://www.googleapis.com/auth/userinfo.profile",
+                "https://www.googleapis.com/auth/userinfo.email",
+            ],
+            redirect_uri="http://localhost:3000",
+        )
+
+        try:
+            flow.fetch_token(code=code)
+            credentials = flow.credentials
+        except:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Failed to get access_token."
+                ).model_dump(),
+                status=500,
+            )
+
         email_req = requests.get(
-            f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}"
+            f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={credentials.token}"
         )
         email_req_status = email_req.status_code
 
@@ -27,65 +95,57 @@ class Google(APIView):
                 SimpleFailResponse(
                     success=False, reason="Failed to get email."
                 ).model_dump(),
-                status=400,
+                status=500,
             )
 
         email_req_json = email_req.json()
         email = email_req_json.get("email")
 
-        try:
-            user = User.objects.get(email=email)
-            if user.provider != "google":
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="No matching social type."
-                    ).model_dump(),
-                    status=400,
-                )
-            if user.name == "NOT REGISTERED":
-                user.delete()
-                raise User.DoesNotExist
+        status = pre_sign_up(email, "google")
 
-            # 성공하면, DOMO 로그인에 사용할 토큰 생성 및 response.
-            Token.objects.filter(user=user).delete()
-            token, _ = Token.objects.get_or_create(user=user)
-            response_data = SocialSignInResponse(
-                success=True,
-                is_user=True,
-                token=token.key,
+        if status == ReturnCode.NO_MATCHING_SOCIAL_TYPE:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="No matching social type."
+                ).model_dump(),
+                status=400,
             )
-            return JsonResponse(response_data.model_dump(), status=200)
-
-        except User.DoesNotExist:
-            # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 새로운 회원가입 준비
-            pre_access_token = secrets.token_urlsafe(32)
-            response_data = SocialPreSignUpResponse(
-                success=True,
-                is_user=False,
-                pre_access_token=pre_access_token,
+        elif status == ReturnCode.ERROR_PRE_CREATING_USER:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error pre-creating user."
+                ).model_dump(),
+                status=500,
             )
-            # Create user
-            try:
-                User.objects.create(
-                    email=email,
-                    name="NOT REGISTERED",
-                    provider="google",
-                    pre_access_token=pre_access_token,
-                    created_at=datetime.now(tz=timezone.utc),
-                )
-            except:
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="Error pre-creating user."
-                    ).model_dump(),
-                    status=500,
-                )
-            return JsonResponse(response_data.model_dump(), status=200)
+        elif status == ReturnCode.SUCCESS:
+            return JsonResponse(status.model_dump(), status=200)
 
 
 class Kakao(APIView):
     def post(self, request):
-        access_token = request.data.get("access_token")
+        code = request.data.get("code")
+
+        client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
+        access_token_req = requests.post(
+            f"https://kauth.kakao.com/oauth/token",
+            data={
+                "grant_type": "authorization_code",
+                "client_id": client_id,
+                "redirect_uri": "http://localhost:3000",
+                "code": code,
+            },
+        )
+
+        if access_token_req.status_code != 200:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Failed to get access_token."
+                ).model_dump(),
+                status=500,
+            )
+
+        access_token_req_json = access_token_req.json()
+        access_token = access_token_req_json.get("access_token")
 
         user_info_req = requests.get(
             f"https://kapi.kakao.com/v2/user/me",
@@ -94,51 +154,21 @@ class Kakao(APIView):
         user_info_req_json = user_info_req.json()
         email = user_info_req_json.get("kakao_account").get("email")
 
-        try:
-            user = User.objects.get(email=email)
-            if user.provider != "kakao":
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="No matching social type."
-                    ).model_dump(),
-                    status=400,
-                )
-            if user.name == "NOT REGISTERED":
-                user.delete()
-                raise User.DoesNotExist
+        status = pre_sign_up(email, "google")
 
-            # 성공하면, DOMO 로그인에 사용할 토큰 생성 및 response.
-            Token.objects.filter(user=user).delete()
-            token, _ = Token.objects.get_or_create(user=user)
-            response_data = SocialSignInResponse(
-                success=True,
-                is_user=True,
-                token=token.key,
+        if status == ReturnCode.NO_MATCHING_SOCIAL_TYPE:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="No matching social type."
+                ).model_dump(),
+                status=400,
             )
-            return JsonResponse(response_data.model_dump(), status=200)
-
-        except User.DoesNotExist:
-            # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 새로운 회원가입 준비
-            pre_access_token = secrets.token_urlsafe(32)
-            response_data = SocialPreSignUpResponse(
-                success=True,
-                is_user=False,
-                pre_access_token=pre_access_token,
+        elif status == ReturnCode.ERROR_PRE_CREATING_USER:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error pre-creating user."
+                ).model_dump(),
+                status=500,
             )
-            # Create user
-            try:
-                User.objects.create(
-                    email=email,
-                    name="NOT REGISTERED",
-                    provider="kakao",
-                    pre_access_token=pre_access_token,
-                    created_at=datetime.now(tz=timezone.utc),
-                )
-            except:
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="Error pre-creating user."
-                    ).model_dump(),
-                    status=500,
-                )
-            return JsonResponse(response_data.model_dump(), status=200)
+        elif status == ReturnCode.SUCCESS:
+            return JsonResponse(status.model_dump(), status=200)
