@@ -18,11 +18,38 @@ from ..http_model import (
 from ..models import User
 
 
-def pre_sign_up(email, social_type):
+def oauth_finish(status):
+    if status[0] == ReturnCode.NO_MATCHING_SOCIAL_TYPE:
+        return JsonResponse(
+            SimpleFailResponse(
+                success=False, reason="No matching social type."
+            ).model_dump(),
+            status=400,
+        )
+    elif status[0] == ReturnCode.ERROR_PRE_CREATING_USER:
+        return JsonResponse(
+            SimpleFailResponse(
+                success=False, reason="Error pre-creating user."
+            ).model_dump(),
+            status=500,
+        )
+    elif status[0] == ReturnCode.SIGN_IN_SUCCESS:
+        return JsonResponse(
+            status[1].model_dump(),
+            status=200,
+        )
+    elif status[0] == ReturnCode.PRE_SIGN_UP_SUCCESS:
+        return JsonResponse(
+            status[1].model_dump(),
+            status=200,
+        )
+
+
+def sign_in(email, social_type):
     try:
         user = User.objects.get(email=email)
         if user.provider != social_type:
-            return ReturnCode.NO_MATCHING_SOCIAL_TYPE
+            return ReturnCode.NO_MATCHING_SOCIAL_TYPE, None
 
         if user.name == "NOT REGISTERED":
             user.delete()
@@ -36,29 +63,33 @@ def pre_sign_up(email, social_type):
             is_user=True,
             token=token.key,
         )
-        return response_data
+        return ReturnCode.SIGN_IN_SUCCESS, response_data
 
     except User.DoesNotExist:
-        # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 새로운 회원가입 준비
-        pre_access_token = secrets.token_urlsafe(32)
-        response_data = SocialPreSignUpResponse(
-            success=True,
-            is_user=False,
-            pre_access_token=pre_access_token,
-        )
-        # Create user
-        try:
-            User.objects.create(
-                email=email,
-                name="NOT REGISTERED",
-                provider="google",
-                pre_access_token=pre_access_token,
-                created_at=datetime.now(tz=timezone.utc),
-            )
-        except:
-            return ReturnCode.ERROR_PRE_CREATING_USER
+        return pre_sign_up(email, social_type)
 
-        return response_data
+
+def pre_sign_up(email, social_type):
+    # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 새로운 회원가입 준비
+    pre_access_token = secrets.token_urlsafe(32)
+    response_data = SocialPreSignUpResponse(
+        success=True,
+        is_user=False,
+        pre_access_token=pre_access_token,
+    )
+    # Create user
+    try:
+        User.objects.create(
+            email=email,
+            name="NOT REGISTERED",
+            provider=social_type,
+            pre_access_token=pre_access_token,
+            created_at=datetime.now(tz=timezone.utc),
+        )
+    except:
+        return ReturnCode.ERROR_PRE_CREATING_USER, None
+
+    return ReturnCode.PRE_SIGN_UP_SUCCESS, response_data
 
 
 class Google(APIView):
@@ -101,24 +132,8 @@ class Google(APIView):
         email_req_json = email_req.json()
         email = email_req_json.get("email")
 
-        status = pre_sign_up(email, "google")
-
-        if status == ReturnCode.NO_MATCHING_SOCIAL_TYPE:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="No matching social type."
-                ).model_dump(),
-                status=400,
-            )
-        elif status == ReturnCode.ERROR_PRE_CREATING_USER:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Error pre-creating user."
-                ).model_dump(),
-                status=500,
-            )
-        elif status == ReturnCode.SUCCESS:
-            return JsonResponse(status.model_dump(), status=200)
+        status = sign_in(email, "google")
+        oauth_finish(status)
 
 
 class Kakao(APIView):
@@ -154,21 +169,5 @@ class Kakao(APIView):
         user_info_req_json = user_info_req.json()
         email = user_info_req_json.get("kakao_account").get("email")
 
-        status = pre_sign_up(email, "google")
-
-        if status == ReturnCode.NO_MATCHING_SOCIAL_TYPE:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="No matching social type."
-                ).model_dump(),
-                status=400,
-            )
-        elif status == ReturnCode.ERROR_PRE_CREATING_USER:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Error pre-creating user."
-                ).model_dump(),
-                status=500,
-            )
-        elif status == ReturnCode.SUCCESS:
-            return JsonResponse(status.model_dump(), status=200)
+        status = sign_in(email, "kakao")
+        oauth_finish(status)
