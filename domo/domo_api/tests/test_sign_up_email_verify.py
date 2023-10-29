@@ -2,19 +2,19 @@ from datetime import datetime, timedelta, timezone
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from domo_api.models import EmailVerifyToken
+from domo_api.models import EmailVerifyToken, User
 from rest_framework.test import APIClient
 
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
-class SignUpVerifyEmailTest(TestCase):
+class SignUpEmailVerifyTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.email = "test@domo.com"
         self.url_email_verify = reverse("email_verify")
         self.url_email_verify_confirm = reverse("email_verify_confirm")
 
-    def test_send_verify_email_success(self):
+    def test_send_email_verify_success(self):
         # Given: 유효한 이메일
         # When: 유효한 이메일로 회원가입 요청을 보내면
         response = self.client.post(self.url_email_verify, {"email": self.email})
@@ -23,7 +23,7 @@ class SignUpVerifyEmailTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(EmailVerifyToken.objects.filter(email=self.email).exists())
 
-    def test_send_verify_email_but_invalid_email(self):
+    def test_send_email_verify_but_invalid_email(self):
         # Given: 유효하지 않은 이메일
         # When: 유효하지 않은 이메일로 회원가입 요청을 보내면
         response = self.client.post(self.url_email_verify, {"email": "invaliddomo.com"})
@@ -32,6 +32,19 @@ class SignUpVerifyEmailTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()["success"])
         self.assertEqual(response.json()["reason"], "Invalid request.")
+
+    def test_send_email_verify_but_already_registered_email(self):
+        # Given: 이미 가입된 이메일
+        User.objects.create_user(
+            email=self.email, password="Testpassword123!", name="TestUser"
+        )
+        # When: 해당 이메일로 회원가입 요청을 보내면
+        response = self.client.post(self.url_email_verify, {"email": self.email})
+
+        # Then: 응답 코드는 200이다. 그러나 실제 토큰은 생성되지 않는다.
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        self.assertFalse(EmailVerifyToken.objects.filter(email=self.email).exists())
 
     def test_verify_confirm_valid_token(self):
         # Given: 유효한 회원가입 토큰
