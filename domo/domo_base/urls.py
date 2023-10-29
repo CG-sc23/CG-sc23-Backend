@@ -46,7 +46,7 @@ urlpatterns = [
     ),
     path(
         "auth/v1/sign-up-email-verify-confirm",
-        auth.EmailVerifyConfirm.as_view(),
+        auth.SignUpEmailVerifyConfirm.as_view(),
         name="email_verify_confirm",
     ),
 ]

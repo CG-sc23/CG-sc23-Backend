@@ -500,7 +500,7 @@ class SignUpEmailVerify(APIView):
             )
 
 
-class EmailVerifyConfirm(APIView):
+class SignUpEmailVerifyConfirm(APIView):
     def post(self, request):
         email = request.data.get("email")
         token = request.data.get("token")
@@ -522,6 +522,16 @@ class EmailVerifyConfirm(APIView):
                     SimpleFailResponse(
                         success=False,
                         reason="Invalid token.",
+                    ).model_dump(),
+                    status=401,
+                )
+            # 토큰 유효 시간 == 10분
+            if (
+                datetime.now(tz=timezone.utc) - email_verify_token.created_at
+            ).total_seconds() > 600:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Token expired."
                     ).model_dump(),
                     status=401,
                 )
