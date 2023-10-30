@@ -34,4 +34,9 @@ urlpatterns = [
         auth.PasswordResetConfirm.as_view(),
         name="password_reset_confirm",
     ),
+    path(
+        "auth/v1/password-change",
+        auth.PasswordChange.as_view(),
+        name="password_change",
+    ),
 ]
