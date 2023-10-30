@@ -25,7 +25,6 @@ jobs:
             cd CG-sc23-Backend
             git pull -X theirs
             poetry install --no-root
-            poetry run domo/manage.py makemigrations
             poetry run domo/manage.py migrate
             poetry run domo/manage.py collectstatic --noinput
             killall uwsgi
