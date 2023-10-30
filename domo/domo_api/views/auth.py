@@ -256,6 +256,31 @@ class SignOut(APIView):
         )
 
 
+class PasswordChange(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        token = request.auth
+        user = request.user
+        current_password = request.data.get("current_password")
+        new_password = request.data.get("new_password")
+
+        if not user.check_password(current_password):
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid current password."
+                ).model_dump(),
+                status=401,
+            )
+
+        user.set_password(new_password)
+        user.save()
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
 class PasswordReset(APIView):
     def post(self, request):
         email = request.data.get("email")
