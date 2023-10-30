@@ -260,7 +260,6 @@ class PasswordChange(APIView):
     authentication_classes = [TokenAuthentication]
 
     def post(self, request):
-        token = request.auth
         user = request.user
         current_password = request.data.get("current_password")
         new_password = request.data.get("new_password")
