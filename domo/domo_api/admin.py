@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import PasswordResetToken, User
+from .models import EmailVerifyToken, PasswordResetToken, User
 
 
 @admin.register(User)
@@ -69,6 +69,24 @@ class PasswordResetTokenAdmin(admin.ModelAdmin):
             {
                 "classes": ("wide",),
                 "fields": ("user", "token"),
+            },
+        ),
+    )
+
+
+@admin.register(EmailVerifyToken)
+class EmailVerifyTokenAdmin(admin.ModelAdmin):
+    list_display = ("id", "email", "token", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("email",)
+    ordering = ("-created_at",)
+    fieldsets = ((None, {"fields": ("email", "token")}),)
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "token"),
             },
         ),
     )
