@@ -62,3 +62,12 @@ class PasswordResetConfirmRequest(BaseModel):
     email: EmailStr
     token: str
     new_password: str
+
+
+class EmailVerifyRequest(BaseModel):
+    email: EmailStr
+
+
+class EmailVerifyConfirmRequest(BaseModel):
+    email: EmailStr
+    token: str

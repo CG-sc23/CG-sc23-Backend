@@ -8,6 +8,8 @@ from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from domo_api.http_model import (
+    EmailVerifyConfirmRequest,
+    EmailVerifyRequest,
     PasswordResetCheckRequest,
     PasswordResetConfirmRequest,
     PasswordResetRequest,
@@ -18,7 +20,7 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
     SocialSignUpRequest,
 )
-from domo_api.models import PasswordResetToken, User
+from domo_api.models import EmailVerifyToken, PasswordResetToken, User
 from domo_api.s3.profile import ProfileHandler
 from PIL import Image
 from pydantic import ValidationError
@@ -434,5 +436,115 @@ class PasswordResetConfirm(APIView):
         except PasswordResetToken.DoesNotExist:
             return JsonResponse(
                 SimpleFailResponse(success=False, reason="Invalid token.").model_dump(),
+                status=401,
+            )
+
+
+class SignUpEmailVerify(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+
+        try:
+            request_data = EmailVerifyRequest(email=email)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        # 유저가 존재하면, 이메일 보내지 말고 200
+        if User.objects.filter(email=request_data.email).exists():
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
+            )
+
+        token = secrets.token_urlsafe(10)
+        if EmailVerifyToken.objects.filter(email=request_data.email).exists():
+            EmailVerifyToken.objects.filter(email=request_data.email).delete()
+        EmailVerifyToken.objects.create(
+            email=request_data.email,
+            token=token,
+            created_at=datetime.now(tz=timezone.utc),
+        )
+
+        try:
+            context = {
+                "email": request_data.email,
+                "token": token,
+            }
+            email_html_message = render_to_string(
+                "templates/sign_up_verify_email.html", context
+            )
+            send_mail(
+                subject="Verify Email account for DOMO",
+                message="",
+                from_email=domo_base.settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[request_data.email],
+                fail_silently=False,
+                html_message=email_html_message,
+            )
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
+            )
+
+        except:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Failed to send email."
+                ).model_dump(),
+                status=500,
+            )
+
+
+class SignUpEmailVerifyConfirm(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        token = request.data.get("token")
+
+        try:
+            request_data = EmailVerifyConfirmRequest(email=email, token=token)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            email_verify_token = EmailVerifyToken.objects.get(email=request_data.email)
+            if email_verify_token.token != request_data.token:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False,
+                        reason="Invalid token.",
+                    ).model_dump(),
+                    status=401,
+                )
+            # 토큰 유효 시간 == 10분
+            if (
+                datetime.now(tz=timezone.utc) - email_verify_token.created_at
+            ).total_seconds() > 600:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Token expired."
+                    ).model_dump(),
+                    status=401,
+                )
+            EmailVerifyToken.objects.filter(email=request_data.email).delete()
+            return JsonResponse(
+                SimpleSuccessResponse(success=True).model_dump(),
+                status=200,
+            )
+        except EmailVerifyToken.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False,
+                    reason="Invalid token.",
+                ).model_dump(),
                 status=401,
             )
