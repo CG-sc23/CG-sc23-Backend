@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from domo_api.models import EmailVerifyToken, User
+from domo_api.models import SignUpEmailVerifyToken, User
 from rest_framework.test import APIClient
 
 
@@ -21,7 +21,9 @@ class SignUpEmailVerifyTest(TestCase):
 
         # Then: 응답 코드는 200이고, 이메일 인증 토큰이 생성된다.
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(EmailVerifyToken.objects.filter(email=self.email).exists())
+        self.assertTrue(
+            SignUpEmailVerifyToken.objects.filter(email=self.email).exists()
+        )
 
     def test_send_email_verify_but_invalid_email(self):
         # Given: 유효하지 않은 이메일
@@ -44,11 +46,13 @@ class SignUpEmailVerifyTest(TestCase):
         # Then: 응답 코드는 200이다. 그러나 실제 토큰은 생성되지 않는다.
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
-        self.assertFalse(EmailVerifyToken.objects.filter(email=self.email).exists())
+        self.assertFalse(
+            SignUpEmailVerifyToken.objects.filter(email=self.email).exists()
+        )
 
     def test_verify_confirm_valid_token(self):
         # Given: 유효한 회원가입 토큰
-        token = EmailVerifyToken.objects.create(
+        token = SignUpEmailVerifyToken.objects.create(
             email=self.email, created_at=datetime.now(tz=timezone.utc)
         )
 
@@ -62,7 +66,7 @@ class SignUpEmailVerifyTest(TestCase):
         self.assertTrue(response.json()["success"])
 
     def test_verify_confirm_invalid_token(self):
-        EmailVerifyToken.objects.create(
+        SignUpEmailVerifyToken.objects.create(
             email=self.email, created_at=datetime.now(tz=timezone.utc)
         )
 
@@ -93,7 +97,7 @@ class SignUpEmailVerifyTest(TestCase):
 
     def test_verify_confirm_expired_token(self):
         # Given: 11분 전에 생성된 비밀번호 재설정 토큰
-        token = EmailVerifyToken.objects.create(
+        token = SignUpEmailVerifyToken.objects.create(
             email=self.email, created_at=datetime.now(tz=timezone.utc)
         )
         token.created_at = datetime.now(tz=timezone.utc) - timedelta(minutes=11)

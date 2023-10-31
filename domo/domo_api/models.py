@@ -103,7 +103,7 @@ class PasswordResetToken(models.Model):
     created_at = models.DateTimeField()
 
 
-class EmailVerifyToken(models.Model):
+class SignUpEmailVerifyToken(models.Model):
     id = models.AutoField(primary_key=True)
     email = models.EmailField(max_length=320, unique=True)
     token = models.CharField(max_length=30)

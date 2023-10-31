@@ -20,7 +20,7 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
     SocialSignUpRequest,
 )
-from domo_api.models import EmailVerifyToken, PasswordResetToken, User
+from domo_api.models import PasswordResetToken, SignUpEmailVerifyToken, User
 from domo_api.s3.profile import ProfileHandler
 from PIL import Image
 from pydantic import ValidationError
@@ -462,9 +462,9 @@ class SignUpEmailVerify(APIView):
             )
 
         token = secrets.token_urlsafe(10)
-        if EmailVerifyToken.objects.filter(email=request_data.email).exists():
-            EmailVerifyToken.objects.filter(email=request_data.email).delete()
-        EmailVerifyToken.objects.create(
+        if SignUpEmailVerifyToken.objects.filter(email=request_data.email).exists():
+            SignUpEmailVerifyToken.objects.filter(email=request_data.email).delete()
+        SignUpEmailVerifyToken.objects.create(
             email=request_data.email,
             token=token,
             created_at=datetime.now(tz=timezone.utc),
@@ -516,7 +516,9 @@ class SignUpEmailVerifyConfirm(APIView):
             )
 
         try:
-            email_verify_token = EmailVerifyToken.objects.get(email=request_data.email)
+            email_verify_token = SignUpEmailVerifyToken.objects.get(
+                email=request_data.email
+            )
             if email_verify_token.token != request_data.token:
                 return JsonResponse(
                     SimpleFailResponse(
@@ -535,12 +537,12 @@ class SignUpEmailVerifyConfirm(APIView):
                     ).model_dump(),
                     status=401,
                 )
-            EmailVerifyToken.objects.filter(email=request_data.email).delete()
+            SignUpEmailVerifyToken.objects.filter(email=request_data.email).delete()
             return JsonResponse(
                 SimpleSuccessResponse(success=True).model_dump(),
                 status=200,
             )
-        except EmailVerifyToken.DoesNotExist:
+        except SignUpEmailVerifyToken.DoesNotExist:
             return JsonResponse(
                 SimpleFailResponse(
                     success=False,
