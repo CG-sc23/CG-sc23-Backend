@@ -50,7 +50,7 @@ urlpatterns = [
         name="email_verify_confirm",
     ),
     path(
-        "external_history/v1/github/check",
+        "external-history/v1/github/check",
         external_history.GithubAccountCheck.as_view(),
         name="github_account_check",
     ),
