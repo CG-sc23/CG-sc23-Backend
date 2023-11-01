@@ -71,3 +71,7 @@ class EmailVerifyRequest(BaseModel):
 class EmailVerifyConfirmRequest(BaseModel):
     email: EmailStr
     token: str
+
+
+class GithubAccountCheckRequest(BaseModel):
+    account: str

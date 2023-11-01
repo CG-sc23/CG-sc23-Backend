@@ -2,7 +2,7 @@ import io
 import secrets
 from datetime import datetime, timezone
 
-import domo_base.settings
+import domo_base.settings.base
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.http import JsonResponse
@@ -323,7 +323,7 @@ class PasswordReset(APIView):
             send_mail(
                 subject="Password Reset for DOMO",
                 message="",
-                from_email=domo_base.settings.DEFAULT_FROM_EMAIL,
+                from_email=domo_base.settings.base.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 fail_silently=False,
                 html_message=email_html_message,
@@ -481,7 +481,7 @@ class SignUpEmailVerify(APIView):
             send_mail(
                 subject="Verify Email account for DOMO",
                 message="",
-                from_email=domo_base.settings.DEFAULT_FROM_EMAIL,
+                from_email=domo_base.settings.base.DEFAULT_FROM_EMAIL,
                 recipient_list=[request_data.email],
                 fail_silently=False,
                 html_message=email_html_message,
