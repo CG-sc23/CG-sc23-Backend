@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlencode
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -60,10 +61,11 @@ class PasswordResetTest(TestCase):
             user=self.user, created_at=datetime.now(tz=timezone.utc)
         )
 
+        encoded_params = urlencode({"email": self.email, "token": token.token})
+        url = f"{self.url_password_reset_check}?{encoded_params}"
+
         # When: 해당 토큰으로 비밀번호 재설정 확인 요청을 보내면
-        response = self.client.post(
-            self.url_password_reset_check, {"email": self.email, "token": token.token}
-        )
+        response = self.client.get(url)
 
         # Then: 응답 코드는 200이다.
         self.assertEqual(response.status_code, 200)
@@ -76,10 +78,10 @@ class PasswordResetTest(TestCase):
 
         # Given: 유효하지 않은 비밀번호 재설정 토큰
         # When: 해당 토큰으로 비밀번호 재설정 확인 요청을 보내면
-        response = self.client.post(
-            self.url_password_reset_check,
-            {"email": self.email, "token": "invalidtoken"},
-        )
+        encoded_params = urlencode({"email": self.email, "token": "invalidtoken"})
+        url = f"{self.url_password_reset_check}?{encoded_params}"
+
+        response = self.client.get(url)
 
         # Then: 응답 코드는 401(유효하지 않은 토큰)이다.
         self.assertEqual(response.status_code, 401)
@@ -89,10 +91,10 @@ class PasswordResetTest(TestCase):
     def test_password_reset_check_no_token_in_db(self):
         # Given: 유효하지 않은 비밀번호 재설정 토큰, DB에는 유저를 FK로 갖는 토큰이 없다.
         # When: 해당 토큰으로 비밀번호 재설정 확인 요청을 보내면
-        response = self.client.post(
-            self.url_password_reset_check,
-            {"email": self.email, "token": "invalidtoken"},
-        )
+        encoded_params = urlencode({"email": self.email, "token": "invalidtoken"})
+        url = f"{self.url_password_reset_check}?{encoded_params}"
+
+        response = self.client.get(url)
 
         # Then: 응답 코드는 401(유효하지 않은 토큰)이다.
         self.assertEqual(response.status_code, 401)
@@ -108,9 +110,10 @@ class PasswordResetTest(TestCase):
         token.save()
 
         # When: 해당 토큰으로 비밀번호 재설정 확인 요청을 보내면
-        response = self.client.post(
-            self.url_password_reset_check, {"email": self.email, "token": token.token}
-        )
+        encoded_params = urlencode({"email": self.email, "token": token.token})
+        url = f"{self.url_password_reset_check}?{encoded_params}"
+
+        response = self.client.get(url)
 
         # Then: 응답 코드는 401(만료된 토큰)이다.
         self.assertEqual(response.status_code, 401)
