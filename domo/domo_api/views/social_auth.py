@@ -2,7 +2,7 @@ import os
 import secrets
 from datetime import datetime, timezone
 
-import domo_base.settings
+import domo_base.settings.base
 import requests
 from django.http import JsonResponse
 from google_auth_oauthlib.flow import Flow
@@ -96,7 +96,7 @@ class Google(APIView):
     def post(self, request):
         code = request.data.get("code")
         flow = Flow.from_client_secrets_file(
-            f"{domo_base.settings.BASE_DIR}/domo_base/client_secret.json",
+            f"{domo_base.settings.base.BASE_DIR}/domo_base/client_secret.json",
             scopes=[
                 "openid",
                 "https://www.googleapis.com/auth/userinfo.profile",
