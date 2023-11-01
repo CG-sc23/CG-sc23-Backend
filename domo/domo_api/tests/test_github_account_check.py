@@ -9,7 +9,7 @@ class GithubAccountCheckTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.url_github_account_check = reverse("github_account_check")
-        self.account = "test"
+        self.github_link = "github.com/test"
 
     @patch("requests.get")
     def test_github_account_check_success(self, mock_get):
@@ -23,7 +23,7 @@ class GithubAccountCheckTest(TestCase):
         response = self.client.post(
             self.url_github_account_check,
             {
-                "account": self.account,
+                "github_link": self.github_link,
             },
         )
 
@@ -43,7 +43,7 @@ class GithubAccountCheckTest(TestCase):
         response = self.client.post(
             self.url_github_account_check,
             {
-                "account": self.account,
+                "github_link": self.github_link,
             },
         )
 

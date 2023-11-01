@@ -74,4 +74,4 @@ class EmailVerifyConfirmRequest(BaseModel):
 
 
 class GithubAccountCheckRequest(BaseModel):
-    account: str
+    github_link: str
