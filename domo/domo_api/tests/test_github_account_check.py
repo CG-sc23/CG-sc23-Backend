@@ -1,10 +1,11 @@
+from unittest import TestCase
 from unittest.mock import patch
 
 from django.urls import reverse
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APIClient
 
 
-class GithubAccountCheckTest(APITestCase):
+class GithubAccountCheckTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.url_github_account_check = reverse("github_account_check")
