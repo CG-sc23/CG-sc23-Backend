@@ -39,15 +39,15 @@ class GithubAccountCheck(APIView):
                 status=400,
             )
 
-        if response.status_code == 200:
-            return JsonResponse(
-                SimpleSuccessResponse(success=True).model_dump(),
-                status=201,
-            )
-        else:
+        if response.status_code != 200:
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Can't find github account."
                 ).model_dump(),
-                status=401,
+                status=404,
             )
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=201,
+        )
