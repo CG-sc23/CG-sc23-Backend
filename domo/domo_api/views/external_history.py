@@ -34,9 +34,10 @@ class GithubAccountCheck(APIView):
         except:
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Invalid request."
+                    success=False, reason="Github API server doesn't response"
                 ).model_dump(),
-                status=400,
+                # Service Temporarily Unavailable
+                status=503,
             )
 
         if response.status_code != 200:
