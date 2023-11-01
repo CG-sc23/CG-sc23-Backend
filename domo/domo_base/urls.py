@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from domo_api.views import auth, health_check, social_auth
+from domo_api.views import auth, external_history, health_check, social_auth
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -48,5 +48,10 @@ urlpatterns = [
         "auth/v1/sign-up-email-verify-confirm",
         auth.SignUpEmailVerifyConfirm.as_view(),
         name="email_verify_confirm",
+    ),
+    path(
+        "external-history/v1/github/check",
+        external_history.GithubAccountCheck.as_view(),
+        name="github_account_check",
     ),
 ]
