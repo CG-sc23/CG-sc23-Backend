@@ -9,10 +9,15 @@ class UserAdmin(admin.ModelAdmin):
         "email",
         "name",
         "is_active",
+        "has_profile_image",
         "short_description",
+        "grade",
+        "like",
+        "rating",
         "github_link",
         "created_at",
         "is_staff",
+        "is_superuser",
         "provider",
         "pre_access_token",
     )
@@ -32,6 +37,7 @@ class UserAdmin(admin.ModelAdmin):
                     "like",
                     "rating",
                     "is_active",
+                    "has_profile_image",
                 )
             },
         ),
