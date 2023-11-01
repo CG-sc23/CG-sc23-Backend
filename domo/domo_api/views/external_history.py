@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 
 
 class GithubAccountCheck(APIView):
-    def post(self, request):
-        github_link = request.data.get("github_link")
+    def get(self, request):
+        github_link = request.GET.get("github_link")
 
         # validate input
         try:

@@ -501,9 +501,9 @@ class SignUpEmailVerify(APIView):
 
 
 class SignUpEmailVerifyConfirm(APIView):
-    def post(self, request):
-        email = request.data.get("email")
-        token = request.data.get("token")
+    def get(self, request):
+        email = request.GET.get("email")
+        token = request.GET.get("token")
 
         try:
             request_data = EmailVerifyConfirmRequest(email=email, token=token)
