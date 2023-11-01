@@ -79,6 +79,7 @@ jobs:
           DOMO_DB_PASSWORD: postgres
           DOMO_DB_HOST: localhost
           DOMO_DB_PORT: 5432
+          DJANGO_SETTINGS_MODULE: domo_base.settings.base
         run: |
           poetry run python manage.py makemigrations
           poetry run python manage.py migrate
