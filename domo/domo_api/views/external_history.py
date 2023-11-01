@@ -49,5 +49,5 @@ class GithubAccountCheck(APIView):
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
-            status=201,
+            status=200,
         )
