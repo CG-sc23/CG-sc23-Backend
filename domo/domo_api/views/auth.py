@@ -261,7 +261,7 @@ class SignOut(APIView):
 class PasswordChange(APIView):
     authentication_classes = [TokenAuthentication]
 
-    def post(self, request):
+    def put(self, request):
         user = request.user
         current_password = request.data.get("current_password")
         new_password = request.data.get("new_password")
@@ -396,7 +396,7 @@ class PasswordResetCheck(APIView):
 
 
 class PasswordResetConfirm(APIView):
-    def post(self, request):
+    def put(self, request):
         email = request.data.get("email")
         token = request.data.get("token")
         new_password = request.data.get("new_password")

@@ -127,7 +127,7 @@ class PasswordResetTest(TestCase):
         )
 
         # When: 새 비밀번호와 함께 비밀번호 재설정 확인 요청을 보낸다.
-        response = self.client.post(
+        response = self.client.put(
             self.url_password_reset_confirm,
             {
                 "email": self.email,
