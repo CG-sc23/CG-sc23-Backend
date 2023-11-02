@@ -75,3 +75,9 @@ class EmailVerifyConfirmRequest(BaseModel):
 
 class GithubAccountCheckRequest(BaseModel):
     github_link: str
+
+
+class ModifyUserInfoRequest(BaseModel):
+    name: Optional[str] = None
+    github_link: Optional[str] = None
+    short_description: Optional[str] = None

@@ -56,7 +56,7 @@ urlpatterns = [
     ),
     path(
         "user/v1",
-        user.Deactivate.as_view(),
-        name="user_deactivate",
+        user.Info.as_view(),
+        name="user_info",
     ),
 ]
