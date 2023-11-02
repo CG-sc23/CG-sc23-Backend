@@ -121,6 +121,15 @@ class Kakao(APIView):
             f"https://kapi.kakao.com/v2/user/me",
             headers={"Authorization": f"Bearer {access_token}"},
         )
+
+        if user_info_req.status_code != 200:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Failed to get email."
+                ).model_dump(),
+                status=503,
+            )
+
         user_info_req_json = user_info_req.json()
         email = user_info_req_json.get("kakao_account").get("email")
 
@@ -158,6 +167,15 @@ class Naver(APIView):
             f"https://openapi.naver.com/v1/nid/me",
             headers={"Authorization": f"Bearer {access_token}"},
         )
+
+        if user_info_req.status_code != 200:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Failed to get email."
+                ).model_dump(),
+                status=503,
+            )
+
         user_info_req_json = user_info_req.json()
         email = user_info_req_json.get("response").get("email")
 
