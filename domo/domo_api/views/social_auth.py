@@ -2,10 +2,8 @@ import os
 import secrets
 from datetime import datetime, timezone
 
-import domo_base.settings.base
 import requests
 from django.http import JsonResponse
-from google_auth_oauthlib.flow import Flow
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
@@ -92,50 +90,6 @@ def pre_sign_up(email, social_type):
     return ReturnCode.PRE_SIGN_UP_SUCCESS, response_data
 
 
-class Google(APIView):
-    def post(self, request):
-        code = request.data.get("code")
-        flow = Flow.from_client_secrets_file(
-            f"{domo_base.settings.base.BASE_DIR}/domo_base/client_secret.json",
-            scopes=[
-                "openid",
-                "https://www.googleapis.com/auth/userinfo.profile",
-                "https://www.googleapis.com/auth/userinfo.email",
-            ],
-            redirect_uri="http://localhost:3000",
-        )
-
-        try:
-            flow.fetch_token(code=code)
-            credentials = flow.credentials
-        except:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Failed to get access_token."
-                ).model_dump(),
-                status=500,
-            )
-
-        email_req = requests.get(
-            f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={credentials.token}"
-        )
-        email_req_status = email_req.status_code
-
-        if email_req_status != 200:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Failed to get email."
-                ).model_dump(),
-                status=500,
-            )
-
-        email_req_json = email_req.json()
-        email = email_req_json.get("email")
-
-        status = sign_in(email, "google")
-        oauth_finish(status)
-
-
 class Kakao(APIView):
     def post(self, request):
         code = request.data.get("code")
@@ -171,13 +125,14 @@ class Kakao(APIView):
         email = user_info_req_json.get("kakao_account").get("email")
 
         status = sign_in(email, "kakao")
-        oauth_finish(status)
+
+        response = oauth_finish(status)
+        return response
 
 
 class Naver(APIView):
     def post(self, request):
         code = request.data.get("code")
-        state_token = request.data.get("state")
 
         client_id = os.environ.get("SOCIAL_AUTH_NAVER_CLIENT_ID")
         client_secret = os.environ.get("SOCIAL_AUTH_NAVER_SECRET")
@@ -185,7 +140,7 @@ class Naver(APIView):
             f"https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&"
             f"client_id={client_id}&"
             f"client_secret={client_secret}&"
-            f"code={code}&state={state_token}"
+            f"code={code}&state=domoweb"
         )
 
         if access_token_req.status_code != 200:
@@ -207,4 +162,6 @@ class Naver(APIView):
         email = user_info_req_json.get("response").get("email")
 
         status = sign_in(email, "naver")
-        oauth_finish(status)
+
+        response = oauth_finish(status)
+        return response

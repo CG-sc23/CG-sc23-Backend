@@ -6,11 +6,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", health_check.check, name="health_check"),
     path(
-        "auth/v1/social/google",
-        social_auth.Google.as_view(),
-        name="google",
-    ),
-    path(
         "auth/v1/social/kakao",
         social_auth.Kakao.as_view(),
         name="kakao",
