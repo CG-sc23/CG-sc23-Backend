@@ -136,18 +136,23 @@ class Google(APIView):
         oauth_finish(status)
 
 
-class Kakao(APIView):
+class Naver(APIView):
     def post(self, request):
         code = request.data.get("code")
+        state = request.data.get("state")
 
-        client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
+        client_id = os.environ.get("SOCIAL_AUTH_NAVER_CLIENT_ID")
+        client_secret = os.environ.get("SOCIAL_AUTH_NAVER_SECRET")
+
         access_token_req = requests.post(
-            f"https://kauth.kakao.com/oauth/token",
+            f"https://nid.naver.com/oauth2.0/token",
             data={
                 "grant_type": "authorization_code",
                 "client_id": client_id,
-                "redirect_uri": "http://localhost:3000",
+                "client_secret": client_secret,
                 "code": code,
+                "state": state,
+                "redirect_uri": "http://localhost:3000",
             },
         )
 
@@ -163,11 +168,11 @@ class Kakao(APIView):
         access_token = access_token_req_json.get("access_token")
 
         user_info_req = requests.get(
-            f"https://kapi.kakao.com/v2/user/me",
+            f"https://openapi.naver.com/v1/nid/me",
             headers={"Authorization": f"Bearer {access_token}"},
         )
         user_info_req_json = user_info_req.json()
-        email = user_info_req_json.get("kakao_account").get("email")
+        email = user_info_req_json.get("response").get("email")
 
-        status = sign_in(email, "kakao")
+        status = sign_in(email, "naver")
         oauth_finish(status)
