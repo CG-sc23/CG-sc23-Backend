@@ -15,6 +15,11 @@ urlpatterns = [
         social_auth.Kakao.as_view(),
         name="kakao",
     ),
+    path(
+        "auth/v1/social/naver",
+        social_auth.Naver.as_view(),
+        name="naver",
+    ),
     path("auth/v1/social/sign-up", auth.SocialSignUp.as_view(), name="social_sign_up"),
     path("auth/v1/sign-up", auth.SignUp.as_view(), name="sign_up"),
     path("auth/v1/sign-in", auth.SignIn.as_view(), name="sign_in"),

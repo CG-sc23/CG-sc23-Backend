@@ -141,12 +141,13 @@ class Kakao(APIView):
         code = request.data.get("code")
 
         client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
+        redirect_uri = os.environ.get("SOCIAL_AUTH_REDIRECT_URI")
         access_token_req = requests.post(
             f"https://kauth.kakao.com/oauth/token",
             data={
                 "grant_type": "authorization_code",
                 "client_id": client_id,
-                "redirect_uri": "http://localhost:3000",
+                "redirect_uri": redirect_uri,
                 "code": code,
             },
         )
@@ -170,4 +171,40 @@ class Kakao(APIView):
         email = user_info_req_json.get("kakao_account").get("email")
 
         status = sign_in(email, "kakao")
+        oauth_finish(status)
+
+
+class Naver(APIView):
+    def post(self, request):
+        code = request.data.get("code")
+        state_token = request.data.get("state")
+
+        client_id = os.environ.get("SOCIAL_AUTH_NAVER_CLIENT_ID")
+        client_secret = os.environ.get("SOCIAL_AUTH_NAVER_SECRET")
+        access_token_req = requests.post(
+            f"https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&"
+            f"client_id={client_id}&"
+            f"client_secret={client_secret}&"
+            f"code={code}&state={state_token}"
+        )
+
+        if access_token_req.status_code != 200:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Failed to get access_token."
+                ).model_dump(),
+                status=500,
+            )
+
+        access_token_req_json = access_token_req.json()
+        access_token = access_token_req_json.get("access_token")
+
+        user_info_req = requests.post(
+            f"https://openapi.naver.com/v1/nid/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        user_info_req_json = user_info_req.json()
+        email = user_info_req_json.get("response").get("email")
+
+        status = sign_in(email, "naver")
         oauth_finish(status)
