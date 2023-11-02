@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from domo_api.views import auth, external_history, health_check, social_auth
+from domo_api.views import auth, external_history, health_check, social_auth, user
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -53,5 +53,10 @@ urlpatterns = [
         "external-history/v1/github/check",
         external_history.GithubAccountCheck.as_view(),
         name="github_account_check",
+    ),
+    path(
+        "user/v1",
+        user.Deactivate.as_view(),
+        name="user_deactivate",
     ),
 ]
