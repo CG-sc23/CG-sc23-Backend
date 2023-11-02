@@ -11,6 +11,11 @@ urlpatterns = [
         name="google",
     ),
     path(
+        "auth/v1/social/kakao",
+        social_auth.Kakao.as_view(),
+        name="kakao",
+    ),
+    path(
         "auth/v1/social/naver",
         social_auth.Naver.as_view(),
         name="naver",
