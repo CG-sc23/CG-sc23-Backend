@@ -1,3 +1,4 @@
+import logging
 import os
 import secrets
 from datetime import datetime, timezone
@@ -140,7 +141,7 @@ class Naver(APIView):
             f"https://nid.naver.com/oauth2.0/token?grant_type=authorization_code&"
             f"client_id={client_id}&"
             f"client_secret={client_secret}&"
-            f"code={code}&state=domoweb"
+            f"code={code}&state=domomainweb!@"
         )
 
         if access_token_req.status_code != 200:
