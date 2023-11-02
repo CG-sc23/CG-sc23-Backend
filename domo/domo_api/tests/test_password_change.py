@@ -25,7 +25,7 @@ class PasswordChangeTest(APITestCase):
     def test_password_change_success(self):
         # Given: 유효한 토큰으로 로그인 되어 있을 때, 기존 비밀번호, 새 비밀번호
         # When: 비밀번호 재설정 요청을 보내면
-        response = self.client.post(
+        response = self.client.put(
             self.url_password_change,
             {
                 "current_password": self.password,
@@ -43,7 +43,7 @@ class PasswordChangeTest(APITestCase):
     def test_password_change_wrong_current_password(self):
         # Given: 유효한 토큰으로 로그인 되어 있을 때, 틀린 기존 비밀번호, 새 비밀번호
         # When: 비밀번호 재설정 요청을 보내면
-        response = self.client.post(
+        response = self.client.put(
             self.url_password_change,
             {
                 "current_password": "WrongPassword",
