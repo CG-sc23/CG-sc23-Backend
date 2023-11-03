@@ -547,7 +547,8 @@ class SignUpEmailVerifyConfirm(APIView):
                     ).model_dump(),
                     status=401,
                 )
-            SignUpEmailVerifyToken.objects.filter(email=request_data.email).delete()
+
+            email_verify_token.delete()
 
             User.objects.create(
                 email=email,
