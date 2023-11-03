@@ -157,10 +157,21 @@ class SignUp(APIView):
                 status=400,
             )
 
-        if User.objects.filter(email=request_data.email).exists():
+        try:
+            user_check = User.objects.filter(email=request_data.email)
+
+            if user_check.get().name != "NOT REGISTERED":
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="User with this email already exists."
+                    ).model_dump(),
+                    status=400,
+                )
+
+        except User.DoesNotExist:
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="User with this email already exists."
+                    success=False, reason="User didn't verify email yet."
                 ).model_dump(),
                 status=400,
             )
@@ -191,8 +202,7 @@ class SignUp(APIView):
 
         # Create user
         try:
-            User.objects.create_user(
-                email=request_data.email,
+            user_check.update(
                 password=request_data.password,
                 name=request_data.name,
                 has_profile_image=profile_upload_success,
@@ -538,6 +548,14 @@ class SignUpEmailVerifyConfirm(APIView):
                     status=401,
                 )
             SignUpEmailVerifyToken.objects.filter(email=request_data.email).delete()
+
+            User.objects.create(
+                email=email,
+                name="NOT REGISTERED",
+                created_at=datetime.now(tz=timezone.utc),
+                provider="our",
+            )
+
             return JsonResponse(
                 SimpleSuccessResponse(success=True).model_dump(),
                 status=200,
