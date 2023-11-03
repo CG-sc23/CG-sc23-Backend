@@ -158,9 +158,9 @@ class SignUp(APIView):
             )
 
         try:
-            user_check = User.objects.filter(email=request_data.email).get()
+            user_check = User.objects.filter(email=request_data.email)
 
-            if user_check.name != "NOT REGISTERED":
+            if user_check.get().name != "NOT REGISTERED":
                 return JsonResponse(
                     SimpleFailResponse(
                         success=False, reason="User with this email already exists."
@@ -203,7 +203,6 @@ class SignUp(APIView):
         # Create user
         try:
             user_check.update(
-                email=request_data.email,
                 password=request_data.password,
                 name=request_data.name,
                 has_profile_image=profile_upload_success,
