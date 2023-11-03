@@ -553,6 +553,7 @@ class SignUpEmailVerifyConfirm(APIView):
                 email=email,
                 name="NOT REGISTERED",
                 created_at=datetime.now(tz=timezone.utc),
+                provider="our",
             )
 
             return JsonResponse(

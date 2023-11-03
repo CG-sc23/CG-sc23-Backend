@@ -33,6 +33,7 @@ class SignUpTest(TestCase):
             email=self.user_data["email"],
             name="NOT REGISTERED",
             created_at=datetime.now(tz=timezone.utc),
+            provider="our",
         )
 
         payload = self.user_data
@@ -132,6 +133,7 @@ class SignUpTest(TestCase):
             email=self.user_data["email"],
             name="NOT REGISTERED",
             created_at=datetime.now(tz=timezone.utc),
+            provider="our",
         )
 
         payload = self.user_data
@@ -157,6 +159,7 @@ class SignUpTest(TestCase):
             email=self.user_data["email"],
             name="NOT REGISTERED",
             created_at=datetime.now(tz=timezone.utc),
+            provider="our",
         )
 
         payload = self.user_data
