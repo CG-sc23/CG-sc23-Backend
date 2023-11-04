@@ -1,10 +1,9 @@
 from django.contrib import admin
 from django.urls import path
-from domo_api.views import auth, external_history, health_check, social_auth, user
+from domo_api.views import auth, external_history, social_auth, user
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", health_check.check, name="health_check"),
     path(
         "auth/v1/social/kakao",
         social_auth.Kakao.as_view(),
