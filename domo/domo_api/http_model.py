@@ -110,3 +110,15 @@ class CreateProjectRequest(BaseModel):
 class CreateProjectResponse(BaseModel):
     success: bool
     project_id: int
+    status: str
+    is_public: bool
+    title: str
+    short_description: str
+    description: Optional[str] = None
+    created_at: datetime
+
+
+class GetAllProjectResponse(BaseModel):
+    success: bool
+    count: int
+    projects: list
