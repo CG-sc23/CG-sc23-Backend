@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr
@@ -82,3 +83,18 @@ class ModifyUserInfoRequest(BaseModel):
     github_link: Optional[str] = None
     short_description: Optional[str] = None
     is_public: Optional[bool] = None
+
+
+class GetUserInfoResponse(BaseModel):
+    success: bool
+    email: str
+    name: str
+    has_profile_image: bool
+    is_public: bool
+    github_link: Optional[str] = None
+    short_description: Optional[str] = None
+    grade: Optional[int] = None
+    like: Optional[int] = None
+    rating: Optional[float] = None
+    provider: str
+    last_login: datetime
