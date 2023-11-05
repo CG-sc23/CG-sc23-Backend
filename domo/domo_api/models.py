@@ -119,7 +119,7 @@ class Project(models.Model):
         on_delete=models.PROTECT,
     )
     # READY, PROGRESSING, COMPLETED, GIVEUP
-    status = models.CharField(max_length=20)
+    status = models.CharField(max_length=20, default="READY")
 
     title = models.CharField(max_length=50)
     short_description = models.CharField(max_length=50)
