@@ -128,6 +128,19 @@ class Project(models.Model):
     like = models.IntegerField(default=0)
     is_public = models.BooleanField(default=True)
 
+    def detail(self):
+        return {
+            "id": self.id,
+            "owner": self.owner.name,
+            "status": self.status,
+            "title": self.title,
+            "short_description": self.short_description,
+            "description": self.description,
+            "created_at": self.created_at,
+            "like": self.like,
+            "is_public": self.is_public,
+        }
+
 
 class ProjectMember(models.Model):
     id = models.AutoField(primary_key=True)
