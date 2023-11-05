@@ -2,6 +2,7 @@ import io
 
 from django.http import JsonResponse
 from domo_api.http_model import (
+    GetUserInfoResponse,
     ModifyUserInfoRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
@@ -15,6 +16,23 @@ from rest_framework.views import APIView
 
 class Info(APIView):
     authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        response = GetUserInfoResponse(
+            success=True,
+            email=request.user.email,
+            name=request.user.name,
+            has_profile_image=request.user.has_profile_image,
+            is_public=request.user.is_public,
+            github_link=request.user.github_link,
+            short_description=request.user.short_description,
+            grade=request.user.grade,
+            like=request.user.like,
+            rating=request.user.rating,
+            provider=request.user.provider,
+            last_login=request.user.last_login,
+        )
+        return JsonResponse(response.model_dump(), status=200)
 
     def put(self, request):
         name = request.data.get("name", None)
