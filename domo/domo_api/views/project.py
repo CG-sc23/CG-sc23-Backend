@@ -32,7 +32,7 @@ def create_new_project(request_user, request_data):
         created_at=datetime.now(tz=timezone.utc),
     ).save()
 
-    return new_project.id
+    return new_project
 
 
 class Info(APIView):
@@ -60,7 +60,7 @@ class Info(APIView):
             )
 
         try:
-            project_id = create_new_project(request.user, request_data)
+            new_project = create_new_project(request.user, request_data)
         except:
             return JsonResponse(
                 SimpleFailResponse(
@@ -72,7 +72,13 @@ class Info(APIView):
         return JsonResponse(
             CreateProjectResponse(
                 success=True,
-                project_id=project_id,
+                project_id=new_project.id,
+                status=new_project.status,
+                is_public=new_project.is_public,
+                title=new_project.title,
+                short_description=new_project.short_description,
+                description=new_project.description,
+                created_at=new_project.created_at,
             ).model_dump(),
             status=201,
         )
