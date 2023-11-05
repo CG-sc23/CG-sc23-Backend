@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from domo_api.views import auth, external_history, social_auth, user
+from domo_api.views import auth, external_history, project, social_auth, user
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -57,5 +57,15 @@ urlpatterns = [
         "user/v1",
         user.Info.as_view(),
         name="user_info",
+    ),
+    path(
+        "project/v1",
+        project.Info.as_view(),
+        name="project_info",
+    ),
+    path(
+        "user/v1/projects",
+        user.ProjectInfo.as_view(),
+        name="user_project_info",
     ),
 ]

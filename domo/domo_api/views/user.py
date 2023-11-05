@@ -2,11 +2,13 @@ import io
 
 from django.http import JsonResponse
 from domo_api.http_model import (
+    GetAllProjectResponse,
     GetUserInfoResponse,
     ModifyUserInfoRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
+from domo_api.models import Project
 from domo_api.s3.profile import ProfileHandler
 from PIL import Image
 from pydantic import ValidationError
@@ -112,3 +114,21 @@ class Info(APIView):
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
         )
+
+
+class ProjectInfo(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        project_list = Project.objects.filter(
+            projectmember__user=request.user,
+        ).order_by("created_at")
+
+        projects = []
+        for project in project_list:
+            projects.append(project.detail())
+
+        response = GetAllProjectResponse(
+            success=True, count=len(projects), projects=projects
+        )
+        return JsonResponse(response.model_dump(), status=200)

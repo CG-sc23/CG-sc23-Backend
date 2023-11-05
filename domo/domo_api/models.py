@@ -110,3 +110,48 @@ class SignUpEmailVerifyToken(models.Model):
     email = models.EmailField(max_length=320, unique=True)
     token = models.CharField(max_length=30)
     created_at = models.DateTimeField()
+
+
+class Project(models.Model):
+    id = models.AutoField(primary_key=True)
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+    )
+    # READY, PROGRESSING, COMPLETED, GIVEUP
+    status = models.CharField(max_length=20, default="READY")
+
+    title = models.CharField(max_length=50)
+    short_description = models.CharField(max_length=50)
+    description = models.TextField(null=True)
+    created_at = models.DateTimeField()
+    like = models.IntegerField(default=0)
+    is_public = models.BooleanField(default=True)
+
+    def detail(self):
+        return {
+            "id": self.id,
+            "owner": self.owner.name,
+            "status": self.status,
+            "title": self.title,
+            "short_description": self.short_description,
+            "description": self.description,
+            "created_at": self.created_at,
+            "like": self.like,
+            "is_public": self.is_public,
+        }
+
+
+class ProjectMember(models.Model):
+    id = models.AutoField(primary_key=True)
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+    )
+    # OWNER, MANAGER, MEMBER
+    role = models.CharField(max_length=20)
+    created_at = models.DateTimeField()
