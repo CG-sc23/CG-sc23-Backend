@@ -80,6 +80,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     pre_access_token = models.TextField(null=True)
 
+    is_public = models.BooleanField(default=True)
+
     is_active = models.BooleanField(default=True)
 
     is_staff = models.BooleanField(default=False)
