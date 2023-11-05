@@ -98,3 +98,15 @@ class GetUserInfoResponse(BaseModel):
     rating: Optional[float] = None
     provider: str
     last_login: datetime
+
+
+class CreateProjectRequest(BaseModel):
+    title: str
+    short_description: str
+    description: Optional[str] = None
+    is_public: bool
+
+
+class CreateProjectResponse(BaseModel):
+    success: bool
+    project_id: int
