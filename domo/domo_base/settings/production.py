@@ -9,7 +9,7 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
 )
 DEBUG = False
-ALLOWED_HOSTS = ["api.domowebest.com", "10.0.11.57"]
+ALLOWED_HOSTS = ["api.domowebest.com"]
 
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
