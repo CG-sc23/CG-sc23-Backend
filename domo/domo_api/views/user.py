@@ -20,11 +20,13 @@ class Info(APIView):
         name = request.data.get("name", None)
         github_link = request.data.get("github_link", None)
         short_description = request.data.get("short_description", None)
+        is_public = request.data.get("is_public", None)
 
         data_dict = {
             "name": name,
             "github_link": github_link,
             "short_description": short_description,
+            "is_public": is_public,
         }
 
         # validate input
@@ -63,9 +65,22 @@ class Info(APIView):
                 )
             request.user.has_profile_image = True
 
-        request.user.name = request_data.name
-        request.user.github_link = request_data.github_link
-        request.user.short_description = request_data.short_description
+        request.user.name = (
+            request_data.name if request_data.name else request.user.name
+        )
+        request.user.github_link = (
+            request_data.github_link
+            if request_data.github_link
+            else request.user.github_link
+        )
+        request.user.short_description = (
+            request_data.short_description
+            if request_data.short_description
+            else request.user.short_description
+        )
+        request.user.is_public = (
+            request_data.is_public if request_data.is_public else request.user.is_public
+        )
         request.user.save()
 
         return JsonResponse(
