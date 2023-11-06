@@ -89,7 +89,7 @@ class GetUserInfoResponse(BaseModel):
     success: bool
     email: str
     name: str
-    profile_image_link: str
+    profile_image_link: Optional[str] = None
 
 
 class GetUserDetailInfoResponse(BaseModel):
