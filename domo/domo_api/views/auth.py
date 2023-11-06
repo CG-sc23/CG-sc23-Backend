@@ -90,9 +90,8 @@ class SocialSignUp(APIView):
             )
 
             converted_image_file = io.BytesIO(output_image_io.getvalue())
-
             profile_upload_success = profile_handler.upload_image(
-                request_data.email, converted_image_file
+                user.email, converted_image_file
             )
             if not profile_upload_success:
                 return JsonResponse(
