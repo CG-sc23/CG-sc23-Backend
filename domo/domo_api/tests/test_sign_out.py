@@ -38,4 +38,4 @@ class SignOutTest(APITestCase):
         response = self.client.get(self.sign_out_url)
 
         # Then: 로그아웃이 실패한다.
-        self.assertNotEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 401)
