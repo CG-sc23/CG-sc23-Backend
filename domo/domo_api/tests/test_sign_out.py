@@ -21,7 +21,7 @@ class SignOutTest(APITestCase):
     def test_sign_out_successful(self):
         # Given: 유효한 토큰을 사용하여,
         # When: 로그아웃 요청을 보내면,
-        response = self.client.post(self.sign_out_url)
+        response = self.client.get(self.sign_out_url)
 
         # Then: 로그아웃이 성공한다.
         self.assertEqual(response.status_code, 200)
@@ -35,7 +35,7 @@ class SignOutTest(APITestCase):
         self.client.force_authenticate(user=None)  # 인증 제거
 
         # When: 로그아웃 요청을 보내면,
-        response = self.client.post(self.sign_out_url)
+        response = self.client.get(self.sign_out_url)
 
         # Then: 로그아웃이 실패한다.
         self.assertNotEqual(response.status_code, 401)

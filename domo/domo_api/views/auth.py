@@ -262,7 +262,7 @@ class SignIn(APIView):
 class SignOut(APIView):
     authentication_classes = [TokenAuthentication]
 
-    def post(self, request):
+    def get(self, request):
         Token.objects.filter(key=request.auth).delete()
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
