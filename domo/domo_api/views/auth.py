@@ -1,4 +1,3 @@
-import io
 import secrets
 from datetime import datetime, timezone
 
@@ -7,6 +6,7 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from domo_api.const import ReturnCode
 from domo_api.http_model import (
     EmailVerifyConfirmRequest,
     EmailVerifyRequest,
@@ -21,12 +21,32 @@ from domo_api.http_model import (
     SocialSignUpRequest,
 )
 from domo_api.models import PasswordResetToken, SignUpEmailVerifyToken, User
-from domo_api.s3.profile import ProfileHandler
-from PIL import Image
+from domo_api.s3 import image
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
+
+
+def upload_profile_image(request_data, profile_image):
+    profile_handler = image.Uploader()
+    profile_upload_success, profile_image_link = profile_handler.upload_image(
+        request_data.email, "profile/image", profile_image
+    )
+
+    if profile_upload_success == ReturnCode.INVALID_ACCESS:
+        return JsonResponse(
+            SimpleFailResponse(success=False, reason="Bad Request.").model_dump(),
+            status=400,
+        )
+    if profile_upload_success == ReturnCode.FAIL:
+        return JsonResponse(
+            SimpleFailResponse(
+                success=False, reason="Error uploading profile image."
+            ).model_dump(),
+            status=500,
+        )
+    return profile_image_link
 
 
 class SocialSignUp(APIView):
@@ -78,45 +98,24 @@ class SocialSignUp(APIView):
                 status=401,
             )
 
-        # If Upload profile image to S3 first
-        profile_upload_success = False
-        profile_handler = ProfileHandler()
+        # If profile image exists, upload to S3 first
+        profile_image_link = None
         if "profile_image" in request.FILES:
-            # Convert image to JPEG
-            uploaded_image = Image.open(request.FILES["profile_image"])
-            output_image_io = io.BytesIO()
-            uploaded_image.convert("RGB").save(
-                output_image_io, format="JPEG", quality=90
+            profile_image_link = upload_profile_image(
+                request_data, request.FILES["profile_image"]
             )
-
-            converted_image_file = io.BytesIO(output_image_io.getvalue())
-            profile_upload_success = profile_handler.upload_image(
-                user.email, converted_image_file
-            )
-            if not profile_upload_success:
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="Error uploading profile image."
-                    ).model_dump(),
-                    status=500,
-                )
+            # This is a JsonResponse for Exception
+            if isinstance(profile_image_link, JsonResponse):
+                return profile_image_link
 
         # Create user
         try:
             user.name = request_data.name
-            user.has_profile_image = profile_upload_success
-            user.github_link = (
-                request_data.github_link if request_data.github_link else None
-            )
-            user.short_description = (
-                request_data.short_description
-                if request_data.short_description
-                else None
-            )
+            user.profile_image_link = profile_image_link
+            user.github_link = request_data.github_link or None
+            user.short_description = request_data.short_description or None
             user.save()
         except:
-            if profile_upload_success:
-                profile_handler.delete_directory(request_data.email)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error creating user."
@@ -175,48 +174,26 @@ class SignUp(APIView):
                 status=400,
             )
 
-        # If Upload profile image to S3 first
-        profile_upload_success = False
-        profile_handler = ProfileHandler()
+        # If profile image exists, upload to S3 first
+        profile_image_link = None
         if "profile_image" in request.FILES:
-            # Convert image to JPEG
-            uploaded_image = Image.open(request.FILES["profile_image"])
-            output_image_io = io.BytesIO()
-            uploaded_image.convert("RGB").save(
-                output_image_io, format="JPEG", quality=90
+            profile_image_link = upload_profile_image(
+                request_data, request.FILES["profile_image"]
             )
-
-            converted_image_file = io.BytesIO(output_image_io.getvalue())
-
-            profile_upload_success = profile_handler.upload_image(
-                request_data.email, converted_image_file
-            )
-            if not profile_upload_success:
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="Error uploading profile image."
-                    ).model_dump(),
-                    status=500,
-                )
+            # This is a JsonResponse for Exception
+            if isinstance(profile_image_link, JsonResponse):
+                return profile_image_link
 
         # Create user
         try:
             user_check.name = request_data.name
-            user_check.has_profile_image = profile_upload_success
-            user_check.github_link = (
-                request_data.github_link if request_data.github_link else None,
-            )
-            user_check.short_description = (
-                request_data.short_description
-                if request_data.short_description
-                else None,
-            )
+            user_check.profile_image_link = profile_image_link
+            user_check.github_link = request_data.github_link or None
+            user_check.short_description = request_data.short_description or None
             user_check.provider = "our"
             user_check.set_password(request_data.password)
             user_check.save()
         except:
-            if profile_upload_success:
-                profile_handler.delete_directory(request_data.email)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error creating user."
