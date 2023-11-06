@@ -1,22 +1,38 @@
+import asyncio
 import json
 import os
+from asyncio import sleep
+from datetime import datetime, timezone
 
 import requests
+from asgiref.sync import sync_to_async
+from django.db import transaction
+from django.db.transaction import atomic
 from domo_api.const import ReturnCode
-from domo_api.models import User, UserStack
+from domo_api.models import GithubStatus, User, UserStack
 
 
 class LoadGithubHistory:
-    def update_github_history(self, user_id):
+    @atomic
+    async def update_github_history(self, user_id):
         token = os.environ.get("GITHUB_API_TOKEN")
 
         headers = {"Authorization": "token " + token}
 
-        user = User.objects.get(id=user_id)
+        async with atomic():
+            user = await User.objects.get(id=user_id)
+
+        github_status = GithubStatus.objects.filter(user_id=user_id)
+
+        UserStack.objects.filter(user_id=user_id).delete()
 
         github_link = user.github_link
 
         if not github_link:
+            github_status.update(
+                status=ReturnCode.GITHUB_STATS_FAILED,
+                last_update=datetime.now(tz=timezone.utc),
+            )
             return ReturnCode.NO_GITHUB_URL
 
         account = (
@@ -29,9 +45,17 @@ class LoadGithubHistory:
             check_url = "https://api.github.com/users/" + account
             response = requests.get(url=check_url, headers=headers)
         except:
-            return
+            github_status.update(
+                status=ReturnCode.GITHUB_STATS_FAILED,
+                last_update=datetime.now(tz=timezone.utc),
+            )
+            return ReturnCode.NO_GITHUB_URL
 
         if response.status_code != 200:
+            github_status.update(
+                status=ReturnCode.GITHUB_STATS_FAILED,
+                last_update=datetime.now(tz=timezone.utc),
+            )
             return ReturnCode.CANNOT_FIND_GITHUB_ACCOUNT
 
         user_data = response.json()
@@ -56,8 +80,14 @@ class LoadGithubHistory:
                     user_id=user_id, language=language, code_amount=code_amount
                 )
 
+        github_status.update(
+            status=ReturnCode.GITHUB_STATUS_COMPLETE,
+            last_update=datetime.now(tz=timezone.utc),
+        )
+
         return ReturnCode.HISTORY_UPDATE_SUCCESS
 
+    @atomic
     def insert_user_stack(self, user_id, language, code_amount):
         try:
             user_stack = UserStack.objects.filter(user_id=user_id, language=language)
