@@ -1,12 +1,7 @@
-import asyncio
-import json
 import os
-from asyncio import sleep
 from datetime import datetime, timezone
 
 import requests
-from asgiref.sync import sync_to_async
-from django.db import transaction
 from django.db.transaction import atomic
 from domo_api.const import ReturnCode
 from domo_api.models import GithubStatus, User, UserStack
@@ -14,19 +9,14 @@ from domo_api.models import GithubStatus, User, UserStack
 
 class LoadGithubHistory:
     @atomic
-    async def update_github_history(self, user_id):
+    async def update_github_history(self, user_id, github_link):
         token = os.environ.get("GITHUB_API_TOKEN")
 
         headers = {"Authorization": "token " + token}
 
-        async with atomic():
-            user = await User.objects.get(id=user_id)
-
         github_status = GithubStatus.objects.filter(user_id=user_id)
 
         UserStack.objects.filter(user_id=user_id).delete()
-
-        github_link = user.github_link
 
         if not github_link:
             github_status.update(
