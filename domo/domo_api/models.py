@@ -116,7 +116,7 @@ class Project(models.Model):
     id = models.AutoField(primary_key=True)
     owner = models.ForeignKey(
         User,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     # READY, PROGRESSING, COMPLETED, GIVEUP
     status = models.CharField(max_length=20, default="READY")
@@ -150,7 +150,7 @@ class ProjectMember(models.Model):
     )
     user = models.ForeignKey(
         User,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     # OWNER, MANAGER, MEMBER
     role = models.CharField(max_length=20)
