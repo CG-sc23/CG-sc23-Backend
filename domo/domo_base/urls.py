@@ -59,6 +59,11 @@ urlpatterns = [
         name="user_info",
     ),
     path(
+        "user/v1/detail",
+        user.Info.as_view(),
+        name="user_detail_info",
+    ),
+    path(
         "project/v1",
         project.Info.as_view(),
         name="project_info",
