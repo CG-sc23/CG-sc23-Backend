@@ -68,11 +68,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     short_description = models.CharField(max_length=50, null=True, blank=True)
 
-    grade = models.IntegerField(null=True, blank=True)
+    grade = models.IntegerField(default=0)
 
-    like = models.IntegerField(null=True, blank=True)
+    like = models.IntegerField(default=0)
 
-    rating = models.FloatField(null=True, blank=True)
+    rating = models.FloatField(default=0)
 
     created_at = models.DateTimeField()
 
