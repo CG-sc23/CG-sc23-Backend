@@ -62,23 +62,23 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     name = models.CharField(max_length=20)
 
-    github_link = models.CharField(max_length=100, null=True)
+    github_link = models.CharField(max_length=100, null=True, blank=True)
 
     has_profile_image = models.BooleanField(default=False)
 
-    short_description = models.CharField(max_length=50, null=True)
+    short_description = models.CharField(max_length=50, null=True, blank=True)
 
-    grade = models.IntegerField(null=True)
+    grade = models.IntegerField(null=True, blank=True)
 
-    like = models.IntegerField(null=True)
+    like = models.IntegerField(null=True, blank=True)
 
-    rating = models.FloatField(null=True)
+    rating = models.FloatField(null=True, blank=True)
 
     created_at = models.DateTimeField()
 
     provider = models.CharField(max_length=20, default="our")
 
-    pre_access_token = models.TextField(null=True)
+    pre_access_token = models.TextField(null=True, blank=True)
 
     is_public = models.BooleanField(default=True)
 

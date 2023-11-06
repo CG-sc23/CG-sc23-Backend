@@ -38,6 +38,7 @@ class UserAdmin(admin.ModelAdmin):
                     "rating",
                     "is_active",
                     "has_profile_image",
+                    "created_at",
                 )
             },
         ),
