@@ -7,11 +7,13 @@ from domo_api.http_model import (
 )
 from domo_api.models import Project
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 
 class Info(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         response = GetUserInfoResponse(
@@ -52,6 +54,7 @@ class DetailInfo(APIView):
 
 class ProjectInfo(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         project_list = Project.objects.filter(

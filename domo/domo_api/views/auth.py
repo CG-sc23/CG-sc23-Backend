@@ -25,6 +25,7 @@ from domo_api.s3 import image
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 
@@ -237,6 +238,7 @@ class SignIn(APIView):
 
 class SignOut(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         Token.objects.filter(key=request.auth).delete()
@@ -247,6 +249,7 @@ class SignOut(APIView):
 
 class PasswordChange(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request):
         user = request.user
