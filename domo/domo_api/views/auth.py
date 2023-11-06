@@ -6,7 +6,6 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-from domo_api.const import ReturnCode
 from domo_api.http_model import (
     EmailVerifyConfirmRequest,
     EmailVerifyRequest,
@@ -21,33 +20,12 @@ from domo_api.http_model import (
     SocialSignUpRequest,
 )
 from domo_api.models import PasswordResetToken, SignUpEmailVerifyToken, User
-from domo_api.s3 import image
+from domo_api.s3.image import upload_profile_image
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-
-
-def upload_profile_image(request_data, profile_image):
-    profile_handler = image.Uploader()
-    profile_upload_success, profile_image_link = profile_handler.upload_image(
-        request_data.email, "profile/image", profile_image
-    )
-
-    if profile_upload_success == ReturnCode.INVALID_ACCESS:
-        return JsonResponse(
-            SimpleFailResponse(success=False, reason="Invalid request.").model_dump(),
-            status=400,
-        )
-    if profile_upload_success == ReturnCode.FAIL:
-        return JsonResponse(
-            SimpleFailResponse(
-                success=False, reason="Error uploading profile image."
-            ).model_dump(),
-            status=500,
-        )
-    return profile_image_link
 
 
 class SocialSignUp(APIView):

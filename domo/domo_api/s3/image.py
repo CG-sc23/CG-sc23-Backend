@@ -3,7 +3,9 @@ import os
 import secrets
 
 import boto3
+from django.http import JsonResponse
 from domo_api.const import ReturnCode
+from domo_api.http_model import SimpleFailResponse
 from PIL import Image
 
 
@@ -66,3 +68,24 @@ class Uploader:
         image.convert("RGB").save(output_image_io, format="JPEG", quality=90)
         converted_image_file = io.BytesIO(output_image_io.getvalue())
         return converted_image_file
+
+
+def upload_profile_image(request_data, profile_image):
+    profile_handler = Uploader()
+    profile_upload_success, profile_image_link = profile_handler.upload_image(
+        request_data.email, "profile/image", profile_image
+    )
+
+    if profile_upload_success == ReturnCode.INVALID_ACCESS:
+        return JsonResponse(
+            SimpleFailResponse(success=False, reason="Invalid request.").model_dump(),
+            status=400,
+        )
+    if profile_upload_success == ReturnCode.FAIL:
+        return JsonResponse(
+            SimpleFailResponse(
+                success=False, reason="Error uploading profile image."
+            ).model_dump(),
+            status=500,
+        )
+    return profile_image_link
