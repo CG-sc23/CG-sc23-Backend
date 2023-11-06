@@ -158,9 +158,9 @@ class SignUp(APIView):
             )
 
         try:
-            user_check = User.objects.filter(email=request_data.email)
+            user_check = User.objects.get(email=request_data.email)
 
-            if user_check.get().name != "NOT REGISTERED":
+            if user_check.name != "NOT REGISTERED":
                 return JsonResponse(
                     SimpleFailResponse(
                         success=False, reason="User with this email already exists."
@@ -202,18 +202,19 @@ class SignUp(APIView):
 
         # Create user
         try:
-            user_check.update(
-                password=request_data.password,
-                name=request_data.name,
-                has_profile_image=profile_upload_success,
-                github_link=request_data.github_link
-                if request_data.github_link
-                else None,
-                short_description=request_data.short_description
+            user_check.name = request_data.name
+            user_check.has_profile_image = profile_upload_success
+            user_check.github_link = (
+                request_data.github_link if request_data.github_link else None,
+            )
+            user_check.short_description = (
+                request_data.short_description
                 if request_data.short_description
                 else None,
-                provider="our",
             )
+            user_check.provider = "our"
+            user_check.set_password(request_data.password)
+            user_check.save()
         except:
             if profile_upload_success:
                 profile_handler.delete_directory(request_data.email)
