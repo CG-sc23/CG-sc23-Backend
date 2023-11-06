@@ -36,7 +36,7 @@ def upload_profile_image(request_data, profile_image):
 
     if profile_upload_success == ReturnCode.INVALID_ACCESS:
         return JsonResponse(
-            SimpleFailResponse(success=False, reason="Bad Request.").model_dump(),
+            SimpleFailResponse(success=False, reason="Invalid request.").model_dump(),
             status=400,
         )
     if profile_upload_success == ReturnCode.FAIL:
