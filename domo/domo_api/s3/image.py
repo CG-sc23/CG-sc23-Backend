@@ -49,7 +49,12 @@ class Uploader:
 
         image_file = self._convert_image_to_jpeg(image_file)
         try:
-            s3.upload_fileobj(image_file, self.aws_s3_bucket_name, full_path)
+            s3.upload_fileobj(
+                image_file,
+                self.aws_s3_bucket_name,
+                full_path,
+                ExtraArgs={"ContentType": "image/jpeg"},
+            )
             return ReturnCode.SUCCESS, uploaded_file_link
         except:
             return ReturnCode.FAIL, None
