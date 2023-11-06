@@ -12,7 +12,7 @@ class LoadGithubHistory:
     async def update_github_history(self, user_id, github_link):
         token = os.environ.get("GITHUB_API_TOKEN")
 
-        headers = {"Authorization": "token " + token}
+        headers = {"Authorization": "Bearer " + token}
 
         github_status = GithubStatus.objects.filter(user_id=user_id)
 
