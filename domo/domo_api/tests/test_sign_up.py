@@ -5,8 +5,9 @@ from unittest.mock import patch
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from domo_api.const import ReturnCode
 from domo_api.models import User
-from domo_api.s3.profile import ProfileHandler
+from domo_api.s3.image import Uploader
 from PIL import Image
 from rest_framework.test import APIClient
 
@@ -123,11 +124,11 @@ class SignUpTest(TestCase):
     #     self.assertFalse(response.json()["success"])
     #     self.assertEqual(response.json()["reason"], "Error creating user.")
 
-    @patch.object(ProfileHandler, "upload_image")
+    @patch.object(Uploader, "upload_image")
     def test_sign_up_with_valid_profile_image(self, mock_upload_image):
         # Given: 유효한 사용자 정보와 함께 프로필 이미지가 주어졌을 때,
         # email verify 완료된 상황
-        mock_upload_image.return_value = True
+        mock_upload_image.return_value = ReturnCode.SUCCESS, "SOME_URL"
 
         User.objects.create(
             email=self.user_data["email"],
@@ -149,11 +150,11 @@ class SignUpTest(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.json()["success"])
 
-    @patch.object(ProfileHandler, "upload_image")
+    @patch.object(Uploader, "upload_image")
     def test_sign_up_with_profile_image_upload_failure(self, mock_upload_image):
         # Given: 이미지 업로드가 실패하는 상황에서,
         # email verify 완료된 상황
-        mock_upload_image.return_value = False
+        mock_upload_image.return_value = ReturnCode.FAIL, None
 
         User.objects.create(
             email=self.user_data["email"],
