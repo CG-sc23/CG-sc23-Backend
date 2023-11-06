@@ -2,6 +2,7 @@ import json
 import os
 
 import requests
+from domo_api.const import ReturnCode
 from domo_api.models import User, UserStack
 
 
@@ -11,12 +12,12 @@ class LoadGithubHistory:
 
         headers = {"Authorization": "token " + token}
 
-        user = User.objects.filter(id=user_id).get()
+        user = User.objects.get(id=user_id)
 
         github_link = user.github_link
 
         if not github_link:
-            return "No github url"
+            return ReturnCode.NO_GITHUB_URL
 
         account = (
             github_link.split("/")[-1]
@@ -28,10 +29,10 @@ class LoadGithubHistory:
             check_url = "https://api.github.com/users/" + account
             response = requests.get(url=check_url, headers=headers)
         except:
-            return "Github API server doesn't response"
+            return
 
         if response.status_code != 200:
-            return "Can't find github account."
+            return ReturnCode.CANNOT_FIND_GITHUB_ACCOUNT
 
         user_data = response.json()
 
@@ -55,7 +56,7 @@ class LoadGithubHistory:
                     user_id=user_id, language=language, code_amount=code_amount
                 )
 
-        return "success"
+        return ReturnCode.HISTORY_UPDATE_SUCCESS
 
     def insert_user_stack(self, user_id, language, code_amount):
         try:
@@ -65,7 +66,6 @@ class LoadGithubHistory:
             user_stack.save()
 
         except UserStack.DoesNotExist:
-            UserStack(user_id)
             user_stack = UserStack(
                 user_id=user_id, language=language, code_amount=code_amount
             )
