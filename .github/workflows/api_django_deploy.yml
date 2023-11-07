@@ -31,18 +31,18 @@ jobs:
             echo "$REMOTE_SSH_KEY" > private_key
             chmod 600 private_key
             ssh -i private_key -o StrictHostKeyChecking=no -p $REMOTE_SSH_PORT $REMOTE_USER@$REMOTE_HOST << EOF
-            cd CG-sc23-Backend
+            cd CG-sc23-Backend/domo
             git pull -X theirs
             poetry install --no-root
-            poetry run domo/manage.py migrate
-            poetry run domo/manage.py collectstatic --noinput
+            poetry run ../manage.py migrate
+            poetry run ../manage.py collectstatic --noinput
           
             killall uwsgi
             poetry run sudo celery multi stopwait -A domo_base worker -l INFO
             sudo service rabbitmq-server restart
             
             poetry run sudo celery multi start -A domo_base worker -l INFO
-            poetry run uwsgi --ini domo/uwsgi.ini --enable-threads >> ./serv.log 2>&1 &
+            poetry run uwsgi --ini uwsgi.ini --enable-threads >> ./serv.log 2>&1 &
             EOF
 
       - name: Update GitHub Deployment Status
