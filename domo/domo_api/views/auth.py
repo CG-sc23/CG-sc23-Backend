@@ -19,8 +19,12 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
     SocialSignUpRequest,
 )
-from domo_api.models import PasswordResetToken, SignUpEmailVerifyToken, User
-from domo_api.s3.image import upload_profile_image
+from domo_api.models import (
+    GithubStatus,
+    PasswordResetToken,
+    SignUpEmailVerifyToken,
+    User,
+)
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -179,6 +183,13 @@ class SignUp(APIView):
                 ).model_dump(),
                 status=500,
             )
+        if request_data.github_link:
+            GithubStatus.objects.create(
+                user_id=user_check.id,
+                status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
+                last_update=datetime.now(tz=timezone.utc),
+            )
+
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
             status=201,

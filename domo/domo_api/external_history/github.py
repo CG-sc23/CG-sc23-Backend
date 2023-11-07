@@ -9,7 +9,7 @@ from domo_api.models import GithubStatus, User, UserStack
 
 class LoadGithubHistory:
     @atomic
-    async def update_github_history(self, user_id, github_link):
+    def update_github_history(self, user_id, github_link):
         token = os.environ.get("GITHUB_API_TOKEN")
 
         headers = {"Authorization": "Bearer " + token}
@@ -20,7 +20,7 @@ class LoadGithubHistory:
 
         if not github_link:
             github_status.update(
-                status=ReturnCode.GITHUB_STATS_FAILED,
+                status=ReturnCode.GITHUB_STATUS_FAILED,
                 last_update=datetime.now(tz=timezone.utc),
             )
             return ReturnCode.NO_GITHUB_URL
@@ -36,14 +36,14 @@ class LoadGithubHistory:
             response = requests.get(url=check_url, headers=headers)
         except:
             github_status.update(
-                status=ReturnCode.GITHUB_STATS_FAILED,
+                status=ReturnCode.GITHUB_STATUS_FAILED,
                 last_update=datetime.now(tz=timezone.utc),
             )
             return ReturnCode.NO_GITHUB_URL
 
         if response.status_code != 200:
             github_status.update(
-                status=ReturnCode.GITHUB_STATS_FAILED,
+                status=ReturnCode.GITHUB_STATUS_FAILED,
                 last_update=datetime.now(tz=timezone.utc),
             )
             return ReturnCode.CANNOT_FIND_GITHUB_ACCOUNT
@@ -56,11 +56,8 @@ class LoadGithubHistory:
 
         for repo in user_repos:
             language_url = (
-                "https://api.github.com/repos/"
-                + account
-                + "/"
-                + repo.get("name")
-                + "/languages"
+                f"https://api.github.com/repos/{account}/"
+                f"{repo.get('name')}/languages"
             )
 
             user_language = requests.get(url=language_url, headers=headers).json()
@@ -83,7 +80,6 @@ class LoadGithubHistory:
             user_stack = UserStack.objects.filter(user_id=user_id, language=language)
             original_value = user_stack.get().code_amount
             user_stack.update(code_amount=original_value + code_amount)
-            user_stack.save()
 
         except UserStack.DoesNotExist:
             user_stack = UserStack(
