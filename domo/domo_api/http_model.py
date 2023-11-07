@@ -89,10 +89,15 @@ class GetUserInfoResponse(BaseModel):
     success: bool
     email: str
     name: str
-    has_profile_image: bool
+    profile_image_link: Optional[str] = None
+
+
+class GetUserDetailInfoResponse(BaseModel):
+    success: bool
     is_public: bool
     github_link: Optional[str] = None
     short_description: Optional[str] = None
+    description: Optional[str] = None
     grade: Optional[int] = None
     like: Optional[int] = None
     rating: Optional[float] = None

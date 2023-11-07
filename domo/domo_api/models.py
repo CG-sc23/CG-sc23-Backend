@@ -15,7 +15,7 @@ class UserManager(BaseUserManager):
         name,
         short_description=None,
         github_link=None,
-        has_profile_image=False,
+        profile_image_link=None,
         provider="our",
     ):
         if not email:
@@ -30,7 +30,7 @@ class UserManager(BaseUserManager):
             name=name,
             short_description=short_description,
             created_at=datetime.now(tz=timezone.utc),
-            has_profile_image=has_profile_image,
+            profile_image_link=profile_image_link,
             provider=provider,
         )
         if github_link:
@@ -59,33 +59,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
 
     email = models.EmailField(max_length=320, unique=True)
-
     name = models.CharField(max_length=20)
-
     github_link = models.CharField(max_length=100, null=True, blank=True)
-
-    has_profile_image = models.BooleanField(default=False)
-
+    profile_image_link = models.TextField(null=True, blank=True)
     short_description = models.CharField(max_length=50, null=True, blank=True)
-
+    description = models.TextField(null=True, blank=True)
     grade = models.IntegerField(default=0)
-
     like = models.IntegerField(default=0)
-
     rating = models.FloatField(default=0)
-
     created_at = models.DateTimeField()
-
     provider = models.CharField(max_length=20, default="our")
-
     pre_access_token = models.TextField(null=True, blank=True)
 
     is_public = models.BooleanField(default=True)
-
     is_active = models.BooleanField(default=True)
-
     is_staff = models.BooleanField(default=False)
-
     is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"

@@ -10,6 +10,7 @@ from domo_api.http_model import (
 from domo_api.models import Project, ProjectMember
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 
@@ -37,6 +38,7 @@ def create_new_project(request_user, request_data):
 
 class Info(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         title = request.data.get("title")
