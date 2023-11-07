@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from domo_api.const import ReturnCode
 from domo_api.http_model import (
     EmailVerifyConfirmRequest,
     EmailVerifyRequest,
@@ -19,8 +20,14 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
     SocialSignUpRequest,
 )
-from domo_api.models import PasswordResetToken, SignUpEmailVerifyToken, User
+from domo_api.models import (
+    GithubStatus,
+    PasswordResetToken,
+    SignUpEmailVerifyToken,
+    User,
+)
 from domo_api.s3.image import upload_profile_image
+from domo_api.tasks import update_github_history
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -179,6 +186,14 @@ class SignUp(APIView):
                 ).model_dump(),
                 status=500,
             )
+        if request_data.github_link:
+            GithubStatus.objects.create(
+                user_id=user_check.id,
+                status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
+                last_update=datetime.now(tz=timezone.utc),
+            )
+            update_github_history.delay(user_check.id, user_check.github_link)
+
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
             status=201,

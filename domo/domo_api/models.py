@@ -143,3 +143,23 @@ class ProjectMember(models.Model):
     # OWNER, MANAGER, MEMBER
     role = models.CharField(max_length=20)
     created_at = models.DateTimeField()
+
+
+class UserStack(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    language = models.CharField()
+    code_amount = models.IntegerField()
+
+
+class GithubStatus(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    status = models.CharField()
+    last_update = models.DateTimeField()
