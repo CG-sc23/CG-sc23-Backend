@@ -27,6 +27,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_SSH_KEY: ${{ secrets.REMOTE_SSH_KEY }}
           REMOTE_SSH_PORT: ${{ secrets.REMOTE_SSH_PORT }}
+          CELERY_FULL_PATH: ${{ secrets.CELERY_FULL_PATH }}
         run: |
             echo "$REMOTE_SSH_KEY" > private_key
             chmod 600 private_key
@@ -38,10 +39,10 @@ jobs:
             poetry run python manage.py collectstatic --noinput
           
             killall uwsgi
-            poetry run celery multi stopwait -A domo_base worker -l INFO
+            sudo $CELERY_FULL_PATH multi stopwait -A domo_base worker -l INFO
             sudo service rabbitmq-server restart
             
-            poetry run celery multi start -A domo_base worker -l INFO
+            sudo $CELERY_FULL_PATH multi start -A domo_base worker -l INFO
             poetry run uwsgi --ini uwsgi.ini --enable-threads >> ./serv.log 2>&1 &
             EOF
 
