@@ -12,6 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Create GitHub Deployment
+        id: deployment
+        uses: bobheadxi/deployments@v1.4.0
+        with:
+          step: start
+          token: ${{ github.token }}
+          env: production
+          ref: ${{ github.sha }}
+            
       - name: executing remote ssh commands
         env:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
@@ -30,15 +39,6 @@ jobs:
             killall uwsgi
             poetry run uwsgi --ini domo/uwsgi.ini --enable-threads >> ./serv.log 2>&1 &
             EOF
-
-      - name: Create GitHub Deployment
-        id: deployment
-        uses: bobheadxi/deployments@v1.4.0
-        with:
-          step: start
-          token: ${{ github.token }}
-          env: production
-          ref: ${{ github.sha }}
 
       - name: Update GitHub Deployment Status
         if: always()
