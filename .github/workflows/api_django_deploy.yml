@@ -36,7 +36,12 @@ jobs:
             poetry install --no-root
             poetry run domo/manage.py migrate
             poetry run domo/manage.py collectstatic --noinput
+          
             killall uwsgi
+            poetry run sudo celery multi stopwait -A domo_base worker -l INFO
+            sudo service rabbitmq-server restart
+            
+            poetry run sudo celery multi start -A domo_base worker -l INFO
             poetry run uwsgi --ini domo/uwsgi.ini --enable-threads >> ./serv.log 2>&1 &
             EOF
 
