@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from .models import PasswordResetToken, SignUpEmailVerifyToken, User, UserStack
+from .models import (
+    GithubStatus,
+    PasswordResetToken,
+    SignUpEmailVerifyToken,
+    User,
+    UserStack,
+)
 
 
 @admin.register(User)
@@ -102,17 +108,35 @@ class EmailVerifyTokenAdmin(admin.ModelAdmin):
 
 @admin.register(UserStack)
 class UserStackAdmin(admin.ModelAdmin):
-    list_display = ("user_id", "language", "code_amount")
-    list_filter = ("user_id",)
+    list_display = ("id", "user", "language", "code_amount")
+    list_filter = ("user",)
     search_fields = ("language",)
-    ordering = ("-user_id",)
-    fieldsets = ((None, {"fields": ("user_id", "language", "code_amount")}),)
+    ordering = ("id",)
+    fieldsets = ((None, {"fields": ("user", "language", "code_amount")}),)
     add_fieldsets = (
         (
             None,
             {
                 "classes": ("wide",),
-                "fields": ("user_id", "language", "code_amount"),
+                "fields": ("user", "language", "code_amount"),
+            },
+        ),
+    )
+
+
+@admin.register(GithubStatus)
+class GithubStatusAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "status", "last_update")
+    list_filter = ("user",)
+    search_fields = ("language",)
+    ordering = ("id",)
+    fieldsets = ((None, {"fields": ("user", "status", "last_update")}),)
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("user", "status", "last_update"),
             },
         ),
     )
