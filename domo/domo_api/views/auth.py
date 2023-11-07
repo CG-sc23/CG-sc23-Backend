@@ -26,6 +26,8 @@ from domo_api.models import (
     SignUpEmailVerifyToken,
     User,
 )
+from domo_api.s3.image import upload_profile_image
+from domo_api.tasks import update_github_history
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -190,6 +192,7 @@ class SignUp(APIView):
                 status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
                 last_update=datetime.now(tz=timezone.utc),
             )
+            update_github_history.delay(user_check.id, user_check.github_link)
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
