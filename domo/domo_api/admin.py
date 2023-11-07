@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import PasswordResetToken, SignUpEmailVerifyToken, User
+from .models import PasswordResetToken, SignUpEmailVerifyToken, User, UserStack
 
 
 @admin.register(User)
@@ -95,6 +95,24 @@ class EmailVerifyTokenAdmin(admin.ModelAdmin):
             {
                 "classes": ("wide",),
                 "fields": ("email", "token", "created_at"),
+            },
+        ),
+    )
+
+
+@admin.register(UserStack)
+class UserStackAdmin(admin.ModelAdmin):
+    list_display = ("user_id", "language", "code_amount")
+    list_filter = ("user_id",)
+    search_fields = ("language",)
+    ordering = ("-user_id",)
+    fieldsets = ((None, {"fields": ("user_id", "language", "code_amount")}),)
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("user_id", "language", "code_amount"),
             },
         ),
     )

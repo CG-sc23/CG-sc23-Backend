@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from domo_api.const import ReturnCode
 from domo_api.http_model import (
     EmailVerifyConfirmRequest,
     EmailVerifyRequest,
