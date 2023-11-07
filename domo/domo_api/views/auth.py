@@ -108,6 +108,14 @@ class SocialSignUp(APIView):
                 ).model_dump(),
                 status=500,
             )
+        if request_data.github_link:
+            GithubStatus.objects.create(
+                user_id=user.id,
+                status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
+                last_update=datetime.now(tz=timezone.utc),
+            )
+            update_github_history.delay(user.id, user.github_link)
+
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
             status=201,
