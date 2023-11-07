@@ -24,6 +24,7 @@ requests = "^2.31.0"
 google-auth = "^2.23.3"
 google-auth-oauthlib = "^1.1.0"
 sentry-sdk = {extras = ["django"], version = "^1.32.0"}
+celery = "^5.3.4"
 
 
 [build-system]
