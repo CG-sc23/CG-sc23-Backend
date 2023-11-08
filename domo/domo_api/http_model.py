@@ -80,9 +80,6 @@ class GithubAccountCheckRequest(BaseModel):
 
 class ModifyUserInfoRequest(BaseModel):
     name: Optional[str] = None
-    github_link: Optional[str] = None
-    short_description: Optional[str] = None
-    is_public: Optional[bool] = None
 
 
 class GetUserInfoResponse(BaseModel):
