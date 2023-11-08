@@ -26,7 +26,7 @@ from domo_api.models import (
     SignUpEmailVerifyToken,
     User,
 )
-from domo_api.s3.Handler import upload_profile_image
+from domo_api.s3.handler import upload_profile_image
 from domo_api.tasks import update_github_history
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication

@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from domo_api.const import ReturnCode
 from domo_api.models import User
-from domo_api.s3.Handler import ProfileImageUploader
+from domo_api.s3.handler import ProfileImageUploader
 from PIL import Image
 from rest_framework.test import APIClient
 
