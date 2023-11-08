@@ -17,13 +17,6 @@ def update_github_history(user_id, github_link):
     headers = {"Authorization": "Bearer " + token}
 
     github_status = GithubStatus.objects.get(user_id=user_id)
-    if not github_status.exists():
-        github_status = GithubStatus(
-            user_id=user_id,
-            status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
-            last_update=datetime.now(tz=timezone.utc),
-        )
-        github_status.save()
 
     UserStack.objects.filter(user_id=user_id).delete()
 
