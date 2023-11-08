@@ -39,7 +39,7 @@ jobs:
             poetry run python manage.py collectstatic --noinput
           
             killall uwsgi
-            sudo ps auxww | grep 'celery' | awk '{print $2}' | xargs kill -9
+            sudo ps auxww | grep celery | awk '{print $2}' | xargs kill -9
             sudo service rabbitmq-server restart
             
             poetry run celery -A domo_base worker -D -B -l INFO
