@@ -98,6 +98,14 @@ def insert_user_stack(user_id, language, code_amount):
 def periodic_update_github_history():
     users = User.objects.filter(github_link__isnull=False)
     for user in users:
+        if not GithubStatus.objects.filter(user=user).exists():
+            github_status = GithubStatus(
+                user=user,
+                status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
+                last_update=datetime.now(tz=timezone.utc),
+            )
+            github_status.save()
+
         update_github_history(user, user.github_link)
 
 
