@@ -108,6 +108,17 @@ class GeneralHandler:
         self.s3_resource = boto3.resource("s3")
         self.prefix = "resources"
 
+    def remove_resource(self, resource_link):
+        key = resource_link.split("/")[-1]
+        try:
+            self.s3_client.delete_object(
+                Bucket=self.aws_s3_bucket_name,
+                Key=f"{self.prefix}/{key}",
+            )
+        except:
+            return False
+        return True
+
     def check_resource_links(self, resource_links):
         for resource_link in resource_links:
             key = resource_link.split("/")[-1]
