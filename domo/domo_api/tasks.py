@@ -9,17 +9,6 @@ from domo_api.const import ReturnCode
 from domo_api.models import GithubStatus, User, UserStack
 
 
-# Example code
-@shared_task
-def add(x, y):
-    return x + y
-
-
-@shared_task
-def mul(x, y):
-    return x * y
-
-
 @shared_task
 @atomic
 def update_github_history(user_id, github_link):
