@@ -99,6 +99,7 @@ def periodic_update_github_history():
             )
             github_status.save()
         else:
+            github_status = GithubStatus.objects.get(user=user)
             github_status.status = ReturnCode.GITHUB_STATUS_IN_PROGRESS
             github_status.last_update = datetime.now(tz=timezone.utc)
             github_status.save()
