@@ -1,13 +1,19 @@
+import json
+
+from django.db.transaction import atomic
 from django.http import JsonResponse
 from domo_api.http_model import (
     GetAllProjectResponse,
     GetUserDetailInfoResponse,
     GetUserInfoResponse,
+    ModifyUserDetailInfoRequest,
     ModifyUserInfoRequest,
+    SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import Project
-from domo_api.s3.handler import upload_profile_image
+from domo_api.models import Project, S3ResourceReferenceCheck
+from domo_api.s3.handler import GeneralHandler, upload_profile_image
+from domo_api.tasks import update_github_history
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -77,13 +83,119 @@ class DetailInfo(APIView):
             github_link=request.user.github_link,
             short_description=request.user.short_description,
             description=request.user.description,
+            description_resource_links=request.user.description_resource_links,
             grade=request.user.grade,
             like=request.user.like,
             rating=request.user.rating,
             provider=request.user.provider,
-            last_login=request.user.last_login,
         )
         return JsonResponse(response.model_dump(), status=200)
+
+    @atomic
+    def put(self, request):
+        is_public = request.data.get("email")
+        github_link = request.data.get("github_link", None)
+        short_description = request.data.get("short_description", None)
+        description = request.data.get("description", None)
+        description_resource_links = request.data.get(
+            "description_resource_links", None
+        )
+        if description_resource_links:
+            description_resource_links = json.loads(description_resource_links)
+
+        data_dict = {
+            "is_public": is_public,
+            "github_link": github_link,
+            "short_description": short_description,
+            "description": description,
+            "description_resource_links": description_resource_links,
+        }
+
+        try:
+            request_data = ModifyUserDetailInfoRequest(**data_dict)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        # description에 media가 있을경우, validation check가 필요하다.
+        # 이후 reference check + 1 한다.
+        if request_data.description_resource_links:
+            s3_handler = GeneralHandler()
+            if not s3_handler.check_resource_links(
+                request_data.description_resource_links
+            ):
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False,
+                        reason="Invalid request",
+                    ).model_dump(),
+                    status=400,
+                )
+            for resource_link in request_data.description_resource_links:
+                try:
+                    ref_check_obj = S3ResourceReferenceCheck.objects.get(
+                        resource_link=resource_link
+                    )
+                    ref_check_obj.reference_cnt += 1
+                    ref_check_obj.save()
+                except S3ResourceReferenceCheck.DoesNotExist:
+                    S3ResourceReferenceCheck.objects.create(
+                        resource_link=resource_link,
+                        reference_cnt=1,
+                    )
+
+            user_description_resource_links = request.user.description_resource_links
+            if user_description_resource_links:
+                for resource_link in user_description_resource_links:
+                    ref_check_obj = S3ResourceReferenceCheck.objects.get(
+                        resource_link=resource_link
+                    )
+                    if ref_check_obj.reference_cnt == 1:
+                        ref_check_obj.delete()
+                    else:
+                        ref_check_obj.reference_cnt -= 1
+                        ref_check_obj.save()
+
+        # 사용자의 description에 resource link가 없는 것. None(변경 X)과는 다름
+        elif isinstance(request_data.description_resource_links, list):
+            user_description_resource_links = request.user.description_resource_links
+            if user_description_resource_links:
+                for resource_link in user_description_resource_links:
+                    ref_check_obj = S3ResourceReferenceCheck.objects.get(
+                        resource_link=resource_link
+                    )
+                    if ref_check_obj.reference_cnt == 1:
+                        ref_check_obj.delete()
+                    else:
+                        ref_check_obj.reference_cnt -= 1
+                        ref_check_obj.save()
+
+        if request_data.github_link:
+            update_github_history.delay(request.user.id, request_data.github_link)
+
+        request.user.is_public = request_data.is_public or request.user.is_public
+        request.user.github_link = request_data.github_link or request.user.github_link
+        request.user.short_description = (
+            request_data.short_description or request.user.short_description
+        )
+        request.user.description = request_data.description or request.user.description
+        if request_data.description_resource_links:
+            request.user.description_resource_links = (
+                request_data.description_resource_links
+            )
+        elif isinstance(request_data.description_resource_links, list):
+            request.user.description_resource_links = None
+
+        request.user.save()
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
 
 
 class ProjectInfo(APIView):
