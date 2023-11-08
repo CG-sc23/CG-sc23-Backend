@@ -163,3 +163,9 @@ class GithubStatus(models.Model):
     )
     status = models.CharField(max_length=20)
     last_update = models.DateTimeField()
+
+
+class S3ResourceReferenceCheck(models.Model):
+    id = models.AutoField(primary_key=True)
+    resource_name = models.CharField(max_length=30)
+    reference_cnt = models.IntegerField()
