@@ -99,7 +99,7 @@ def periodic_update_github_history():
             )
             github_status.save()
 
-        update_github_history(user, user.github_link)
+        update_github_history(user.id, user.github_link)
 
 
 @shared_task
