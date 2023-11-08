@@ -151,7 +151,7 @@ class UserStack(models.Model):
         User,
         on_delete=models.CASCADE,
     )
-    language = models.CharField()
+    language = models.CharField(max_length=20)
     code_amount = models.IntegerField()
 
 
@@ -161,5 +161,5 @@ class GithubStatus(models.Model):
         User,
         on_delete=models.CASCADE,
     )
-    status = models.CharField()
+    status = models.CharField(max_length=20)
     last_update = models.DateTimeField()
