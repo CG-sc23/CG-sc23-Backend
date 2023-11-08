@@ -39,10 +39,10 @@ jobs:
             poetry run python manage.py collectstatic --noinput
           
             killall uwsgi
-            sudo $CELERY_FULL_PATH multi stopwait -A domo_base worker -l INFO
+            sudo ps auxww | grep 'celery' | awk '{print $2}' | xargs kill -9
             sudo service rabbitmq-server restart
             
-            sudo $CELERY_FULL_PATH multi start -A domo_base worker -l INFO
+            poetry run celery -A domo_base worker -D -B -l INFO
             poetry run uwsgi --ini uwsgi.ini --enable-threads >> ./serv.log 2>&1 &
             EOF
 

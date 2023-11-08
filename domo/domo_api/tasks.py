@@ -6,7 +6,7 @@ import requests
 from celery import shared_task
 from django.db.transaction import atomic
 from domo_api.const import ReturnCode
-from domo_api.models import GithubStatus, UserStack
+from domo_api.models import GithubStatus, User, UserStack
 
 
 # Example code
@@ -99,3 +99,21 @@ def insert_user_stack(user_id, language, code_amount):
             user_id=user_id, language=language, code_amount=code_amount
         )
         user_stack.save()
+
+
+@shared_task
+def periodic_update_github_history():
+    users = User.objects.filter(github_link__isnull=False)
+    for user in users:
+        update_github_history(user, user.github_link)
+
+
+@shared_task
+def periodic_fail_check_github_history():
+    users = GithubStatus.objects.filter(status=ReturnCode.GITHUB_STATUS_IN_PROGRESS)
+
+    for user in users:
+        if (datetime.now(tz=timezone.utc) - user.last_update).total_seconds() > 60 * 30:
+            user.status = ReturnCode.GITHUB_STATUS_FAILED
+            user.last_update = datetime.now(tz=timezone.utc)
+            user.save()
