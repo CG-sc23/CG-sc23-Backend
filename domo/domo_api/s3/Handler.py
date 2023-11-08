@@ -9,7 +9,7 @@ from domo_api.http_model import SimpleFailResponse
 from PIL import Image
 
 
-class Uploader:
+class ProfileImageUploader:
     def __init__(self):
         self.aws_s3_bucket_name = os.environ.get("AWS_S3_BUCKET_NAME")
 
@@ -71,7 +71,7 @@ class Uploader:
 
 
 def upload_profile_image(request_data, profile_image):
-    profile_handler = Uploader()
+    profile_handler = ProfileImageUploader()
     profile_upload_success, profile_image_link = profile_handler.upload_image(
         request_data.email, "profile/image", profile_image
     )
