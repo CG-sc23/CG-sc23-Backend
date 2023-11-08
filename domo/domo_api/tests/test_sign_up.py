@@ -45,7 +45,7 @@ class SignUpTest(TestCase):
 
         # Then: 회원가입이 성공하고, 성공 메시지가 반환된다.
         user = User.objects.get(email=self.user_data["email"])
-        mock_github_delay.assert_called_once_with(user.id, user.github_link)
+        mock_github_delay.assert_called_once_with(user, user.github_link)
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.json()["success"])
 
@@ -154,7 +154,7 @@ class SignUpTest(TestCase):
 
         # Then: 회원가입이 성공하고, 성공 메시지가 반환된다.
         user = User.objects.get(email=self.user_data["email"])
-        mock_github_delay.assert_called_once_with(user.id, user.github_link)
+        mock_github_delay.assert_called_once_with(user, user.github_link)
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.json()["success"])
 
