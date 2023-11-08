@@ -16,7 +16,7 @@ def update_github_history(user_id, github_link):
 
     headers = {"Authorization": "Bearer " + token}
 
-    github_status = GithubStatus.objects.filter(user_id=user_id)
+    github_status = GithubStatus.objects.get(user_id=user_id)
     if not github_status.exists():
         github_status = GithubStatus(
             user_id=user_id,
@@ -28,10 +28,9 @@ def update_github_history(user_id, github_link):
     UserStack.objects.filter(user_id=user_id).delete()
 
     if not github_link:
-        github_status.update(
-            status=ReturnCode.GITHUB_STATUS_FAILED,
-            last_update=datetime.now(tz=timezone.utc),
-        )
+        github_status.status = ReturnCode.GITHUB_STATUS_FAILED
+        github_status.last_update = datetime.now(tz=timezone.utc)
+        github_status.save()
         return ReturnCode.NO_GITHUB_URL
 
     account = (
@@ -44,17 +43,15 @@ def update_github_history(user_id, github_link):
         check_url = "https://api.github.com/users/" + account
         response = requests.get(url=check_url, headers=headers)
     except:
-        github_status.update(
-            status=ReturnCode.GITHUB_STATUS_FAILED,
-            last_update=datetime.now(tz=timezone.utc),
-        )
+        github_status.status = ReturnCode.GITHUB_STATUS_FAILED
+        github_status.last_update = datetime.now(tz=timezone.utc)
+        github_status.save()
         return ReturnCode.NO_GITHUB_URL
 
     if response.status_code != 200:
-        github_status.update(
-            status=ReturnCode.GITHUB_STATUS_FAILED,
-            last_update=datetime.now(tz=timezone.utc),
-        )
+        github_status.status = ReturnCode.GITHUB_STATUS_FAILED
+        github_status.last_update = datetime.now(tz=timezone.utc)
+        github_status.save()
         return ReturnCode.CANNOT_FIND_GITHUB_ACCOUNT
 
     user_data = response.json()
@@ -75,10 +72,9 @@ def update_github_history(user_id, github_link):
                 user_id=user_id, language=language, code_amount=code_amount
             )
 
-    github_status.update(
-        status=ReturnCode.GITHUB_STATUS_COMPLETE,
-        last_update=datetime.now(tz=timezone.utc),
-    )
+    github_status.status = ReturnCode.GITHUB_STATUS_COMPLETE
+    github_status.last_update = datetime.now(tz=timezone.utc)
+    github_status.save()
 
     return ReturnCode.HISTORY_UPDATE_SUCCESS
 
@@ -86,9 +82,10 @@ def update_github_history(user_id, github_link):
 @atomic
 def insert_user_stack(user_id, language, code_amount):
     try:
-        user_stack = UserStack.objects.filter(user_id=user_id, language=language)
-        original_value = user_stack.get().code_amount
-        user_stack.update(code_amount=original_value + code_amount)
+        user_stack = UserStack.objects.get(user_id=user_id, language=language)
+        original_value = user_stack.code_amount
+        user_stack.code_amount = original_value + code_amount
+        user_stack.save()
 
     except UserStack.DoesNotExist:
         user_stack = UserStack(
