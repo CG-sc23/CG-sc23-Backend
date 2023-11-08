@@ -156,20 +156,7 @@ class DetailInfo(APIView):
                     )
                     if ref_check_obj.reference_cnt == 1:
                         ref_check_obj.delete()
-                    else:
-                        ref_check_obj.reference_cnt -= 1
-                        ref_check_obj.save()
-
-        # 사용자의 description에 resource link가 없는 것. None(변경 X)과는 다름
-        elif isinstance(request_data.description_resource_links, list):
-            user_description_resource_links = request.user.description_resource_links
-            if user_description_resource_links:
-                for resource_link in user_description_resource_links:
-                    ref_check_obj = S3ResourceReferenceCheck.objects.get(
-                        resource_link=resource_link
-                    )
-                    if ref_check_obj.reference_cnt == 1:
-                        ref_check_obj.delete()
+                        s3_handler.remove_resource(resource_link)
                     else:
                         ref_check_obj.reference_cnt -= 1
                         ref_check_obj.save()
