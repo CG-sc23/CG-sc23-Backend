@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from domo_api.const import ReturnCode
 from domo_api.models import User
-from domo_api.s3.image import Uploader
+from domo_api.s3.handler import ProfileImageUploader
 from PIL import Image
 from rest_framework.test import APIClient
 
@@ -128,7 +128,7 @@ class SignUpTest(TestCase):
     #     self.assertEqual(response.json()["reason"], "Error creating user.")
 
     @patch("domo_api.tasks.update_github_history.delay")
-    @patch.object(Uploader, "upload_image")
+    @patch.object(ProfileImageUploader, "upload_image")
     def test_sign_up_with_valid_profile_image(
         self, mock_upload_image, mock_github_delay
     ):
@@ -158,7 +158,7 @@ class SignUpTest(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.json()["success"])
 
-    @patch.object(Uploader, "upload_image")
+    @patch.object(ProfileImageUploader, "upload_image")
     def test_sign_up_with_profile_image_upload_failure(self, mock_upload_image):
         # Given: 이미지 업로드가 실패하는 상황에서,
         # email verify 완료된 상황

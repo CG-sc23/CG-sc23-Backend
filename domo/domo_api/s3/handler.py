@@ -9,7 +9,7 @@ from domo_api.http_model import SimpleFailResponse
 from PIL import Image
 
 
-class Uploader:
+class ProfileImageUploader:
     def __init__(self):
         self.aws_s3_bucket_name = os.environ.get("AWS_S3_BUCKET_NAME")
 
@@ -71,7 +71,7 @@ class Uploader:
 
 
 def upload_profile_image(request_data, profile_image):
-    profile_handler = Uploader()
+    profile_handler = ProfileImageUploader()
     profile_upload_success, profile_image_link = profile_handler.upload_image(
         request_data.email, "profile/image", profile_image
     )
@@ -89,3 +89,49 @@ def upload_profile_image(request_data, profile_image):
             status=500,
         )
     return profile_image_link
+
+
+class GeneralHandler:
+    def __init__(self):
+        self.aws_s3_bucket_name = os.environ.get("AWS_S3_BUCKET_NAME")
+
+        # # For Local Test
+        # self.s3_session = boto3.Session(profile_name="minio")
+        # self.s3_client = self.s3_session.client(
+        #     "s3", endpoint_url="http://127.0.0.1:9000"
+        # )
+        # self.s3_resource = self.s3_session.resource(
+        #     "s3", endpoint_url="http://127.0.0.1:9000"
+        # )
+        self.s3_client = boto3.client("s3")
+        self.s3_resource = boto3.resource("s3")
+        self.prefix = "resources"
+
+    @staticmethod
+    def is_valid_object_type(object_type):
+        return object_type in ["jpg", "jpeg", "png", "gif", "mp4"]
+
+    def create_presigned_url(self, object_name):
+        object_type = object_name.split(".")[-1]
+
+        if not self.is_valid_object_type(object_type):
+            return ReturnCode.INVALID_ACCESS, None
+
+        random_token = secrets.token_urlsafe(16)
+        key = f"{self.prefix}/{random_token}.{object_type}"
+        try:
+            response = self.s3_client.generate_presigned_post(
+                Bucket=self.aws_s3_bucket_name,
+                Key=key,
+                ExpiresIn=600,
+            )
+        except:
+            return ReturnCode.FAILED_CREATE_PRESIGNED_URL, None
+
+        return ReturnCode.SUCCESS, response
+
+
+if __name__ == "__main__":
+    test = GeneralHandler()
+    result = test.create_presigned_url("test.gif")
+    print(result)

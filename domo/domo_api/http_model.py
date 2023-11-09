@@ -137,3 +137,9 @@ class GetAllProjectResponse(BaseModel):
     success: bool
     count: int
     projects: list
+
+
+class GetPreSignedUrlResponse(BaseModel):
+    success: bool
+    url: str
+    aws_response: dict
