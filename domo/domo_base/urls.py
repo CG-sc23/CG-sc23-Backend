@@ -75,7 +75,7 @@ urlpatterns = [
     ),
     path(
         "user/v1/detail",
-        user.Info.as_view(),
+        user.DetailInfo.as_view(),
         name="user_detail_info",
     ),
     path(

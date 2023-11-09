@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     GithubStatus,
     PasswordResetToken,
+    S3ResourceReferenceCheck,
     SignUpEmailVerifyToken,
     User,
     UserStack,
@@ -40,6 +41,7 @@ class UserAdmin(admin.ModelAdmin):
                     "github_link",
                     "short_description",
                     "description",
+                    "description_resource_links",
                     "grade",
                     "like",
                     "rating",
@@ -137,6 +139,23 @@ class GithubStatusAdmin(admin.ModelAdmin):
             {
                 "classes": ("wide",),
                 "fields": ("user", "status", "last_update"),
+            },
+        ),
+    )
+
+
+@admin.register(S3ResourceReferenceCheck)
+class S3ResourceReferenceCheckAdmin(admin.ModelAdmin):
+    list_display = ("id", "resource_link", "owner")
+    list_filter = ("resource_link", "owner")
+    ordering = ("id", "owner")
+    fieldsets = ((None, {"fields": ("resource_link", "owner")}),)
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("resource_link", "owner"),
             },
         ),
     )

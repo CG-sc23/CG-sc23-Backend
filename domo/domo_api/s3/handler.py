@@ -3,6 +3,7 @@ import os
 import secrets
 
 import boto3
+from botocore.exceptions import ClientError
 from django.http import JsonResponse
 from domo_api.const import ReturnCode
 from domo_api.http_model import SimpleFailResponse
@@ -106,6 +107,29 @@ class GeneralHandler:
         self.s3_client = boto3.client("s3")
         self.s3_resource = boto3.resource("s3")
         self.prefix = "resources"
+
+    def remove_resource(self, resource_link):
+        key = resource_link.split("/")[-1]
+        try:
+            self.s3_client.delete_object(
+                Bucket=self.aws_s3_bucket_name,
+                Key=f"{self.prefix}/{key}",
+            )
+        except:
+            return False
+        return True
+
+    def check_resource_links(self, resource_links):
+        for resource_link in resource_links:
+            key = resource_link.split("/")[-1]
+            try:
+                self.s3_client.head_object(
+                    Bucket=self.aws_s3_bucket_name,
+                    Key=f"{self.prefix}/{key}",
+                )
+            except:
+                return False
+        return True
 
     @staticmethod
     def is_valid_object_type(object_type):

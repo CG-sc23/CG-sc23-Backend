@@ -90,9 +90,14 @@ class GetAllUserStackResponse(BaseModel):
 
 class ModifyUserInfoRequest(BaseModel):
     name: Optional[str] = None
+
+
+class ModifyUserDetailInfoRequest(BaseModel):
+    is_public: Optional[bool] = None
     github_link: Optional[str] = None
     short_description: Optional[str] = None
-    is_public: Optional[bool] = None
+    description: Optional[str] = None
+    description_resource_links: Optional[list[str]] = None
 
 
 class GetUserInfoResponse(BaseModel):
@@ -108,11 +113,11 @@ class GetUserDetailInfoResponse(BaseModel):
     github_link: Optional[str] = None
     short_description: Optional[str] = None
     description: Optional[str] = None
+    description_resource_links: Optional[list[str]] = None
     grade: Optional[int] = None
     like: Optional[int] = None
     rating: Optional[float] = None
     provider: str
-    last_login: datetime
 
 
 class CreateProjectRequest(BaseModel):
