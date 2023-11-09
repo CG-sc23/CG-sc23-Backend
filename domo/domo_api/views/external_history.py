@@ -1,11 +1,15 @@
 import requests
 from django.http import JsonResponse
 from domo_api.http_model import (
+    GetGithubUpdateStatus,
     GithubAccountCheckRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
+from domo_api.models import GithubStatus
 from pydantic import ValidationError
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 
@@ -71,3 +75,23 @@ class GithubAccountCheck(APIView):
             SimpleSuccessResponse(success=True).model_dump(),
             status=200,
         )
+
+    class GithubUpdateStatus(APIView):
+        authentication_classes = [TokenAuthentication]
+        permission_classes = [IsAuthenticated]
+
+        def get(self, request):
+            try:
+                github_status = GithubStatus.objects.get(user=request.user)
+                response = GetGithubUpdateStatus(
+                    status=github_status.status, last_update=github_status.last_update
+                )
+                return JsonResponse(response.model_dump(), status=200)
+
+            except GithubStatus.DoesNotExist:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Github status Not Found "
+                    ).model_dump(),
+                    status=404,
+                )
