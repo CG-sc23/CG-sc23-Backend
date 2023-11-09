@@ -146,16 +146,16 @@ class GithubStatusAdmin(admin.ModelAdmin):
 
 @admin.register(S3ResourceReferenceCheck)
 class S3ResourceReferenceCheckAdmin(admin.ModelAdmin):
-    list_display = ("id", "resource_link", "reference_cnt")
-    list_filter = ("resource_link",)
-    ordering = ("id", "reference_cnt")
-    fieldsets = ((None, {"fields": ("resource_link", "reference_cnt")}),)
+    list_display = ("id", "resource_link", "owner")
+    list_filter = ("resource_link", "owner")
+    ordering = ("id", "owner")
+    fieldsets = ((None, {"fields": ("resource_link", "owner")}),)
     add_fieldsets = (
         (
             None,
             {
                 "classes": ("wide",),
-                "fields": ("resource_link", "reference_cnt"),
+                "fields": ("resource_link", "owner"),
             },
         ),
     )
