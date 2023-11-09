@@ -9,6 +9,7 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
 )
 from domo_api.models import GithubStatus, UserStack
+from domo_api.tasks import periodic_update_github_history
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -137,7 +138,22 @@ class GithubStack(APIView):
         stacks = {}
 
         for stack in github_stacks:
-            stacks[stack.language].append(stack.code_amount)
+            stacks[stack.language] = stack.code_amount
 
         response = GetAllUserStack(count=github_stacks.count(), stacks=stacks)
         return JsonResponse(response.model_dump(), status=200)
+
+
+class GithubManualUpdate(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        periodic_update_github_history.delay(user.id, user.github_link)
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=202,
+        )
