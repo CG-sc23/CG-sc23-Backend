@@ -90,7 +90,9 @@ class GithubUpdateStatus(APIView):
         try:
             github_status = GithubStatus.objects.get(user=request.user)
             response = GetGithubUpdateStatusResponse(
-                status=github_status.status, last_update=github_status.last_update
+                success=True,
+                status=github_status.status,
+                last_update=github_status.last_update,
             )
             return JsonResponse(response.model_dump(), status=200)
 
@@ -142,7 +144,9 @@ class GithubStack(APIView):
         for stack in github_stacks:
             stacks[stack.language] = stack.code_amount
 
-        response = GetAllUserStackResponse(count=github_stacks.count(), stacks=stacks)
+        response = GetAllUserStackResponse(
+            success=True, count=github_stacks.count(), stacks=stacks
+        )
         return JsonResponse(response.model_dump(), status=200)
 
 
