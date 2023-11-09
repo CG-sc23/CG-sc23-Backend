@@ -111,8 +111,9 @@ class Project(models.Model):
     status = models.CharField(max_length=20, default="READY")
 
     title = models.CharField(max_length=50)
-    short_description = models.CharField(max_length=50)
-    description = models.TextField(null=True)
+    short_description = models.TextField(default="")
+    description = models.TextField(null=True, blank=True)
+    description_resource_links = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
     like = models.IntegerField(default=0)
     is_public = models.BooleanField(default=True)
