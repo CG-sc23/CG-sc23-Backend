@@ -94,7 +94,7 @@ class DetailInfo(APIView):
 
     @atomic
     def put(self, request):
-        is_public = request.data.get("email")
+        is_public = request.data.get("is_public", None)
         github_link = request.data.get("github_link", None)
         short_description = request.data.get("short_description", None)
         description = request.data.get("description", None)
