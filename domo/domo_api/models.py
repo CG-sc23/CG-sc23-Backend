@@ -111,7 +111,7 @@ class Project(models.Model):
     status = models.CharField(max_length=20, default="READY")
 
     title = models.CharField(max_length=50)
-    short_description = models.TextField(default="")
+    short_description = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     description_resource_links = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
