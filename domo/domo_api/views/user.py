@@ -122,7 +122,7 @@ class DetailInfo(APIView):
             )
 
         # description에 media가 있을경우, validation check가 필요하다.
-        # 이후 reference check + 1 한다.
+        # 이후 owner를 지정한다.
         if request_data.description_resource_links:
             s3_handler = GeneralHandler()
             if not s3_handler.check_resource_links(
@@ -137,15 +137,11 @@ class DetailInfo(APIView):
                 )
             for resource_link in request_data.description_resource_links:
                 try:
-                    ref_check_obj = S3ResourceReferenceCheck.objects.get(
-                        resource_link=resource_link
-                    )
-                    ref_check_obj.reference_cnt += 1
-                    ref_check_obj.save()
+                    S3ResourceReferenceCheck.objects.get(resource_link=resource_link)
                 except S3ResourceReferenceCheck.DoesNotExist:
                     S3ResourceReferenceCheck.objects.create(
                         resource_link=resource_link,
-                        reference_cnt=1,
+                        owner=request.user,
                     )
 
             user_description_resource_links = request.user.description_resource_links
@@ -154,12 +150,9 @@ class DetailInfo(APIView):
                     ref_check_obj = S3ResourceReferenceCheck.objects.get(
                         resource_link=resource_link
                     )
-                    if ref_check_obj.reference_cnt == 1:
+                    if ref_check_obj.owner == request.user:
                         ref_check_obj.delete()
                         s3_handler.remove_resource(resource_link)
-                    else:
-                        ref_check_obj.reference_cnt -= 1
-                        ref_check_obj.save()
 
         if request_data.github_link:
             update_github_history.delay(request.user.id, request_data.github_link)
