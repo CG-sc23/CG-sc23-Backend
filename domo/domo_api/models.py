@@ -169,4 +169,4 @@ class GithubStatus(models.Model):
 class S3ResourceReferenceCheck(models.Model):
     id = models.AutoField(primary_key=True)
     resource_link = models.CharField(max_length=100)
-    reference_cnt = models.IntegerField()
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
