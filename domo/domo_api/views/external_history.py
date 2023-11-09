@@ -1,12 +1,14 @@
 import requests
 from django.http import JsonResponse
+from domo_api.const import ReturnCode
 from domo_api.http_model import (
+    GetAllUserStack,
     GetGithubUpdateStatus,
     GithubAccountCheckRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import GithubStatus
+from domo_api.models import GithubStatus, UserStack
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -76,22 +78,64 @@ class GithubAccountCheck(APIView):
             status=200,
         )
 
-    class GithubUpdateStatus(APIView):
-        authentication_classes = [TokenAuthentication]
-        permission_classes = [IsAuthenticated]
+class GithubUpdateStatus(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-        def get(self, request):
-            try:
-                github_status = GithubStatus.objects.get(user=request.user)
-                response = GetGithubUpdateStatus(
-                    status=github_status.status, last_update=github_status.last_update
-                )
-                return JsonResponse(response.model_dump(), status=200)
+    def get(self, request):
+        try:
+            github_status = GithubStatus.objects.get(user=request.user)
+            response = GetGithubUpdateStatus(
+                status=github_status.status, last_update=github_status.last_update
+            )
+            return JsonResponse(response.model_dump(), status=200)
 
-            except GithubStatus.DoesNotExist:
-                return JsonResponse(
-                    SimpleFailResponse(
-                        success=False, reason="Github status Not Found "
-                    ).model_dump(),
-                    status=404,
-                )
+        except GithubStatus.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status Not Found "
+                ).model_dump(),
+                status=404,
+            )
+
+class GithubStack(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            github_status = GithubStatus.objects.get(user=request.user)
+
+        except GithubStatus.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status Not Found "
+                ).model_dump(),
+                status=404,
+            )
+
+        if github_status.status == ReturnCode.GITHUB_STATUS_IN_PROGRESS:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status is in progress"
+                ).model_dump(),
+                status=503,
+            )
+
+        if github_status.status == ReturnCode.GITHUB_STATUS_FAILED:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status failed to update"
+                ).model_dump(),
+                status=503,
+            )
+
+        github_stacks = UserStack.objects.filter(user=request.user)
+
+        stacks = {}
+
+        for stack in github_stacks:
+            stacks[stack.language].append(stack.code_amount)
+
+        response = GetAllUserStack(count=github_stacks.count(), stacks=stacks)
+        return JsonResponse(response.model_dump(), status=200)
