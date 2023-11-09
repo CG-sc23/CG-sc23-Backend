@@ -54,6 +54,21 @@ urlpatterns = [
         name="github_account_check",
     ),
     path(
+        "external-history/v1/github/status",
+        external_history.GithubUpdateStatus.as_view(),
+        name="get_github_update_status",
+    ),
+    path(
+        "external-history/v1/github/stack",
+        external_history.GithubStack.as_view(),
+        name="get_github_stack",
+    ),
+    path(
+        "external-history/v1/github/update",
+        external_history.GithubManualUpdate.as_view(),
+        name="github_manual_update",
+    ),
+    path(
         "user/v1",
         user.Info.as_view(),
         name="user_info",
