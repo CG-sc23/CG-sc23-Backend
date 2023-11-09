@@ -78,6 +78,7 @@ class GithubAccountCheck(APIView):
             status=200,
         )
 
+
 class GithubUpdateStatus(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -97,6 +98,7 @@ class GithubUpdateStatus(APIView):
                 ).model_dump(),
                 status=404,
             )
+
 
 class GithubStack(APIView):
     authentication_classes = [TokenAuthentication]
