@@ -97,7 +97,7 @@ class GithubUpdateStatus(APIView):
         except GithubStatus.DoesNotExist:
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Github status Not Found "
+                    success=False, reason="Github status Not Found"
                 ).model_dump(),
                 status=404,
             )
@@ -114,7 +114,7 @@ class GithubStack(APIView):
         except GithubStatus.DoesNotExist:
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Github status Not Found "
+                    success=False, reason="Github status Not Found"
                 ).model_dump(),
                 status=404,
             )
