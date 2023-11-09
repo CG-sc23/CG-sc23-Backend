@@ -89,7 +89,7 @@ urlpatterns = [
         name="user_project_info",
     ),
     path(
-        "media/v1/pre-signed-url/<str:file_name>",
+        "resource/v1/pre-signed-url/<str:file_name>",
         media.PreSignedUrl.as_view(),
         name="pre_signed_url",
     ),
