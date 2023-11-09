@@ -4,8 +4,8 @@ import requests
 from django.http import JsonResponse
 from domo_api.const import ReturnCode
 from domo_api.http_model import (
-    GetAllUserStack,
-    GetGithubUpdateStatus,
+    GetAllUserStackResponse,
+    GetGithubUpdateStatusResponse,
     GithubAccountCheckRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
@@ -89,7 +89,7 @@ class GithubUpdateStatus(APIView):
     def get(self, request):
         try:
             github_status = GithubStatus.objects.get(user=request.user)
-            response = GetGithubUpdateStatus(
+            response = GetGithubUpdateStatusResponse(
                 status=github_status.status, last_update=github_status.last_update
             )
             return JsonResponse(response.model_dump(), status=200)
@@ -142,7 +142,7 @@ class GithubStack(APIView):
         for stack in github_stacks:
             stacks[stack.language] = stack.code_amount
 
-        response = GetAllUserStack(count=github_stacks.count(), stacks=stacks)
+        response = GetAllUserStackResponse(count=github_stacks.count(), stacks=stacks)
         return JsonResponse(response.model_dump(), status=200)
 
 

@@ -78,12 +78,12 @@ class GithubAccountCheckRequest(BaseModel):
     github_link: str
 
 
-class GetGithubUpdateStatus(BaseModel):
+class GetGithubUpdateStatusResponse(BaseModel):
     status: str
     last_update: datetime
 
 
-class GetAllUserStack(BaseModel):
+class GetAllUserStackResponse(BaseModel):
     count: int
     stacks: dict
 
