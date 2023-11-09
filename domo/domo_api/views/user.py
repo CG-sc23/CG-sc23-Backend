@@ -150,7 +150,11 @@ class DetailInfo(APIView):
                     ref_check_obj = S3ResourceReferenceCheck.objects.get(
                         resource_link=resource_link
                     )
-                    if ref_check_obj.owner == request.user:
+                    if (
+                        ref_check_obj.resource_link
+                        not in request_data.description_resource_links
+                        and ref_check_obj.owner == request.user
+                    ):
                         ref_check_obj.delete()
                         s3_handler.remove_resource(resource_link)
 
