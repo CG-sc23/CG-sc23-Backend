@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import requests
 from django.http import JsonResponse
 from domo_api.const import ReturnCode
@@ -9,7 +11,7 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
 )
 from domo_api.models import GithubStatus, UserStack
-from domo_api.tasks import periodic_update_github_history
+from domo_api.tasks import update_github_history
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -151,7 +153,22 @@ class GithubManualUpdate(APIView):
     def post(self, request):
         user = request.user
 
-        periodic_update_github_history.delay(user.id, user.github_link)
+        github_status = GithubStatus.objects.filter(user=user)
+
+        if github_status.exists():
+            github_status.update(
+                user=user,
+                status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
+                last_update=datetime.now(tz=timezone.utc),
+            )
+        else:
+            github_status.create(
+                user=user,
+                status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
+                last_update=datetime.now(tz=timezone.utc),
+            )
+
+        update_github_history.delay(user.id, user.github_link)
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
