@@ -75,6 +75,7 @@ class Info(APIView):
 
 class DetailInfo(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         response = GetUserDetailInfoResponse(
@@ -123,7 +124,7 @@ class DetailInfo(APIView):
 
         # description에 media가 있을경우, validation check가 필요하다.
         # 이후 owner를 지정한다.
-        if request_data.description_resource_links:
+        if isinstance(request_data.description_resource_links, list):
             s3_handler = GeneralHandler()
             if not s3_handler.check_resource_links(
                 request_data.description_resource_links
@@ -131,7 +132,7 @@ class DetailInfo(APIView):
                 return JsonResponse(
                     SimpleFailResponse(
                         success=False,
-                        reason="Invalid request",
+                        reason="Invalid request.",
                     ).model_dump(),
                     status=400,
                 )
