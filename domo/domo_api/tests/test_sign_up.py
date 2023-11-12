@@ -134,7 +134,11 @@ class SignUpTest(TestCase):
     ):
         # Given: 유효한 사용자 정보와 함께 프로필 이미지가 주어졌을 때,
         # email verify 완료된 상황
-        mock_upload_image.return_value = ReturnCode.SUCCESS, "SOME_URL"
+        mock_upload_image.return_value = (
+            ReturnCode.SUCCESS,
+            "https://domo-s3.s3.ap-northeast-2.amazonaws.com/users/some-user%40some-domain.some-TLD/"
+            "profile/image/profile-image.jpeg",
+        )
 
         User.objects.create(
             email=self.user_data["email"],
