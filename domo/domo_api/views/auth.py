@@ -88,7 +88,7 @@ class SocialSignUp(APIView):
         profile_image_link = None
         if "profile_image" in request.FILES:
             profile_image_link = upload_profile_image(
-                request_data, request.FILES["profile_image"]
+                user, request.FILES["profile_image"]
             )
             # This is a JsonResponse for Exception
             if isinstance(profile_image_link, JsonResponse):
