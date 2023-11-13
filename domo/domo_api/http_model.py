@@ -95,6 +95,7 @@ class ModifyUserInfoRequest(BaseModel):
 
 
 class ModifyUserDetailInfoRequest(BaseModel):
+    name: Optional[str] = None
     github_link: Optional[str] = None
     short_description: Optional[str] = None
     description: Optional[str] = None
@@ -119,6 +120,17 @@ class GetUserDetailInfoResponse(BaseModel):
     like: Optional[int] = None
     rating: Optional[float] = None
     provider: str
+
+
+class GetUserPublicDetailInfoResponse(BaseModel):
+    success: bool
+    github_link: Optional[str] = None
+    short_description: Optional[str] = None
+    description: Optional[str] = None
+    description_resource_links: Optional[list[str]] = None
+    grade: Optional[int] = None
+    like: Optional[int] = None
+    rating: Optional[float] = None
 
 
 class CreateProjectRequest(BaseModel):
