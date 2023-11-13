@@ -103,6 +103,7 @@ class ModifyUserDetailInfoRequest(BaseModel):
 
 class GetUserInfoResponse(BaseModel):
     success: bool
+    user_id: int
     email: str
     name: str
     profile_image_link: Optional[str] = None

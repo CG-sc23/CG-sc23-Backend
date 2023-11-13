@@ -27,6 +27,7 @@ class Info(APIView):
     def get(self, request):
         response = GetUserInfoResponse(
             success=True,
+            user_id=request.user.id,
             email=request.user.email,
             name=request.user.name,
             profile_image_link=request.user.profile_image_link,
