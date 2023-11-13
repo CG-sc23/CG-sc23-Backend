@@ -74,9 +74,14 @@ urlpatterns = [
         name="user_info",
     ),
     path(
-        "user/v1/detail",
+        "user/v1/detail/own",
         user.DetailInfo.as_view(),
         name="user_detail_info",
+    ),
+    path(
+        "user/v1/detail/<int:user_id>",
+        user.PublicDetailInfo.as_view(),
+        name="user_public_detail_info",
     ),
     path(
         "project/v1",
