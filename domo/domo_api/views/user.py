@@ -183,6 +183,8 @@ class PublicDetailInfo(APIView):
 
         response = GetUserPublicDetailInfoResponse(
             success=True,
+            email=user.email,
+            name=user.name,
             github_link=user.github_link,
             short_description=user.short_description,
             description=user.description,
@@ -192,7 +194,10 @@ class PublicDetailInfo(APIView):
             rating=user.rating,
             provider=user.provider,
         )
-        return JsonResponse(response.model_dump(), status=200)
+        return JsonResponse(
+            response.model_dump(),
+            status=200,
+        )
 
 
 class ProjectInfo(APIView):
