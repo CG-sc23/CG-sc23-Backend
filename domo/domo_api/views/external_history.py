@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 
 import requests
@@ -157,6 +158,14 @@ class GithubManualUpdate(APIView):
     def post(self, request):
         user = request.user
 
+        if not user.github_link:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You don't have github link."
+                ).model_dump(),
+                status=400,
+            )
+
         github_status = GithubStatus.objects.filter(user=user)
 
         if github_status.exists():
@@ -172,7 +181,16 @@ class GithubManualUpdate(APIView):
                 last_update=datetime.now(tz=timezone.utc),
             )
 
-        update_github_history.delay(user.id, user.github_link)
+        try:
+            update_github_history.delay(user.id, user.github_link)
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error updating github history."
+                ).model_dump(),
+                status=500,
+            )
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
