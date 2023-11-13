@@ -169,6 +169,13 @@ class GithubManualUpdate(APIView):
         github_status = GithubStatus.objects.filter(user=user)
 
         if github_status.exists():
+            if github_status.get().status == ReturnCode.GITHUB_STATUS_IN_PROGRESS:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False, reason="Github status is in progress"
+                    ).model_dump(),
+                    status=503,
+                )
             github_status.update(
                 user=user,
                 status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
