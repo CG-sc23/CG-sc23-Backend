@@ -13,6 +13,7 @@ from .models import (
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "email",
         "name",
         "is_active",
