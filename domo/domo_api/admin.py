@@ -2,9 +2,14 @@ from django.contrib import admin
 
 from .models import (
     GithubStatus,
+    Milestone,
     PasswordResetToken,
+    Project,
+    ProjectMember,
     S3ResourceReferenceCheck,
     SignUpEmailVerifyToken,
+    Task,
+    TaskGroup,
     User,
     UserStack,
 )
@@ -157,6 +162,151 @@ class S3ResourceReferenceCheckAdmin(admin.ModelAdmin):
             {
                 "classes": ("wide",),
                 "fields": ("resource_link", "owner"),
+            },
+        ),
+    )
+
+
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "owner",
+        "status",
+        "title",
+        "short_description",
+        "description",
+        "created_at",
+        "like",
+    )
+    list_filter = ("status", "owner")
+    ordering = ("id", "created_at", "owner", "status")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "owner",
+                    "status",
+                    "title",
+                    "short_description",
+                    "description",
+                    "created_at",
+                    "like",
+                )
+            },
+        ),
+    )
+
+
+@admin.register(ProjectMember)
+class ProjectMemberAdmin(admin.ModelAdmin):
+    list_display = ("id", "project", "user", "role", "created_at")
+    list_filter = ("project", "user", "role")
+    ordering = ("id", "created_at", "project", "user", "role")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "project",
+                    "user",
+                    "role",
+                    "created_at",
+                )
+            },
+        ),
+    )
+
+
+@admin.register(Milestone)
+class MilestoneAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "project",
+        "tags",
+        "subject",
+        "status",
+        "created_at",
+        "due_date",
+    )
+    list_filter = ("project", "status")
+    ordering = ("id", "created_at", "project", "status")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "project",
+                    "tags",
+                    "subject",
+                    "status",
+                    "created_at",
+                    "due_date",
+                )
+            },
+        ),
+    )
+
+
+@admin.register(TaskGroup)
+class TaskGroupAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "milestone",
+        "title",
+        "tags",
+        "status",
+        "created_at",
+        "due_date",
+    )
+    list_filter = ("milestone", "status")
+    ordering = ("id", "created_at", "milestone", "status")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "milestone",
+                    "title",
+                    "tags",
+                    "status",
+                    "created_at",
+                    "due_date",
+                )
+            },
+        ),
+    )
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "owner",
+        "task_group",
+        "title",
+        "description",
+        "tags",
+        "created_at",
+        "is_public",
+    )
+    list_filter = ("owner", "task_group", "is_public")
+    ordering = ("id", "created_at", "owner", "task_group", "is_public")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "owner",
+                    "task_group",
+                    "title",
+                    "description",
+                    "description_resource_links",
+                    "tags",
+                    "created_at",
+                    "is_public",
+                )
             },
         ),
     )
