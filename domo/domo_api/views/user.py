@@ -6,12 +6,13 @@ from domo_api.http_model import (
     GetAllProjectResponse,
     GetUserDetailInfoResponse,
     GetUserInfoResponse,
+    GetUserPublicDetailInfoResponse,
     ModifyUserDetailInfoRequest,
     ModifyUserInfoRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import Project, S3ResourceReferenceCheck
+from domo_api.models import Project, S3ResourceReferenceCheck, User
 from domo_api.s3.handler import GeneralHandler, upload_profile_image
 from domo_api.tasks import update_github_history
 from pydantic import ValidationError
@@ -33,37 +34,6 @@ class Info(APIView):
             profile_image_link=request.user.profile_image_link,
         )
         return JsonResponse(response.model_dump(), status=200)
-
-    def put(self, request):
-        try:
-            request_data = ModifyUserInfoRequest(**request.data)
-        except ValidationError:
-            return JsonResponse(
-                SimpleSuccessResponse(
-                    success=False, message="Invalid request."
-                ).model_dump(),
-                status=400,
-            )
-        # If profile image exists, upload to S3 first
-        profile_image_link = None
-        if "profile_image" in request.FILES:
-            profile_image_link = upload_profile_image(
-                request_data, request.FILES["profile_image"]
-            )
-            # This is a JsonResponse for Exception
-            if isinstance(profile_image_link, JsonResponse):
-                return profile_image_link
-
-        if request_data.name:
-            request.user.name = request_data.name
-        if profile_image_link:
-            request.user.profile_image_link = profile_image_link
-        request.user.save()
-
-        return JsonResponse(
-            SimpleSuccessResponse(success=True).model_dump(),
-            status=200,
-        )
 
     def delete(self, request):
         request.user.is_active = False
@@ -94,6 +64,7 @@ class DetailInfo(APIView):
 
     @atomic
     def put(self, request):
+        name = request.data.get("name", None)
         github_link = request.data.get("github_link", None)
         short_description = request.data.get("short_description", None)
         description = request.data.get("description", None)
@@ -104,6 +75,7 @@ class DetailInfo(APIView):
             description_resource_links = json.loads(description_resource_links)
 
         data_dict = {
+            "name": name,
             "github_link": github_link,
             "short_description": short_description,
             "description": description,
@@ -119,6 +91,19 @@ class DetailInfo(APIView):
                 ).model_dump(),
                 status=400,
             )
+
+        # If profile image exists, upload to S3 first
+        profile_image_link = None
+        if "profile_image" in request.FILES:
+            profile_image_link = upload_profile_image(
+                request_data, request.FILES["profile_image"]
+            )
+            # This is a JsonResponse for Exception
+            if isinstance(profile_image_link, JsonResponse):
+                return profile_image_link
+
+        if profile_image_link:
+            request.user.profile_image_link = profile_image_link
 
         # description에 media가 있을경우, validation check가 필요하다.
         # 이후 owner를 지정한다.
@@ -160,6 +145,7 @@ class DetailInfo(APIView):
         if request_data.github_link:
             update_github_history.delay(request.user.id, request_data.github_link)
 
+        request.user.name = request_data.name or request.user.name
         request.user.github_link = request_data.github_link or request.user.github_link
         request.user.short_description = (
             request_data.short_description or request.user.short_description
@@ -178,6 +164,35 @@ class DetailInfo(APIView):
             SimpleSuccessResponse(success=True).model_dump(),
             status=200,
         )
+
+
+class PublicDetailInfo(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="User does not exist."
+                ).model_dump(),
+                status=404,
+            )
+
+        response = GetUserPublicDetailInfoResponse(
+            success=True,
+            github_link=user.github_link,
+            short_description=user.short_description,
+            description=user.description,
+            description_resource_links=user.description_resource_links,
+            grade=user.grade,
+            like=user.like,
+            rating=user.rating,
+            provider=user.provider,
+        )
+        return JsonResponse(response.model_dump(), status=200)
 
 
 class ProjectInfo(APIView):
