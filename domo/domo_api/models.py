@@ -115,19 +115,18 @@ class Project(models.Model):
     description_resource_links = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
     like = models.IntegerField(default=0)
-    is_public = models.BooleanField(default=True)
 
     def detail(self):
         return {
             "id": self.id,
-            "owner": self.owner.name,
+            "owner": self.owner.id,
             "status": self.status,
             "title": self.title,
             "short_description": self.short_description,
             "description": self.description,
+            "description_resource_links": self.description_resource_links,
             "created_at": self.created_at,
             "like": self.like,
-            "is_public": self.is_public,
         }
 
 
@@ -144,6 +143,59 @@ class ProjectMember(models.Model):
     # OWNER, MANAGER, MEMBER
     role = models.CharField(max_length=20)
     created_at = models.DateTimeField()
+
+
+class Milestone(models.Model):
+    id = models.AutoField(primary_key=True)
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+    )
+
+    tags = models.JSONField(null=True, blank=True)
+    subject = models.CharField(max_length=100)
+
+    # READY, PROGRESSING, COMPLETED
+    status = models.CharField(max_length=20, default="READY")
+
+    created_at = models.DateTimeField()
+    due_date = models.DateTimeField(null=True, blank=True)
+
+
+class TaskGroup(models.Model):
+    id = models.AutoField(primary_key=True)
+    milestone = models.ForeignKey(
+        Milestone,
+        on_delete=models.CASCADE,
+    )
+
+    title = models.CharField(max_length=100)
+    tags = models.JSONField(null=True, blank=True)
+
+    # READY, PROGRESSING, COMPLETED
+    status = models.CharField(max_length=20, default="READY")
+
+    created_at = models.DateTimeField()
+    due_date = models.DateTimeField(null=True, blank=True)
+
+
+class Task(models.Model):
+    id = models.AutoField(primary_key=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    task_group = models.ForeignKey(
+        TaskGroup,
+        on_delete=models.CASCADE,
+    )
+
+    title = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    description_resource_links = models.JSONField(null=True, blank=True)
+
+    tags = models.JSONField(null=True, blank=True)
+
+    created_at = models.DateTimeField()
+
+    is_public = models.BooleanField(default=True)
 
 
 class UserStack(models.Model):
