@@ -1,3 +1,5 @@
+import logging
+
 from django.http import JsonResponse
 from domo_api.const import ReturnCode
 from domo_api.http_model import GetPreSignedUrlResponse, SimpleFailResponse
@@ -23,6 +25,7 @@ class PreSignedUrl(APIView):
                 status=400,
             )
         if aws_response[0] == ReturnCode.FAILED_CREATE_PRESIGNED_URL:
+            logging.error(aws_response[1])
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error generating presigned url."

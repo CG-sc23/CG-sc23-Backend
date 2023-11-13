@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 import secrets
 
@@ -59,8 +60,8 @@ class ProfileImageUploader:
                 ExtraArgs={"ContentType": "image/jpeg"},
             )
             return ReturnCode.SUCCESS, uploaded_file_link
-        except:
-            return ReturnCode.FAIL, None
+        except Exception as e:
+            return ReturnCode.FAIL, e
 
     @staticmethod
     def _convert_image_to_jpeg(image_file):
@@ -83,6 +84,7 @@ def upload_profile_image(request_data, profile_image):
             status=400,
         )
     if profile_upload_success == ReturnCode.FAIL:
+        logging.error(profile_image_link)
         return JsonResponse(
             SimpleFailResponse(
                 success=False, reason="Error uploading profile image."
@@ -149,8 +151,8 @@ class GeneralHandler:
                 Key=key,
                 ExpiresIn=600,
             )
-        except:
-            return ReturnCode.FAILED_CREATE_PRESIGNED_URL, None
+        except Exception as e:
+            return ReturnCode.FAILED_CREATE_PRESIGNED_URL, e
 
         return ReturnCode.SUCCESS, response
 

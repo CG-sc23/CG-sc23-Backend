@@ -1,3 +1,4 @@
+import logging
 import os
 import secrets
 from datetime import datetime, timezone
@@ -25,6 +26,7 @@ def oauth_finish(status):
             status=400,
         )
     elif status[0] == ReturnCode.ERROR_PRE_CREATING_USER:
+        logging.error(status[1])
         return JsonResponse(
             SimpleFailResponse(
                 success=False, reason="Error pre-creating user."
@@ -84,8 +86,8 @@ def pre_sign_up(email, social_type):
             pre_access_token=pre_access_token,
             created_at=datetime.now(tz=timezone.utc),
         )
-    except:
-        return ReturnCode.ERROR_PRE_CREATING_USER, None
+    except Exception as e:
+        return ReturnCode.ERROR_PRE_CREATING_USER, e
 
     return ReturnCode.PRE_SIGN_UP_SUCCESS, response_data
 

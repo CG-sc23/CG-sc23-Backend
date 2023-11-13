@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 
 from django.db.transaction import atomic
@@ -63,7 +64,8 @@ class Info(APIView):
 
         try:
             new_project = create_new_project(request.user, request_data)
-        except:
+        except Exception as e:
+            logging.error(e)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error creating project."

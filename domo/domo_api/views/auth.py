@@ -1,3 +1,4 @@
+import logging
 import secrets
 from datetime import datetime, timezone
 
@@ -101,7 +102,8 @@ class SocialSignUp(APIView):
             user.github_link = request_data.github_link or None
             user.short_description = request_data.short_description or None
             user.save()
-        except:
+        except Exception as e:
+            logging.error(e)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error creating user."
@@ -187,7 +189,8 @@ class SignUp(APIView):
             user_check.provider = "our"
             user_check.set_password(request_data.password)
             user_check.save()
-        except:
+        except Exception as e:
+            logging.error(e)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error creating user."
@@ -329,7 +332,8 @@ class PasswordReset(APIView):
                 SimpleSuccessResponse(success=True).model_dump(),
                 status=200,
             )
-        except:
+        except Exception as e:
+            logging.error(e)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Failed to send email."
@@ -482,7 +486,8 @@ class SignUpEmailVerify(APIView):
                 status=200,
             )
 
-        except:
+        except Exception as e:
+            logging.error(e)
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Failed to send email."
