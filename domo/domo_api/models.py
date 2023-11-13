@@ -72,7 +72,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     provider = models.CharField(max_length=20, default="our")
     pre_access_token = models.TextField(null=True, blank=True)
 
-    is_public = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

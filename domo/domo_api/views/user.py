@@ -80,7 +80,6 @@ class DetailInfo(APIView):
     def get(self, request):
         response = GetUserDetailInfoResponse(
             success=True,
-            is_public=request.user.is_public,
             github_link=request.user.github_link,
             short_description=request.user.short_description,
             description=request.user.description,
@@ -94,7 +93,6 @@ class DetailInfo(APIView):
 
     @atomic
     def put(self, request):
-        is_public = request.data.get("is_public", None)
         github_link = request.data.get("github_link", None)
         short_description = request.data.get("short_description", None)
         description = request.data.get("description", None)
@@ -105,7 +103,6 @@ class DetailInfo(APIView):
             description_resource_links = json.loads(description_resource_links)
 
         data_dict = {
-            "is_public": is_public,
             "github_link": github_link,
             "short_description": short_description,
             "description": description,
@@ -162,7 +159,6 @@ class DetailInfo(APIView):
         if request_data.github_link:
             update_github_history.delay(request.user.id, request_data.github_link)
 
-        request.user.is_public = request_data.is_public or request.user.is_public
         request.user.github_link = request_data.github_link or request.user.github_link
         request.user.short_description = (
             request_data.short_description or request.user.short_description

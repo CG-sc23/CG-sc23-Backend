@@ -95,7 +95,6 @@ class ModifyUserInfoRequest(BaseModel):
 
 
 class ModifyUserDetailInfoRequest(BaseModel):
-    is_public: Optional[bool] = None
     github_link: Optional[str] = None
     short_description: Optional[str] = None
     description: Optional[str] = None
@@ -111,7 +110,6 @@ class GetUserInfoResponse(BaseModel):
 
 class GetUserDetailInfoResponse(BaseModel):
     success: bool
-    is_public: bool
     github_link: Optional[str] = None
     short_description: Optional[str] = None
     description: Optional[str] = None
