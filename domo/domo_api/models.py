@@ -208,6 +208,15 @@ class UserStack(models.Model):
     code_amount = models.IntegerField()
 
 
+class UserKeyword(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    keyword = models.CharField(max_length=50)
+
+
 class GithubStatus(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
