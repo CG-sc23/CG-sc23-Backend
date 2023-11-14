@@ -6,109 +6,10 @@ from datetime import datetime, timezone
 import requests
 from celery import shared_task
 from django.db.transaction import atomic
-from domo_api.const import ReturnCode
+from domo_api.const import ReturnCode, ReturnList
 from domo_api.models import GithubStatus, User, UserKeyword, UserStack
 
-words = (defaultdict(lambda: 0),)
-
-word_list = [
-    "react",
-    "node",
-    "express",
-    "angular",
-    "next",
-    "recoil",
-    "nuxt",
-    "enzyme",
-    "mocha",
-    "karma",
-    "sinon",
-    "appium",
-    "selenium",
-    "springboot",
-    "liquibase",
-    "apollo",
-    "koa",
-    "netty",
-    "nest",
-    "grpc",
-    "webrtc",
-    "mongodb",
-    "mysql",
-    "elasticsearch",
-    "redis",
-    "cassandra",
-    "memcached",
-    "arcus",
-    "cubird",
-    "solr",
-    "neo4j",
-    "ceph",
-    "zeppelin",
-    "hbase",
-    "kibana",
-    "kafka",
-    "druid",
-    "grafana",
-    "airflow",
-    "tensorflow",
-    "keras",
-    "torch",
-    "pytorch",
-    "fluentd",
-    "zipkin",
-    "docker",
-    "jenkins",
-    "harbor",
-    "traefik",
-    "ansible",
-    "oracledb",
-    "retrofit",
-    "retrofit2",
-    "rocksdb",
-    "unity",
-    "argo",
-    "celery",
-    "cockroachdb",
-    "flutter",
-    "glide",
-    "kotest",
-    "kudu",
-    "looker",
-    "lottie",
-    "mssql",
-    "nexus",
-    "action",
-    "reactivex",
-    "electron",
-    "kubernetes",
-    "prometheus",
-    "puppeteer",
-    "junit",
-    "firebase",
-    "aws",
-    "rabbitmq",
-    "postgresql",
-    "arangodb",
-    "greenplum",
-    "jest",
-    "opengl",
-    "storybook",
-    "vue",
-    "relay",
-    "vuex",
-    "graphql",
-    "redux",
-    "django",
-    "spring",
-    "fastapi",
-    "flask",
-    "hadoop",
-    "spark",
-    "flink",
-    "hive",
-    "storm",
-]
+words = defaultdict(lambda: 0)
 
 
 @shared_task
@@ -157,14 +58,10 @@ def update_github_history(user_id, github_link):
 
     user_repos = requests.get(url=repos_url, headers=headers).json()
 
-    word_ignore.append(account)
-
     for repo in user_repos:
         language_url = (
             f"https://api.github.com/repos/{account}/" f"{repo.get('name')}/languages"
         )
-
-        word_ignore.append(repo.get("name"))
 
         user_language = requests.get(url=language_url, headers=headers).json()
 
@@ -185,6 +82,7 @@ def update_github_history(user_id, github_link):
     sorted_words = sorted(words.items(), key=lambda x: x[1], reverse=True)
 
     i = 0
+    word_list = ReturnList.WORD_LIST
     for word in sorted_words:
         if i == 20:
             break
