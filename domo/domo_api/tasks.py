@@ -1,12 +1,15 @@
 # Create your tasks here
 import os
+from collections import defaultdict
 from datetime import datetime, timezone
 
 import requests
 from celery import shared_task
 from django.db.transaction import atomic
-from domo_api.const import ReturnCode
-from domo_api.models import GithubStatus, User, UserStack
+from domo_api.const import ReturnCode, ReturnList
+from domo_api.models import GithubStatus, User, UserKeyword, UserStack
+
+words = defaultdict(lambda: 0)
 
 
 @shared_task
@@ -19,6 +22,8 @@ def update_github_history(user_id, github_link):
     github_status = GithubStatus.objects.get(user_id=user_id)
 
     UserStack.objects.filter(user_id=user_id).delete()
+
+    UserKeyword.objects.filter(user_id=user_id).delete()
 
     if not github_link:
         github_status.status = ReturnCode.GITHUB_STATUS_FAILED
@@ -65,6 +70,30 @@ def update_github_history(user_id, github_link):
                 user_id=user_id, language=language, code_amount=code_amount
             )
 
+        dependency_url = (
+            f"https://api.github.com/repos/{account}/"
+            f"{repo.get('name')}/dependency-graph/sbom"
+        )
+
+        user_dependency = requests.get(url=dependency_url, headers=headers).json()
+
+        insert_user_dependency(dependency=user_dependency)
+
+    sorted_words = sorted(words.items(), key=lambda x: x[1], reverse=True)
+
+    i = 0
+    word_list = ReturnList.WORD_LIST
+    for word in sorted_words:
+        if i == 20:
+            break
+        # word is tuple (word, count)
+        if word[0] not in word_list:
+            continue
+
+        i += 1
+        user_keyword = UserKeyword(user_id=user_id, keyword=word[0])
+        user_keyword.save()
+
     github_status.status = ReturnCode.GITHUB_STATUS_COMPLETE
     github_status.last_update = datetime.now(tz=timezone.utc)
     github_status.save()
@@ -85,6 +114,33 @@ def insert_user_stack(user_id, language, code_amount):
             user_id=user_id, language=language, code_amount=code_amount
         )
         user_stack.save()
+
+
+@atomic
+def insert_user_dependency(dependency):
+    def word_count(string):
+        string = (
+            string.replace(" ", ".")
+            .replace("-", ".")
+            .replace(":", ".")
+            .replace("/", ".")
+            .replace("@", ".")
+        )
+        string_set = string.split(".")
+
+        for word in string_set:
+            words[word] += 1
+
+    if type(dependency) is not dict:
+        return
+    for key, value in dependency.items():
+        if key == "name":
+            word_count(value)
+        elif type(value) is dict:
+            insert_user_dependency(value)
+        elif type(value) is list:
+            for item in value:
+                insert_user_dependency(item)
 
 
 @shared_task

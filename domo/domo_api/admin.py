@@ -11,6 +11,7 @@ from .models import (
     Task,
     TaskGroup,
     User,
+    UserKeyword,
     UserStack,
 )
 
@@ -127,6 +128,24 @@ class UserStackAdmin(admin.ModelAdmin):
             {
                 "classes": ("wide",),
                 "fields": ("user", "language", "code_amount"),
+            },
+        ),
+    )
+
+
+@admin.register(UserKeyword)
+class UserKeywordAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "keyword")
+    list_filter = ("user",)
+    search_fields = ("keyword",)
+    ordering = ("id",)
+    fieldsets = ((None, {"fields": ("user", "keyword")}),)
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("user", "keyword"),
             },
         ),
     )
