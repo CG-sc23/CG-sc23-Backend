@@ -5,13 +5,14 @@ import requests
 from django.http import JsonResponse
 from domo_api.const import ReturnCode
 from domo_api.http_model import (
+    GetAllUserKeywordResponse,
     GetAllUserStackResponse,
     GetGithubUpdateStatusResponse,
     GithubAccountCheckRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import GithubStatus, UserStack
+from domo_api.models import GithubStatus, UserKeyword, UserStack
 from domo_api.tasks import update_github_history
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
@@ -148,6 +149,49 @@ class GithubStack(APIView):
         response = GetAllUserStackResponse(
             success=True, count=github_stacks.count(), stacks=stacks
         )
+        return JsonResponse(response.model_dump(), status=200)
+
+
+class GithubKeyword(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            github_status = GithubStatus.objects.get(user=request.user)
+
+        except GithubStatus.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status Not Found"
+                ).model_dump(),
+                status=404,
+            )
+
+        if github_status.status == ReturnCode.GITHUB_STATUS_IN_PROGRESS:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status is in progress"
+                ).model_dump(),
+                status=503,
+            )
+
+        if github_status.status == ReturnCode.GITHUB_STATUS_FAILED:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status failed to update"
+                ).model_dump(),
+                status=503,
+            )
+
+        github_keywords = UserKeyword.objects.filter(user=request.user)
+
+        keywords = []
+
+        for keyword in github_keywords:
+            keywords.append(keyword.keyword)
+
+        response = GetAllUserKeywordResponse(success=True, keywords=keywords)
         return JsonResponse(response.model_dump(), status=200)
 
 
