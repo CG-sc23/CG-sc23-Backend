@@ -215,6 +215,7 @@ class UserKeyword(models.Model):
         on_delete=models.CASCADE,
     )
     keyword = models.CharField(max_length=50)
+    count = models.IntegerField(default=0)
 
 
 class GithubStatus(models.Model):
