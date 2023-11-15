@@ -90,6 +90,11 @@ class GetAllUserStackResponse(BaseModel):
     stacks: dict
 
 
+class GetAllUserKeywordResponse(BaseModel):
+    success: bool
+    keywords: list
+
+
 class ModifyUserInfoRequest(BaseModel):
     name: Optional[str] = None
 
