@@ -92,7 +92,7 @@ class GetAllUserStackResponse(BaseModel):
 
 class GetAllUserKeywordResponse(BaseModel):
     success: bool
-    keywords: list
+    keywords: dict
 
 
 class ModifyUserInfoRequest(BaseModel):

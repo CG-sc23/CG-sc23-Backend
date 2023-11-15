@@ -184,12 +184,14 @@ class GithubKeyword(APIView):
                 status=503,
             )
 
-        github_keywords = UserKeyword.objects.filter(user=request.user)
+        github_keywords = UserKeyword.objects.filter(user=request.user).order_by(
+            "-count"
+        )
 
-        keywords = []
+        keywords = {}
 
         for keyword in github_keywords:
-            keywords.append(keyword.keyword)
+            keywords[keyword.keyword] = keyword.count
 
         response = GetAllUserKeywordResponse(success=True, keywords=keywords)
         return JsonResponse(response.model_dump(), status=200)

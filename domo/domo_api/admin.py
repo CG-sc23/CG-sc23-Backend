@@ -135,17 +135,17 @@ class UserStackAdmin(admin.ModelAdmin):
 
 @admin.register(UserKeyword)
 class UserKeywordAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "keyword")
+    list_display = ("id", "user", "keyword", "count")
     list_filter = ("user",)
     search_fields = ("keyword",)
     ordering = ("id",)
-    fieldsets = ((None, {"fields": ("user", "keyword")}),)
+    fieldsets = ((None, {"fields": ("user", "keyword", "count")}),)
     add_fieldsets = (
         (
             None,
             {
                 "classes": ("wide",),
-                "fields": ("user", "keyword"),
+                "fields": ("user", "keyword", "count"),
             },
         ),
     )
