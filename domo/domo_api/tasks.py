@@ -19,6 +19,9 @@ def update_github_history(user_id, github_link):
 
     headers = {"Authorization": "Bearer " + token}
 
+    global words
+    words = defaultdict(lambda: 0)
+
     github_status = GithubStatus.objects.get(user_id=user_id)
 
     UserStack.objects.filter(user_id=user_id).delete()
@@ -91,7 +94,7 @@ def update_github_history(user_id, github_link):
             continue
 
         i += 1
-        user_keyword = UserKeyword(user_id=user_id, keyword=word[0])
+        user_keyword = UserKeyword(user_id=user_id, keyword=word[0], count=word[1])
         user_keyword.save()
 
     github_status.status = ReturnCode.GITHUB_STATUS_COMPLETE
