@@ -140,7 +140,7 @@ class Invite(APIView):
                 SimpleFailResponse(
                     success=False, reason="You are not in requested project."
                 ).model_dump(),
-                status=400,
+                status=403,
             )
         if (
             request_data.role == "MANAGER"
