@@ -174,3 +174,9 @@ class MakeProjectInviteRequest(BaseModel):
     project_id: int
     invitee_id: int
     role: str
+
+
+class ReplyProjectInviteRequest(BaseModel):
+    project_id: int
+    inviter_id: int
+    accept: bool

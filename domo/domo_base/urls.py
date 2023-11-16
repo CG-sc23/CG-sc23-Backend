@@ -128,4 +128,9 @@ urlpatterns = [
         user.Invitee.as_view(),
         name="user_inviter",
     ),
+    path(
+        "user/v1/invitee/reply",
+        user.Invitee.as_view(),
+        name="user_inviter_reply",
+    ),
 ]

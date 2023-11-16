@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 from django.db.transaction import atomic
 from django.http import JsonResponse
@@ -9,10 +10,17 @@ from domo_api.http_model import (
     GetUserPublicDetailInfoResponse,
     ModifyUserDetailInfoRequest,
     ModifyUserInfoRequest,
+    ReplyProjectInviteRequest,
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import Project, ProjectInvite, S3ResourceReferenceCheck, User
+from domo_api.models import (
+    Project,
+    ProjectInvite,
+    ProjectMember,
+    S3ResourceReferenceCheck,
+    User,
+)
 from domo_api.s3.handler import GeneralHandler, upload_profile_image
 from domo_api.tasks import update_github_history
 from pydantic import ValidationError
@@ -242,6 +250,67 @@ class Inviter(APIView):
 class Invitee(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        project_id = request.data.get("project_id")
+        inviter_id = request.data.get("inviter_id")
+        accept = request.data.get("accept")
+
+        data_dict = {
+            "project_id": project_id,
+            "inviter_id": inviter_id,
+            "accept": accept,
+        }
+
+        try:
+            request_data = ReplyProjectInviteRequest(**data_dict)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        if not ProjectInvite.objects.filter(
+            project_id=request_data.project_id,
+            inviter_id=request_data.inviter_id,
+            invitee=request.user,
+        ).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invite does not exist."
+                ).model_dump(),
+                status=404,
+            )
+
+        if request_data.accept:
+            ProjectMember.objects.create(
+                project_id=request_data.project_id,
+                user=request.user,
+                role=ProjectInvite.objects.get(
+                    project_id=request_data.project_id,
+                    inviter_id=request_data.inviter_id,
+                    invitee=request.user,
+                ).role,
+                created_at=datetime.now(tz=timezone.utc),
+            )
+            ProjectInvite.objects.get(
+                project_id=request_data.project_id,
+                inviter_id=request_data.inviter_id,
+                invitee=request.user,
+            ).delete()
+        else:
+            ProjectInvite.objects.get(
+                project_id=request_data.project_id,
+                inviter_id=request_data.inviter_id,
+                invitee=request.user,
+            ).delete()
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
 
     def get(self, request):
         invited_project_list = ProjectInvite.objects.filter(
