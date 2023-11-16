@@ -113,4 +113,19 @@ urlpatterns = [
         media.PreSignedUrl.as_view(),
         name="pre_signed_url",
     ),
+    path(
+        "project/v1/invite",
+        project.Invite.as_view(),
+        name="project_invite",
+    ),
+    path(
+        "user/v1/inviter",
+        user.Inviter.as_view(),
+        name="user_inviter",
+    ),
+    path(
+        "user/v1/invitee",
+        user.Invitee.as_view(),
+        name="user_inviter",
+    ),
 ]
