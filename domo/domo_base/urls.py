@@ -84,6 +84,11 @@ urlpatterns = [
         name="github_manual_update",
     ),
     path(
+        "external-history/v1/common/stack/<str:stack>",
+        external_history.CommonStack.as_view(),
+        name="common_stack_check",
+    ),
+    path(
         "user/v1",
         user.Info.as_view(),
         name="user_info",
