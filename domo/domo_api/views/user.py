@@ -12,7 +12,7 @@ from domo_api.http_model import (
     SimpleFailResponse,
     SimpleSuccessResponse,
 )
-from domo_api.models import Project, S3ResourceReferenceCheck, User
+from domo_api.models import Project, ProjectInvite, S3ResourceReferenceCheck, User
 from domo_api.s3.handler import GeneralHandler, upload_profile_image
 from domo_api.tasks import update_github_history
 from pydantic import ValidationError
@@ -214,3 +214,49 @@ class ProjectInfo(APIView):
             success=True, count=len(projects), projects=projects
         )
         return JsonResponse(response.model_dump(), status=200)
+
+
+class Inviter(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        invited_project_list = ProjectInvite.objects.filter(
+            inviter=request.user,
+        ).order_by("-created_at")
+
+        response_list = []
+        for invite_project in invited_project_list:
+            response_list.append(
+                {
+                    "project_id": invite_project.project.id,
+                    "invitee_id": invite_project.invitee.id,
+                    "role": invite_project.role,
+                    "created_at": invite_project.created_at,
+                }
+            )
+
+        return JsonResponse(response_list, status=200, safe=False)
+
+
+class Invitee(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        invited_project_list = ProjectInvite.objects.filter(
+            invitee=request.user,
+        ).order_by("-created_at")
+
+        response_list = []
+        for invite_project in invited_project_list:
+            response_list.append(
+                {
+                    "project_id": invite_project.project.id,
+                    "inviter_id": invite_project.inviter.id,
+                    "role": invite_project.role,
+                    "created_at": invite_project.created_at,
+                }
+            )
+
+        return JsonResponse(response_list, status=200, safe=False)

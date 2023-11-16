@@ -6,9 +6,11 @@ from django.http import JsonResponse
 from domo_api.http_model import (
     CreateProjectRequest,
     CreateProjectResponse,
+    MakeProjectInviteRequest,
     SimpleFailResponse,
+    SimpleSuccessResponse,
 )
-from domo_api.models import Project, ProjectMember
+from domo_api.models import Project, ProjectInvite, ProjectMember
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -85,4 +87,95 @@ class Info(APIView):
                 created_at=new_project.created_at,
             ).model_dump(),
             status=201,
+        )
+
+
+class Invite(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        project_id = request.data.get("project_id")
+        invitee_id = request.data.get("invitee_id")
+        role = request.data.get("role")
+
+        try:
+            request_data = MakeProjectInviteRequest(
+                project_id=project_id,
+                invitee_id=invitee_id,
+                role=role,
+            )
+            if request_data.role not in ["MANAGER", "MEMBER"]:
+                raise ValidationError
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        if not Project.objects.filter(
+            id=request_data.project_id,
+        ).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Project does not exist."
+                ).model_dump(),
+                status=404,
+            )
+        if ProjectMember.objects.filter(
+            project_id=project_id, user_id=invitee_id
+        ).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="User already in project."
+                ).model_dump(),
+                status=400,
+            )
+        if not ProjectMember.objects.filter(
+            project_id=project_id, user_id=request.user.id
+        ).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You are not in requested project."
+                ).model_dump(),
+                status=400,
+            )
+        if (
+            request_data.role == "MANAGER"
+            and not ProjectMember.objects.filter(
+                project_id=project_id,
+                user_id=request.user.id,
+                role__in=["OWNER", "MANAGER"],
+            ).exists()
+        ):
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You are not manager of requested project."
+                ).model_dump(),
+                status=403,
+            )
+        try:
+            ProjectInvite(
+                project_id=project_id,
+                inviter_id=request.user.id,
+                invitee_id=invitee_id,
+                role=request_data.role,
+                created_at=datetime.now(tz=timezone.utc),
+            ).save()
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error inviting user."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(
+                success=True,
+            ).model_dump(),
+            status=200,
         )
