@@ -1,4 +1,6 @@
+import csv
 import logging
+import os
 from datetime import datetime, timezone
 
 import requests
@@ -7,6 +9,7 @@ from domo_api.const import ReturnCode
 from domo_api.http_model import (
     GetAllUserKeywordResponse,
     GetAllUserStackResponse,
+    GetCommonStackResponse,
     GetGithubUpdateStatusResponse,
     GithubAccountCheckRequest,
     SimpleFailResponse,
@@ -330,4 +333,22 @@ class GithubManualUpdate(APIView):
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
             status=202,
+        )
+
+
+class CommonStack(APIView):
+    def get(self, request, stack):
+        f = open(os.getcwd() + "/domo_api/raw_data/common_stack.csv", "r")
+        reader = csv.reader(f)
+
+        data = list(reader)
+
+        for row in data:
+            if row[2] == stack:
+                response = GetCommonStackResponse(success=True, url=row[1], id=row[0])
+                return JsonResponse(response.model_dump(), status=200)
+
+        return JsonResponse(
+            SimpleFailResponse(success=False, reason="Can't find stack").model_dump(),
+            status=404,
         )

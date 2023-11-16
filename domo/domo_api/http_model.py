@@ -95,6 +95,12 @@ class GetAllUserKeywordResponse(BaseModel):
     keywords: dict
 
 
+class GetCommonStackResponse(BaseModel):
+    success: bool
+    id: str
+    url: str
+
+
 class ModifyUserInfoRequest(BaseModel):
     name: Optional[str] = None
 
@@ -145,7 +151,6 @@ class CreateProjectRequest(BaseModel):
     title: str
     short_description: str
     description: Optional[str] = None
-    is_public: bool
 
 
 class CreateProjectResponse(BaseModel):
@@ -169,3 +174,15 @@ class GetPreSignedUrlResponse(BaseModel):
     success: bool
     url: str
     aws_response: dict
+
+
+class MakeProjectInviteRequest(BaseModel):
+    project_id: int
+    invitee_id: int
+    role: str
+
+
+class ReplyProjectInviteRequest(BaseModel):
+    project_id: int
+    inviter_id: int
+    accept: bool

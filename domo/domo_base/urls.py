@@ -84,6 +84,11 @@ urlpatterns = [
         name="github_manual_update",
     ),
     path(
+        "external-history/v1/common/stack/<str:stack>",
+        external_history.CommonStack.as_view(),
+        name="common_stack_check",
+    ),
+    path(
         "user/v1",
         user.Info.as_view(),
         name="user_info",
@@ -112,5 +117,25 @@ urlpatterns = [
         "resource/v1/pre-signed-url/<str:file_name>",
         media.PreSignedUrl.as_view(),
         name="pre_signed_url",
+    ),
+    path(
+        "project/v1/invite",
+        project.Invite.as_view(),
+        name="project_invite",
+    ),
+    path(
+        "user/v1/inviter",
+        user.Inviter.as_view(),
+        name="user_inviter",
+    ),
+    path(
+        "user/v1/invitee",
+        user.Invitee.as_view(),
+        name="user_inviter",
+    ),
+    path(
+        "user/v1/invitee/reply",
+        user.Invitee.as_view(),
+        name="user_inviter_reply",
     ),
 ]

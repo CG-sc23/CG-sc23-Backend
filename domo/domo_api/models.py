@@ -232,3 +232,14 @@ class S3ResourceReferenceCheck(models.Model):
     id = models.AutoField(primary_key=True)
     resource_link = models.CharField(max_length=100)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class ProjectInvite(models.Model):
+    id = models.AutoField(primary_key=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    inviter = models.ForeignKey(User, on_delete=models.CASCADE, related_name="inviter")
+    invitee = models.ForeignKey(User, on_delete=models.CASCADE, related_name="invitee")
+
+    role = models.CharField(max_length=20)
+    created_at = models.DateTimeField()

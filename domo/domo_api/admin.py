@@ -5,6 +5,7 @@ from .models import (
     Milestone,
     PasswordResetToken,
     Project,
+    ProjectInvite,
     ProjectMember,
     S3ResourceReferenceCheck,
     SignUpEmailVerifyToken,
@@ -325,6 +326,27 @@ class TaskAdmin(admin.ModelAdmin):
                     "tags",
                     "created_at",
                     "is_public",
+                )
+            },
+        ),
+    )
+
+
+@admin.register(ProjectInvite)
+class ProjectInviteAdmin(admin.ModelAdmin):
+    list_display = ("id", "project", "role", "inviter", "invitee", "created_at")
+    list_filter = ("inviter", "invitee", "created_at")
+    ordering = ("id", "created_at")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "project",
+                    "role",
+                    "inviter",
+                    "invitee",
+                    "created_at",
                 )
             },
         ),
