@@ -152,6 +152,48 @@ class GithubStack(APIView):
         return JsonResponse(response.model_dump(), status=200)
 
 
+class PublicGithubStack(APIView):
+    def get(self, request, user_id):
+        try:
+            github_status = GithubStatus.objects.get(user=user_id)
+
+        except GithubStatus.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status Not Found"
+                ).model_dump(),
+                status=404,
+            )
+
+        if github_status.status == ReturnCode.GITHUB_STATUS_IN_PROGRESS:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status is in progress"
+                ).model_dump(),
+                status=503,
+            )
+
+        if github_status.status == ReturnCode.GITHUB_STATUS_FAILED:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Github status failed to update"
+                ).model_dump(),
+                status=503,
+            )
+
+        github_stacks = UserStack.objects.filter(user=user_id)
+
+        stacks = {}
+
+        for stack in github_stacks:
+            stacks[stack.language] = stack.code_amount
+
+        response = GetAllUserStackResponse(
+            success=True, count=github_stacks.count(), stacks=stacks
+        )
+        return JsonResponse(response.model_dump(), status=200)
+
+
 class GithubKeyword(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
