@@ -95,6 +95,12 @@ class GetAllUserKeywordResponse(BaseModel):
     keywords: dict
 
 
+class GetCommonStackResponse(BaseModel):
+    success: bool
+    id: str
+    url: str
+
+
 class ModifyUserInfoRequest(BaseModel):
     name: Optional[str] = None
 
