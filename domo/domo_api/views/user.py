@@ -167,9 +167,6 @@ class DetailInfo(APIView):
 
 
 class PublicDetailInfo(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
