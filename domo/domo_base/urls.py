@@ -64,9 +64,19 @@ urlpatterns = [
         name="get_github_stack",
     ),
     path(
+        "external-history/v1/github/stack/<int:user_id>",
+        external_history.PublicGithubStack.as_view(),
+        name="get_public_github_stack",
+    ),
+    path(
         "external-history/v1/github/keyword",
         external_history.GithubKeyword.as_view(),
         name="get_github_keyword",
+    ),
+    path(
+        "external-history/v1/github/keyword/<int:user_id>",
+        external_history.PublicGithubKeyword.as_view(),
+        name="get_public_github_keyword",
     ),
     path(
         "external-history/v1/github/update",
