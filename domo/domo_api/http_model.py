@@ -145,7 +145,6 @@ class CreateProjectRequest(BaseModel):
     title: str
     short_description: str
     description: Optional[str] = None
-    is_public: bool
 
 
 class CreateProjectResponse(BaseModel):
@@ -169,3 +168,9 @@ class GetPreSignedUrlResponse(BaseModel):
     success: bool
     url: str
     aws_response: dict
+
+
+class MakeProjectInviteRequest(BaseModel):
+    project_id: int
+    invitee_id: int
+    role: str
