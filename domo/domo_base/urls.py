@@ -109,6 +109,11 @@ urlpatterns = [
         name="project_info",
     ),
     path(
+        "project/v1/info",
+        project.PublicInfo.as_view(),
+        name="project_info",
+    ),
+    path(
         "user/v1/projects",
         user.ProjectInfo.as_view(),
         name="user_project_info",
