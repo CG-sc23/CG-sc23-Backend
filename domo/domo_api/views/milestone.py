@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timezone
 
@@ -39,6 +40,8 @@ class Info(APIView):
         project_id = request.GET.get("project-id")
         subject = request.data.get("subject")
         tags = request.data.get("tags", None)
+        if tags:
+            tags = json.loads(tags)
         due_date = request.data.get("due_date", None)
 
         try:
@@ -149,6 +152,8 @@ class Info(APIView):
         if not status:
             status = milestone.status
         tags = request.data.get("tags", None)
+        if tags:
+            tags = json.loads(tags)
         due_date = request.data.get("due_date", None)
 
         try:
