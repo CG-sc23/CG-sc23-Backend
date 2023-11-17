@@ -205,18 +205,7 @@ class Info(APIView):
         )
 
     def get(self, request):
-        project_id = request.GET.get("project-id")
         milestone_id = request.GET.get("milestone-id")
-
-        try:
-            project = Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Can't find project."
-                ).model_dump(),
-                status=404,
-            )
 
         try:
             milestone = Milestone.objects.get(id=milestone_id)
@@ -227,6 +216,8 @@ class Info(APIView):
                 ).model_dump(),
                 status=404,
             )
+
+        project = milestone.project
 
         try:
             member_role = ProjectMember.objects.get(
@@ -240,10 +231,13 @@ class Info(APIView):
             "name": milestone.created_by.name,
         }
 
+        project_data = {"id": project.id, "title": project.title}
+
         return JsonResponse(
             GetMilestoneResponse(
                 success=True,
                 milestone_id=milestone.id,
+                project=project_data,
                 created_by=created_data,
                 status=milestone.status,
                 subject=milestone.subject,

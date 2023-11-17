@@ -226,6 +226,7 @@ class ModifyMilestoneRequest(BaseModel):
 class GetMilestoneResponse(BaseModel):
     success: bool
     milestone_id: int
+    project: dict
     created_by: dict
     subject: str
     tags: Optional[list[str]] = None
