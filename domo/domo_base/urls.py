@@ -1,6 +1,14 @@
 from django.contrib import admin
 from django.urls import path
-from domo_api.views import auth, external_history, media, project, social_auth, user
+from domo_api.views import (
+    auth,
+    external_history,
+    media,
+    milestone,
+    project,
+    social_auth,
+    user,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -117,6 +125,11 @@ urlpatterns = [
         "user/v1/projects",
         user.ProjectInfo.as_view(),
         name="user_project_info",
+    ),
+    path(
+        "milestone/v1",
+        milestone.Info.as_view(),
+        name="milestone_info",
     ),
     path(
         "resource/v1/pre-signed-url/<str:file_name>",
