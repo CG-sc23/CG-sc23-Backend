@@ -24,8 +24,10 @@ def create_new_project(request_user, request_data):
         title=request_data.title,
         short_description=request_data.short_description,
         description=request_data.description,
+        description_resource_links=request_data.description_resource_links,
         created_at=datetime.now(tz=timezone.utc),
-        is_public=request_data.is_public,
+        due_date=request_data.due_date,
+        thumbnail_image=request_data.thumbnail_image,
     )
     new_project.save()
 
@@ -45,16 +47,22 @@ class Info(APIView):
 
     def post(self, request):
         title = request.data.get("title")
-        short_description = request.data.get("short_description")
+        short_description = request.data.get("short_description", None)
         description = request.data.get("description", None)
-        is_public = request.data.get("is_public", None)
+        description_resource_links = request.data.get(
+            "description_resource_links", None
+        )
+        due_date = request.data.get("due_date", None)
+        thumbnail_image = request.data.get("thumbnail_image", None)
 
         try:
             request_data = CreateProjectRequest(
                 title=title,
                 short_description=short_description,
                 description=description,
-                is_public=is_public,
+                description_resource_links=description_resource_links,
+                due_date=due_date,
+                thumbnail_image=thumbnail_image,
             )
         except ValidationError:
             return JsonResponse(
@@ -80,11 +88,13 @@ class Info(APIView):
                 success=True,
                 project_id=new_project.id,
                 status=new_project.status,
-                is_public=new_project.is_public,
                 title=new_project.title,
                 short_description=new_project.short_description,
                 description=new_project.description,
+                description_resource_links=new_project.description_resource_links,
                 created_at=new_project.created_at,
+                due_date=new_project.due_date,
+                thumbnail_image=new_project.thumbnail_image,
             ).model_dump(),
             status=201,
         )
