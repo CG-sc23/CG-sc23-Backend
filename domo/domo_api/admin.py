@@ -248,6 +248,7 @@ class MilestoneAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "project",
+        "created_by",
         "tags",
         "subject",
         "status",
@@ -262,6 +263,7 @@ class MilestoneAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "project",
+                    "created_by",
                     "tags",
                     "subject",
                     "status",

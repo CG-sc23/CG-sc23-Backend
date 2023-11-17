@@ -154,10 +154,16 @@ class Milestone(models.Model):
         on_delete=models.CASCADE,
     )
 
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        default=0,
+    )
+
     tags = models.JSONField(null=True, blank=True)
     subject = models.CharField(max_length=100)
 
-    # READY, PROGRESSING, COMPLETED
+    # READY, IN_PROGRESS, COMPLETED
     status = models.CharField(max_length=20, default="READY")
 
     created_at = models.DateTimeField()
