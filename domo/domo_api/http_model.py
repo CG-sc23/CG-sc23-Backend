@@ -223,6 +223,18 @@ class ModifyMilestoneRequest(BaseModel):
     due_date: Optional[datetime] = None
 
 
+class GetMilestoneResponse(BaseModel):
+    success: bool
+    milestone_id: int
+    created_by: dict
+    subject: str
+    tags: Optional[list[str]] = None
+    status: str
+    created_at: datetime
+    due_date: Optional[datetime] = None
+    permission: str
+
+
 class GetPreSignedUrlResponse(BaseModel):
     success: bool
     url: str
