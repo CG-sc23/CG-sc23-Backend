@@ -196,8 +196,10 @@ class ProjectAdmin(admin.ModelAdmin):
         "title",
         "short_description",
         "description",
+        "description_resource_links",
         "created_at",
-        "like",
+        "due_date",
+        "thumbnail_image",
     )
     list_filter = ("status", "owner")
     ordering = ("id", "created_at", "owner", "status")
@@ -211,8 +213,10 @@ class ProjectAdmin(admin.ModelAdmin):
                     "title",
                     "short_description",
                     "description",
+                    "description_resource_links",
                     "created_at",
-                    "like",
+                    "due_date",
+                    "thumbnail_image",
                 )
             },
         ),
