@@ -270,6 +270,8 @@ class Info(APIView):
 
 
 class PublicInfo(APIView):
+    authentication_classes = [TokenAuthentication]
+
     def get(self, request):
         project_id = request.GET.get("project-id")
         try:
@@ -281,6 +283,13 @@ class PublicInfo(APIView):
                 ).model_dump(),
                 status=404,
             )
+
+        try:
+            member_role = ProjectMember.objects.get(
+                project=project, user=request.user
+            ).role
+        except:
+            member_role = "NOTHING"
 
         owner_data = {
             "id": project.owner.id,
@@ -300,6 +309,7 @@ class PublicInfo(APIView):
                 created_at=project.created_at,
                 due_date=project.due_date,
                 thumbnail_image=project.thumbnail_image,
+                permission=member_role,
             ).model_dump(),
             status=200,
         )

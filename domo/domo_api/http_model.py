@@ -191,6 +191,7 @@ class GetProjectResponse(BaseModel):
     created_at: datetime
     due_date: Optional[datetime] = None
     thumbnail_image: Optional[str] = None
+    permission: str
 
 
 class GetAllProjectResponse(BaseModel):
