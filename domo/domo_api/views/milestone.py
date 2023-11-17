@@ -110,18 +110,7 @@ class Info(APIView):
         )
 
     def put(self, request):
-        project_id = request.GET.get("project-id")
         milestone_id = request.GET.get("milestone-id")
-
-        try:
-            project = Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Project not found"
-                ).model_dump(),
-                status=404,
-            )
 
         try:
             milestone = Milestone.objects.get(id=milestone_id)
@@ -132,6 +121,8 @@ class Info(APIView):
                 ).model_dump(),
                 status=404,
             )
+
+        project = milestone.project
 
         try:
             member_role = ProjectMember.objects.get(
