@@ -148,7 +148,7 @@ class Info(APIView):
                 status=401,
             )
 
-        title = request.data.get("title")
+        title = request.data.get("title", None)
         status = request.data.get("status", None)
         if not status:
             status = project.status

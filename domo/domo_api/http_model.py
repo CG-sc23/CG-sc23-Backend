@@ -157,8 +157,8 @@ class CreateProjectRequest(BaseModel):
 
 
 class ModifyProjectRequest(BaseModel):
-    title: str
-    status: str
+    title: Optional[str] = None
+    status: Optional[str] = None
     short_description: Optional[str] = None
     description: Optional[str] = None
     description_resource_links: Optional[str] = None
