@@ -216,6 +216,13 @@ class CreateMilestoneResponse(BaseModel):
     due_date: Optional[datetime] = None
 
 
+class ModifyMilestoneRequest(BaseModel):
+    subject: Optional[str] = None
+    status: Optional[str] = None
+    tags: Optional[list[str]] = None
+    due_date: Optional[datetime] = None
+
+
 class GetPreSignedUrlResponse(BaseModel):
     success: bool
     url: str
