@@ -106,7 +106,7 @@ class Project(models.Model):
         User,
         on_delete=models.CASCADE,
     )
-    # READY, PROGRESSING, COMPLETED, GIVEUP
+    # READY, IN_PROGRESS, COMPLETED, TERMINATED
     status = models.CharField(max_length=20, default="READY")
 
     title = models.CharField(max_length=50)
@@ -114,7 +114,8 @@ class Project(models.Model):
     description = models.TextField(null=True, blank=True)
     description_resource_links = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
-    like = models.IntegerField(default=0)
+    due_date = models.DateTimeField(null=True, blank=True)
+    thumbnail_image = models.CharField(max_length=500, null=True, blank=True)
 
     def detail(self):
         return {
@@ -126,7 +127,8 @@ class Project(models.Model):
             "description": self.description,
             "description_resource_links": self.description_resource_links,
             "created_at": self.created_at,
-            "like": self.like,
+            "due_date": self.due_date,
+            "thumbnail_image": self.thumbnail_image,
         }
 
 
