@@ -254,3 +254,62 @@ class Info(APIView):
             ).model_dump(),
             status=200,
         )
+
+
+# Todo: implement delete method
+# def delete(self, request):
+#     project_id = request.GET.get("project-id")
+#     milestone_id = request.GET.get("milestone-id")
+#
+#     try:
+#         project = Project.objects.get(id=project_id)
+#     except Project.DoesNotExist:
+#         return JsonResponse(
+#             SimpleFailResponse(
+#                 success=False, reason="Can't find project."
+#             ).model_dump(),
+#             status=404,
+#         )
+#
+#     try:
+#         milestone = Milestone.objects.get(id=milestone_id)
+#     except Milestone.DoesNotExist:
+#         return JsonResponse(
+#             SimpleFailResponse(
+#                 success=False, reason="Milestone not found"
+#             ).model_dump(),
+#             status=404,
+#         )
+#
+#     try:
+#         member_role = ProjectMember.objects.get(
+#             project=project, user=request.user
+#         ).role
+#     except:
+#         member_role = "NOTHING"
+#
+#     if member_role == "NOTHING" or "MEMBER":
+#         return JsonResponse(
+#             SimpleFailResponse(
+#                 success=False, reason="Permission error"
+#             ).model_dump(),
+#             status=401,
+#         )
+#
+#     try:
+#         milestone.delete()
+#     except Exception as e:
+#         logging.error(e)
+#         return JsonResponse(
+#             SimpleFailResponse(
+#                 success=False, reason="Error deleting milestone."
+#             ).model_dump(),
+#             status=500,
+#         )
+#
+#     return JsonResponse(
+#         SimpleSuccessResponse(
+#             success=True,
+#         ).model_dump(),
+#         status=200,
+#     )
