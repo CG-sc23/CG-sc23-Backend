@@ -179,6 +179,20 @@ class CreateProjectResponse(BaseModel):
     thumbnail_image: Optional[str] = None
 
 
+class GetProjectResponse(BaseModel):
+    success: bool
+    project_id: int
+    owner: dict
+    status: str
+    title: str
+    short_description: Optional[str] = None
+    description: Optional[str] = None
+    description_resource_links: Optional[str] = None
+    created_at: datetime
+    due_date: Optional[datetime] = None
+    thumbnail_image: Optional[str] = None
+
+
 class GetAllProjectResponse(BaseModel):
     success: bool
     count: int
