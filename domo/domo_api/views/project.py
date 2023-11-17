@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timezone
 
@@ -60,6 +61,9 @@ class Info(APIView):
         description_resource_links = request.data.get(
             "description_resource_links", None
         )
+        if description_resource_links:
+            description_resource_links = json.loads(description_resource_links)
+
         due_date = request.data.get("due_date", None)
         thumbnail_image = request.data.get("thumbnail_image", None)
 
@@ -157,6 +161,9 @@ class Info(APIView):
         description_resource_links = request.data.get(
             "description_resource_links", None
         )
+        if description_resource_links:
+            description_resource_links = json.loads(description_resource_links)
+
         due_date = request.data.get("due_date", None)
         thumbnail_image = request.data.get("thumbnail_image", None)
 
