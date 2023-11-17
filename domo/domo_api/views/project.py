@@ -130,10 +130,20 @@ class Info(APIView):
                 status=404,
             )
 
-        if request.user != project.owner:
+        try:
+            member_role = ProjectMember.objects.get(
+                project=project, user=request.user
+            ).role
+        except ProjectMember.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason="Not found").model_dump(),
+                status=404,
+            )
+
+        if member_role == "MEMBER":
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Permission error"
+                    success=False, reason="User must OWNER or MANAGER"
                 ).model_dump(),
                 status=401,
             )
