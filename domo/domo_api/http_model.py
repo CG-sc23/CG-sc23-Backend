@@ -200,6 +200,22 @@ class GetAllProjectResponse(BaseModel):
     projects: list
 
 
+class CreateMilestoneRequest(BaseModel):
+    subject: str
+    tags: Optional[list[str]] = None
+    due_date: Optional[datetime] = None
+
+
+class CreateMilestoneResponse(BaseModel):
+    success: bool
+    milestone_id: int
+    subject: str
+    tags: Optional[list[str]] = None
+    status: str
+    created_at: datetime
+    due_date: Optional[datetime] = None
+
+
 class GetPreSignedUrlResponse(BaseModel):
     success: bool
     url: str
