@@ -11,6 +11,7 @@ from domo_api.http_model import (
     SimpleSuccessResponse,
 )
 from domo_api.models import Project, ProjectInvite, ProjectMember
+from domo_api.s3.handler import GeneralHandler
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -71,6 +72,19 @@ class Info(APIView):
                 ).model_dump(),
                 status=400,
             )
+
+        if thumbnail_image:
+            s3_handler = GeneralHandler()
+            if not s3_handler.check_resource_links(
+                    request_data.thumbnail_image
+            ):
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False,
+                        reason="Invalid thumbnail image.",
+                    ).model_dump(),
+                    status=400,
+                )
 
         try:
             new_project = create_new_project(request.user, request_data)
