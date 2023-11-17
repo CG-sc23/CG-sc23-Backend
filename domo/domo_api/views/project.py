@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from domo_api.http_model import (
     CreateProjectRequest,
     CreateProjectResponse,
+    GetProjectResponse,
     MakeProjectInviteRequest,
     ModifyProjectRequest,
     SimpleFailResponse,
@@ -244,6 +245,42 @@ class Info(APIView):
         return JsonResponse(
             CreateProjectResponse(
                 success=True,
+                project_id=project.id,
+                status=project.status,
+                title=project.title,
+                short_description=project.short_description,
+                description=project.description,
+                description_resource_links=project.description_resource_links,
+                created_at=project.created_at,
+                due_date=project.due_date,
+                thumbnail_image=project.thumbnail_image,
+            ).model_dump(),
+            status=200,
+        )
+
+
+class PublicInfo(APIView):
+    def get(self, request):
+        project_id = request.GET.get("project-id")
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Can't find project."
+                ).model_dump(),
+                status=404,
+            )
+
+        owner_data = {
+            "id": project.owner.id,
+            "name": project.owner.name,
+        }
+
+        return JsonResponse(
+            GetProjectResponse(
+                success=True,
+                owner=owner_data,
                 project_id=project.id,
                 status=project.status,
                 title=project.title,
