@@ -32,6 +32,7 @@ class Info(APIView):
             email=request.user.email,
             name=request.user.name,
             profile_image_link=request.user.profile_image_link,
+            provider=request.user.provider,
         )
         return JsonResponse(response.model_dump(), status=200)
 

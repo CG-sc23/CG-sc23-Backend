@@ -21,6 +21,7 @@ class GetUserInfoResponse(BaseModel):
     email: str
     name: str
     profile_image_link: Optional[str] = None
+    provider: str
 
 
 class GetUserDetailInfoResponse(BaseModel):
