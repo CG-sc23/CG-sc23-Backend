@@ -8,7 +8,7 @@ urlpatterns = [
         name="github_account_check",
     ),
     path(
-        "v1/github/status",
+        "v1/github/status/<int:user_id>",
         external_history.GithubUpdateStatus.as_view(),
         name="get_github_update_status",
     ),

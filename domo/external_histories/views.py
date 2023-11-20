@@ -87,12 +87,9 @@ class GithubAccountCheck(APIView):
 
 
 class GithubUpdateStatus(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
+    def get(self, request, user_id):
         try:
-            github_status = GithubStatus.objects.get(user=request.user)
+            github_status = GithubStatus.objects.get(user_id=user_id)
             response = GetGithubUpdateStatusResponse(
                 success=True,
                 status=github_status.status,
