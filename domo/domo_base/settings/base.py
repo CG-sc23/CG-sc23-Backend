@@ -37,13 +37,20 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
-    "domo_api",
+    "auths",
+    "common",
+    "external_histories",
+    "tasks",
+    "milestones",
+    "projects",
+    "resources",
+    "users",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "domo_api.middleware.health_check.HealthCheckMiddleware",
+    "common.middleware.health_check.HealthCheckMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -89,7 +96,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "domo_api.User"
+AUTH_USER_MODEL = "users.User"
 
 
 # Password validation
