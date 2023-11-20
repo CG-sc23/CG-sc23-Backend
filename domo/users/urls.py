@@ -28,6 +28,11 @@ urlpatterns = [
         name="user_inviter",
     ),
     path(
+        "v1/projects",
+        user.ProjectInfo.as_view(),
+        name="user_project_info",
+    ),
+    path(
         "v1/invitee/reply",
         user.Invitee.as_view(),
         name="user_inviter_reply",
