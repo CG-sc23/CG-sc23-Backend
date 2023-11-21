@@ -80,3 +80,8 @@ class ReplyProjectInviteRequest(BaseModel):
     project_id: int
     inviter_id: int
     accept: bool
+
+
+class ChangeRoleRequest(BaseModel):
+    user_email: EmailStr
+    role: str
