@@ -80,7 +80,7 @@ class Info(APIView):
             )
 
         if thumbnail_image:
-            s3_handler = GeneralHandler()
+            s3_handler = GeneralHandler("resource")
             if not s3_handler.check_resource_links(request_data.thumbnail_image):
                 return JsonResponse(
                     SimpleFailResponse(
@@ -181,7 +181,7 @@ class Info(APIView):
             )
 
         if thumbnail_image:
-            s3_handler = GeneralHandler()
+            s3_handler = GeneralHandler("resource")
             if not s3_handler.check_resource_links(request_data.thumbnail_image):
                 return JsonResponse(
                     SimpleFailResponse(
@@ -194,7 +194,7 @@ class Info(APIView):
         # description에 media가 있을경우, validation check가 필요하다.
         # 이후 owner를 지정한다.
         if isinstance(request_data.description_resource_links, list):
-            s3_handler = GeneralHandler()
+            s3_handler = GeneralHandler("resource")
             if not s3_handler.check_resource_links(
                 request_data.description_resource_links
             ):

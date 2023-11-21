@@ -94,7 +94,7 @@ def upload_profile_image(request_data, profile_image):
 
 
 class GeneralHandler:
-    def __init__(self):
+    def __init__(self, type, user_email=None):
         self.aws_s3_bucket_name = os.environ.get("AWS_S3_BUCKET_NAME")
 
         # # For Local Test
@@ -107,10 +107,21 @@ class GeneralHandler:
         # )
         self.s3_client = boto3.client("s3")
         self.s3_resource = boto3.resource("s3")
-        self.prefix = "resources"
+        self.user_email = user_email
+        self.type = type
+        if type == "resource":
+            self.prefix = "resources"
+        elif type == "profile":
+            self.prefix = "users"
 
     def remove_resource(self, resource_link):
-        key = resource_link.split("/")[-1]
+        if self.type == "resource":
+            key = resource_link.split("/")[-1]
+        elif self.type == "profile":
+            key = resource_link.split("/")[-4:]
+            key = "/".join(key)
+        if not key:
+            return False
         try:
             self.s3_client.delete_object(
                 Bucket=self.aws_s3_bucket_name,
@@ -121,8 +132,19 @@ class GeneralHandler:
         return True
 
     def check_resource_links(self, resource_links):
-        for resource_link in resource_links:
-            key = resource_link.split("/")[-1]
+        if self.type == "resource":
+            for resource_link in resource_links:
+                key = resource_link.split("/")[-1]
+                try:
+                    self.s3_client.head_object(
+                        Bucket=self.aws_s3_bucket_name,
+                        Key=f"{self.prefix}/{key}",
+                    )
+                except:
+                    return False
+        elif self.type == "profile":
+            key = resource_links.split("/")[-4:]
+            key = "/".join(key)
             try:
                 self.s3_client.head_object(
                     Bucket=self.aws_s3_bucket_name,
@@ -130,6 +152,10 @@ class GeneralHandler:
                 )
             except:
                 return False
+
+        else:
+            return False
+
         return True
 
     @staticmethod
@@ -142,57 +168,13 @@ class GeneralHandler:
         if not self.is_valid_object_type(object_type):
             return ReturnCode.INVALID_ACCESS, None
 
-        random_token = secrets.token_urlsafe(16)
-        key = f"{self.prefix}/{random_token}.{object_type}"
-        try:
-            response = self.s3_client.generate_presigned_post(
-                Bucket=self.aws_s3_bucket_name,
-                Key=key,
-                ExpiresIn=600,
-            )
-        except Exception as e:
-            return ReturnCode.FAILED_CREATE_PRESIGNED_URL, e
-
-        return ReturnCode.SUCCESS, response
-
-
-class ProfileImageModifier(GeneralHandler):
-    def __init__(self):
-        super().__init__()
-        self.prefix = "users"
-
-    def check_resource_link(self, resource_link):
-        key = resource_link.split("/")[-4:]
-        key = "/".join(key)
-        try:
-            self.s3_client.head_object(
-                Bucket=self.aws_s3_bucket_name,
-                Key=f"{self.prefix}/{key}",
-            )
-        except Exception as e:
-            raise e
-            return False
-        return True
-
-    def remove_resource(self, resource_link):
-        key = resource_link.split("/")[-4:]
-        key = "/".join(key)
-        try:
-            self.s3_client.delete_object(
-                Bucket=self.aws_s3_bucket_name,
-                Key=f"{self.prefix}/{key}",
-            )
-        except:
-            return False
-        return True
-
-    def create_presigned_url(self, user_email, object_name):
-        object_type = object_name.split(".")[-1]
-
-        if not self.is_valid_object_type(object_type):
+        if self.type == "resource":
+            random_token = secrets.token_urlsafe(16)
+            key = f"{self.prefix}/{random_token}.{object_type}"
+        elif self.type == "profile":
+            key = f"{self.prefix}/{self.user_email}/profile/image/profile-image.{object_type}"
+        else:
             return ReturnCode.INVALID_ACCESS, None
-
-        key = f"{self.prefix}/{user_email}/profile/image/profile-image.{object_type}"
         try:
             response = self.s3_client.generate_presigned_post(
                 Bucket=self.aws_s3_bucket_name,
@@ -206,6 +188,6 @@ class ProfileImageModifier(GeneralHandler):
 
 
 if __name__ == "__main__":
-    test = GeneralHandler()
+    test = GeneralHandler("resource")
     result = test.create_presigned_url("test.gif")
     print(result)

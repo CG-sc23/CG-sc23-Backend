@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone
 
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
-from common.s3.handler import GeneralHandler, ProfileImageModifier, upload_profile_image
+from common.s3.handler import GeneralHandler
 from common.tasks import update_github_history
 from django.db.transaction import atomic
 from django.http import JsonResponse
@@ -99,7 +99,7 @@ class DetailInfo(APIView):
         # description에 media가 있을경우, validation check가 필요하다.
         # 이후 owner를 지정한다.
         if isinstance(request_data.description_resource_links, list):
-            s3_handler = GeneralHandler()
+            s3_handler = GeneralHandler("resource")
             if not s3_handler.check_resource_links(
                 request_data.description_resource_links
             ):
@@ -134,14 +134,14 @@ class DetailInfo(APIView):
                         s3_handler.remove_resource(resource_link)
 
         # 위와 마찬가지로 profile image가 있을경우, validation check가 필요하다.
-        profile_image_modifier = ProfileImageModifier()
+        profile_image_modifier = GeneralHandler("profile")
 
         if request_data.profile_image_link is None:
             pass
         elif request_data.profile_image_link == "":
             profile_image_modifier.remove_resource(request.user.profile_image_link)
         else:
-            if not profile_image_modifier.check_resource_link(
+            if not profile_image_modifier.check_resource_links(
                 request_data.profile_image_link
             ):
                 return JsonResponse(
