@@ -13,6 +13,7 @@ class ModifyUserDetailInfoRequest(BaseModel):
     short_description: Optional[str] = None
     description: Optional[str] = None
     description_resource_links: Optional[list[str]] = None
+    profile_image_link: Optional[str] = None
 
 
 class GetUserInfoResponse(BaseModel):
