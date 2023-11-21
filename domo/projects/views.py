@@ -6,6 +6,7 @@ from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from common.s3.handler import GeneralHandler
 from django.db.transaction import atomic
 from django.http import JsonResponse
+from milestones.models import Milestone
 from projects.http_model import (
     ChangeRoleRequest,
     CreateProjectRequest,
@@ -298,7 +299,13 @@ class PublicInfo(APIView):
         owner_data = {
             "id": project.owner.id,
             "name": project.owner.name,
+            "profile_image_link": project.owner.profile_image_link,
         }
+
+        milestones = Milestone.objects.filter(project_id=project.id)
+        milestones_data = []
+        for milestone in milestones:
+            milestones_data.append(milestone.simple_info())
 
         return JsonResponse(
             GetProjectResponse(
@@ -313,6 +320,7 @@ class PublicInfo(APIView):
                 created_at=project.created_at,
                 due_date=project.due_date,
                 thumbnail_image=project.thumbnail_image,
+                milestones=milestones_data,
                 permission=member_role,
             ).model_dump(),
             status=200,

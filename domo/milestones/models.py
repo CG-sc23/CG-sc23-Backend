@@ -25,3 +25,6 @@ class Milestone(models.Model):
 
     created_at = models.DateTimeField()
     due_date = models.DateTimeField(null=True, blank=True)
+
+    def simple_info(self):
+        return {"id": self.id, "subject": self.subject, "tags": self.tags}
