@@ -1,11 +1,13 @@
 import json
 from datetime import datetime, timezone
 
+from common.const import ReturnCode
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from common.s3.handler import GeneralHandler
 from common.tasks import update_github_history
 from django.db.transaction import atomic
 from django.http import JsonResponse
+from external_histories.models import GithubStatus
 from projects.http_model import GetAllProjectResponse, ReplyProjectInviteRequest
 from projects.models import Project, ProjectInvite, ProjectMember, User
 from pydantic import ValidationError
@@ -156,6 +158,12 @@ class DetailInfo(APIView):
             request_data.github_link
             and request_data.github_link != request.user.github_link
         ):
+            if not GithubStatus.objects.filter(user_id=request.user.id).exists():
+                GithubStatus.objects.create(
+                    user_id=request.user.id,
+                    status=ReturnCode.GITHUB_STATUS_IN_PROGRESS,
+                    last_update=datetime.now(tz=timezone.utc),
+                )
             update_github_history.delay(request.user.id, request_data.github_link)
 
         request.user.name = request_data.name or request.user.name
