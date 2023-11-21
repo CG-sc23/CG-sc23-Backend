@@ -34,6 +34,7 @@ class Info(APIView):
             email=request.user.email,
             name=request.user.name,
             profile_image_link=request.user.profile_image_link,
+            profile_image_updated_at=request.user.profile_image_updated_at,
             provider=request.user.provider,
         )
         return JsonResponse(response.model_dump(), status=200)
@@ -177,10 +178,12 @@ class DetailInfo(APIView):
 
         if request_data.profile_image_link == "":
             request.user.profile_image_link = None
+            request.user.profile_image_updated_at = None
         else:
             request.user.profile_image_link = (
                 request_data.profile_image_link or request.user.profile_image_link
             )
+            request.user.profile_image_updated_at = datetime.now(tz=timezone.utc)
 
         if request_data.description_resource_links:
             request.user.description_resource_links = (
@@ -214,6 +217,7 @@ class PublicDetailInfo(APIView):
             email=user.email,
             name=user.name,
             profile_image_link=user.profile_image_link,
+            profile_image_updated_at=user.profile_image_updated_at,
             github_link=user.github_link,
             short_description=user.short_description,
             description=user.description,

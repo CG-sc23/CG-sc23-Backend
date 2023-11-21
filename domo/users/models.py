@@ -63,6 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=20)
     github_link = models.TextField(null=True, blank=True)
     profile_image_link = models.TextField(null=True, blank=True)
+    profile_image_updated_at = models.DateTimeField(null=True, blank=True)
     short_description = models.CharField(max_length=50, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     description_resource_links = models.JSONField(null=True, blank=True)

@@ -90,6 +90,7 @@ class SocialSignUp(APIView):
             # This is a JsonResponse for Exception
             if isinstance(profile_image_link, JsonResponse):
                 return profile_image_link
+            user.profile_image_updated_at = datetime.now(tz=timezone.utc)
 
         # Create user
         try:
@@ -175,6 +176,7 @@ class SignUp(APIView):
             # This is a JsonResponse for Exception
             if isinstance(profile_image_link, JsonResponse):
                 return profile_image_link
+            user_check.profile_image_updated_at = datetime.now(tz=timezone.utc)
 
         # Create user
         try:
