@@ -9,4 +9,5 @@ urlpatterns = [
     path("milestone/", include("milestones.urls")),
     path("external-history/", include("external_histories.urls")),
     path("resource/", include("resources.urls")),
+    path("task-group/", include("task_groups.urls")),
 ]
