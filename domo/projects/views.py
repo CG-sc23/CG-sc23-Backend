@@ -144,7 +144,7 @@ class Info(APIView):
                 SimpleFailResponse(
                     success=False, reason="User must OWNER or MANAGER"
                 ).model_dump(),
-                status=401,
+                status=403,
             )
 
         title = request.data.get("title", None)

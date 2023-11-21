@@ -63,7 +63,7 @@ class Info(APIView):
                 SimpleFailResponse(
                     success=False, reason="Permission error"
                 ).model_dump(),
-                status=401,
+                status=403,
             )
 
         if member_role == "MEMBER":
@@ -71,7 +71,7 @@ class Info(APIView):
                 SimpleFailResponse(
                     success=False, reason="User must OWNER or MANAGER"
                 ).model_dump(),
-                status=401,
+                status=403,
             )
 
         try:
@@ -136,7 +136,7 @@ class Info(APIView):
                 SimpleFailResponse(
                     success=False, reason="Permission error"
                 ).model_dump(),
-                status=401,
+                status=403,
             )
 
         if member_role == "MEMBER":
@@ -144,7 +144,7 @@ class Info(APIView):
                 SimpleFailResponse(
                     success=False, reason="User must OWNER or MANAGER"
                 ).model_dump(),
-                status=401,
+                status=403,
             )
 
         subject = request.data.get("subject")
