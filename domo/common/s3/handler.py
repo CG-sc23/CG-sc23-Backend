@@ -133,6 +133,8 @@ class GeneralHandler:
 
     def check_resource_links(self, resource_links):
         if self.type == "resource":
+            if isinstance(resource_links, str):
+                resource_links = [resource_links]
             for resource_link in resource_links:
                 key = resource_link.split("/")[-1]
                 try:
