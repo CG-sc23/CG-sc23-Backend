@@ -152,7 +152,10 @@ class DetailInfo(APIView):
                     status=400,
                 )
 
-        if request_data.github_link:
+        if (
+            request_data.github_link
+            and request_data.github_link != request.user.github_link
+        ):
             update_github_history.delay(request.user.id, request_data.github_link)
 
         request.user.name = request_data.name or request.user.name
