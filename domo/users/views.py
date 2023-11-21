@@ -167,7 +167,7 @@ class DetailInfo(APIView):
             update_github_history.delay(request.user.id, request_data.github_link)
 
         request.user.name = request_data.name or request.user.name
-        request.user.github_link = request_data.github_link or request.user.github_link
+        request.user.github_link = request_data.github_link
         request.user.short_description = (
             request_data.short_description or request.user.short_description
         )
