@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.urls import path
 from projects import views as project
 
@@ -17,5 +16,10 @@ urlpatterns = [
         "v1/invite",
         project.Invite.as_view(),
         name="project_invite",
+    ),
+    path(
+        "v1/<int:project_id>/role",
+        project.Role.as_view(),
+        name="project_role",
     ),
 ]

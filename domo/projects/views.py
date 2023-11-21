@@ -7,6 +7,7 @@ from common.s3.handler import GeneralHandler
 from django.db.transaction import atomic
 from django.http import JsonResponse
 from projects.http_model import (
+    ChangeRoleRequest,
     CreateProjectRequest,
     CreateProjectResponse,
     GetProjectResponse,
@@ -400,5 +401,103 @@ class Invite(APIView):
 
         return JsonResponse(
             MakeProjectInviteResponse(result=result).model_dump(),
+            status=200,
+        )
+
+
+class Role(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, project_id):
+        user_email = request.data.get("user_email")
+        role = request.data.get("role")
+
+        try:
+            request_data = ChangeRoleRequest(
+                user_email=user_email,
+                role=role,
+            )
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason="Not Found.").model_dump(),
+                status=404,
+            )
+
+        try:
+            member_role = ProjectMember.objects.get(
+                project=project, user=request.user
+            ).role
+        except ProjectMember.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You are not in requested project."
+                ).model_dump(),
+                status=403,
+            )
+
+        if member_role == "MEMBER":
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You must OWNER or MANAGER."
+                ).model_dump(),
+                status=403,
+            )
+
+        if role not in ["MANAGER", "MEMBER"]:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason="Invalid role.").model_dump(),
+                status=400,
+            )
+
+        if not ProjectMember.objects.filter(
+            project_id=project_id, user__email=request_data.user_email
+        ).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Requested user does not exist in project."
+                ).model_dump(),
+                status=404,
+            )
+
+        if (
+            ProjectMember.objects.get(
+                project_id=project_id, user__email=request_data.user_email
+            ).role
+            == "OWNER"
+        ):
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You can't change owner's role."
+                ).model_dump(),
+                status=403,
+            )
+        try:
+            user_obj = ProjectMember.objects.get(
+                project_id=project_id, user__email=request_data.user_email
+            )
+            user_obj.role = request_data.role
+            user_obj.save()
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error changing role."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
             status=200,
         )
