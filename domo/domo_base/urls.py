@@ -10,4 +10,5 @@ urlpatterns = [
     path("external-history/", include("external_histories.urls")),
     path("resource/", include("resources.urls")),
     path("task-group/", include("task_groups.urls")),
+    path("task/", include("tasks.urls")),
 ]
