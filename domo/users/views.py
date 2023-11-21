@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone
 
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
-from common.s3.handler import GeneralHandler, upload_profile_image
+from common.s3.handler import GeneralHandler, ProfileImageModifier, upload_profile_image
 from common.tasks import update_github_history
 from django.db.transaction import atomic
 from django.http import JsonResponse
@@ -72,6 +72,8 @@ class DetailInfo(APIView):
         description_resource_links = request.data.get(
             "description_resource_links", None
         )
+        profile_image_link = request.data.get("profile_image_link", None)
+
         if description_resource_links:
             description_resource_links = json.loads(description_resource_links)
 
@@ -81,6 +83,7 @@ class DetailInfo(APIView):
             "short_description": short_description,
             "description": description,
             "description_resource_links": description_resource_links,
+            "profile_image_link": profile_image_link,
         }
 
         try:
@@ -92,19 +95,6 @@ class DetailInfo(APIView):
                 ).model_dump(),
                 status=400,
             )
-
-        # If profile image exists, upload to S3 first
-        profile_image_link = None
-        if "profile_image" in request.FILES:
-            profile_image_link = upload_profile_image(
-                request_data, request.FILES["profile_image"]
-            )
-            # This is a JsonResponse for Exception
-            if isinstance(profile_image_link, JsonResponse):
-                return profile_image_link
-
-        if profile_image_link:
-            request.user.profile_image_link = profile_image_link
 
         # description에 media가 있을경우, validation check가 필요하다.
         # 이후 owner를 지정한다.
@@ -143,6 +133,25 @@ class DetailInfo(APIView):
                         ref_check_obj.delete()
                         s3_handler.remove_resource(resource_link)
 
+        # 위와 마찬가지로 profile image가 있을경우, validation check가 필요하다.
+        profile_image_modifier = ProfileImageModifier()
+
+        if request_data.profile_image_link is None:
+            pass
+        elif request_data.profile_image_link == "":
+            profile_image_modifier.remove_resource(request.user.profile_image_link)
+        else:
+            if not profile_image_modifier.check_resource_link(
+                request_data.profile_image_link
+            ):
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False,
+                        reason="Invalid request.",
+                    ).model_dump(),
+                    status=400,
+                )
+
         if request_data.github_link:
             update_github_history.delay(request.user.id, request_data.github_link)
 
@@ -152,6 +161,14 @@ class DetailInfo(APIView):
             request_data.short_description or request.user.short_description
         )
         request.user.description = request_data.description or request.user.description
+
+        if request_data.profile_image_link == "":
+            request.user.profile_image_link = None
+        else:
+            request.user.profile_image_link = (
+                request_data.profile_image_link or request.user.profile_image_link
+            )
+
         if request_data.description_resource_links:
             request.user.description_resource_links = (
                 request_data.description_resource_links
