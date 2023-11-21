@@ -183,6 +183,7 @@ class PublicDetailInfo(APIView):
             success=True,
             email=user.email,
             name=user.name,
+            profile_image_link=user.profile_image_link,
             github_link=user.github_link,
             short_description=user.short_description,
             description=user.description,
