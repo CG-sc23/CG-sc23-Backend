@@ -121,8 +121,7 @@ class Info(APIView):
             status=201,
         )
 
-    def put(self, request):
-        project_id = request.GET.get("project-id")
+    def put(self, request, project_id):
         try:
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
@@ -218,9 +217,9 @@ class Info(APIView):
                         owner=request.user,
                     )
 
-            user_description_resource_links = request.user.description_resource_links
-            if user_description_resource_links:
-                for resource_link in user_description_resource_links:
+            project_description_resource_links = project.description_resource_links
+            if project_description_resource_links:
+                for resource_link in project_description_resource_links:
                     ref_check_obj = S3ResourceReferenceCheck.objects.get(
                         resource_link=resource_link
                     )
@@ -278,8 +277,7 @@ class Info(APIView):
 class PublicInfo(APIView):
     authentication_classes = [TokenAuthentication]
 
-    def get(self, request):
-        project_id = request.GET.get("project-id")
+    def get(self, request, project_id):
         try:
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
