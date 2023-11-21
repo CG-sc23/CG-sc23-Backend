@@ -8,7 +8,12 @@ urlpatterns = [
         name="project_info",
     ),
     path(
-        "v1/info",
+        "v1/<int:project_id>",
+        project.Info.as_view(),
+        name="project_info_id",
+    ),
+    path(
+        "v1/info/<int:project_id>",
         project.PublicInfo.as_view(),
         name="project_info",
     ),
