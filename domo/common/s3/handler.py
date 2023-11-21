@@ -134,7 +134,7 @@ class GeneralHandler:
 
     @staticmethod
     def is_valid_object_type(object_type):
-        return object_type in ["jpg", "jpeg", "png", "gif", "mp4"]
+        return object_type in ["jpg", "jpeg", "png", "gif"]
 
     def create_presigned_url(self, object_name):
         object_type = object_name.split(".")[-1]
@@ -144,6 +144,55 @@ class GeneralHandler:
 
         random_token = secrets.token_urlsafe(16)
         key = f"{self.prefix}/{random_token}.{object_type}"
+        try:
+            response = self.s3_client.generate_presigned_post(
+                Bucket=self.aws_s3_bucket_name,
+                Key=key,
+                ExpiresIn=600,
+            )
+        except Exception as e:
+            return ReturnCode.FAILED_CREATE_PRESIGNED_URL, e
+
+        return ReturnCode.SUCCESS, response
+
+
+class ProfileImageModifier(GeneralHandler):
+    def __init__(self):
+        super().__init__()
+        self.prefix = "users"
+
+    def check_resource_link(self, resource_link):
+        key = resource_link.split("/")[-4:]
+        key = "/".join(key)
+        try:
+            self.s3_client.head_object(
+                Bucket=self.aws_s3_bucket_name,
+                Key=f"{self.prefix}/{key}",
+            )
+        except Exception as e:
+            raise e
+            return False
+        return True
+
+    def remove_resource(self, resource_link):
+        key = resource_link.split("/")[-4:]
+        key = "/".join(key)
+        try:
+            self.s3_client.delete_object(
+                Bucket=self.aws_s3_bucket_name,
+                Key=f"{self.prefix}/{key}",
+            )
+        except:
+            return False
+        return True
+
+    def create_presigned_url(self, user_email, object_name):
+        object_type = object_name.split(".")[-1]
+
+        if not self.is_valid_object_type(object_type):
+            return ReturnCode.INVALID_ACCESS, None
+
+        key = f"{self.prefix}/{user_email}/profile/image/profile-image.{object_type}"
         try:
             response = self.s3_client.generate_presigned_post(
                 Bucket=self.aws_s3_bucket_name,
