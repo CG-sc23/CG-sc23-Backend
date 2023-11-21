@@ -153,6 +153,8 @@ class DetailInfo(APIView):
                     ).model_dump(),
                     status=400,
                 )
+            if request_data.profile_image_link != request.user.profile_image_link:
+                profile_image_modifier.remove_resource(request.user.profile_image_link)
 
         if (
             request_data.github_link
