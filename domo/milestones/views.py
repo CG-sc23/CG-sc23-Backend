@@ -88,6 +88,10 @@ class Info(APIView):
                 status=400,
             )
 
+        request_data.due_date = request_data.due_date.replace(
+            hour=14, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc
+        )
+
         try:
             new_milestone = create_new_milestone(request.user, project, request_data)
         except Exception as e:
@@ -170,6 +174,10 @@ class Info(APIView):
                 ).model_dump(),
                 status=400,
             )
+
+        request_data.due_date = request_data.due_date.replace(
+            hour=14, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc
+        )
 
         try:
             milestone.subject = request_data.subject or milestone.subject
