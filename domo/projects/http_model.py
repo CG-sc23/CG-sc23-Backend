@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class CreateProjectRequest(BaseModel):
@@ -59,8 +59,21 @@ class GetAllProjectResponse(BaseModel):
 
 class MakeProjectInviteRequest(BaseModel):
     project_id: int
-    invitee_id: int
-    role: str
+    invitee_emails: list[EmailStr]
+
+
+class MakeProjectInviteDetailResponse(BaseModel):
+    invitee_email: EmailStr
+    success: bool
+    reason: Optional[str] = None
+
+    @classmethod
+    def create(cls, invitee_email: str, success: bool, reason: str = None):
+        return cls(invitee_email=invitee_email, success=success, reason=reason)
+
+
+class MakeProjectInviteResponse(BaseModel):
+    result: list[MakeProjectInviteDetailResponse]
 
 
 class ReplyProjectInviteRequest(BaseModel):

@@ -61,7 +61,7 @@ class ProjectMemberAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectInvite)
 class ProjectInviteAdmin(admin.ModelAdmin):
-    list_display = ("id", "project", "role", "inviter", "invitee", "created_at")
+    list_display = ("id", "project", "inviter", "invitee", "created_at")
     list_filter = ("inviter", "invitee", "created_at")
     ordering = ("id", "created_at")
     fieldsets = (
@@ -70,7 +70,6 @@ class ProjectInviteAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "project",
-                    "role",
                     "inviter",
                     "invitee",
                     "created_at",

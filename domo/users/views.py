@@ -267,7 +267,6 @@ class Inviter(APIView):
                 {
                     "project_id": invite_project.project.id,
                     "invitee_id": invite_project.invitee.id,
-                    "role": invite_project.role,
                     "created_at": invite_project.created_at,
                 }
             )
@@ -316,11 +315,7 @@ class Invitee(APIView):
             ProjectMember.objects.create(
                 project_id=request_data.project_id,
                 user=request.user,
-                role=ProjectInvite.objects.get(
-                    project_id=request_data.project_id,
-                    inviter_id=request_data.inviter_id,
-                    invitee=request.user,
-                ).role,
+                role="MEMBER",
                 created_at=datetime.now(tz=timezone.utc),
             )
             ProjectInvite.objects.get(
@@ -351,7 +346,6 @@ class Invitee(APIView):
                 {
                     "project_id": invite_project.project.id,
                     "inviter_id": invite_project.inviter.id,
-                    "role": invite_project.role,
                     "created_at": invite_project.created_at,
                 }
             )
