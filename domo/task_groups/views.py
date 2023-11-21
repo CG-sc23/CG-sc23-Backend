@@ -25,6 +25,7 @@ def create_new_task_group(request_user, request_milestone, request_data):
         created_by=request_user,
         title=request_data.title,
         created_at=datetime.now(tz=timezone.utc),
+        due_date=request_data.due_date,
     )
     new_task_group.save()
 
@@ -37,6 +38,7 @@ class Info(APIView):
     def post(self, request):
         milestone_id = request.GET.get("milestone-id")
         title = request.data.get("title")
+        due_date = request.data.get("due_date", None)
 
         try:
             milestone = Milestone.objects.get(id=milestone_id)
@@ -72,6 +74,7 @@ class Info(APIView):
         try:
             request_data = CreateTaskGroupRequest(
                 title=title,
+                due_date=due_date,
             )
         except ValidationError:
             return JsonResponse(
@@ -80,6 +83,10 @@ class Info(APIView):
                 ).model_dump(),
                 status=400,
             )
+
+        request_data.due_date = request_data.due_date.replace(
+            hour=14, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc
+        )
 
         try:
             new_task_group = create_new_task_group(
@@ -101,6 +108,7 @@ class Info(APIView):
                 status=new_task_group.status,
                 title=new_task_group.title,
                 created_at=new_task_group.created_at,
+                due_date=new_task_group.due_date,
             ).model_dump(),
             status=201,
         )
@@ -143,6 +151,7 @@ class Info(APIView):
 
         title = request.data.get("title")
         status = request.data.get("status")
+        due_date = request.data.get("due_date")
         if not status:
             status = milestone.status
 
@@ -150,6 +159,7 @@ class Info(APIView):
             request_data = ModifyTaskGroupRequest(
                 title=title,
                 status=status,
+                due_date=due_date,
             )
         except ValidationError:
             return JsonResponse(
@@ -159,9 +169,14 @@ class Info(APIView):
                 status=400,
             )
 
+        request_data.due_date = request_data.due_date.replace(
+            hour=14, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc
+        )
+
         try:
             task_group.title = request_data.title or task_group.title
             task_group.status = request_data.status or task_group.status
+            task_group.due_date = request_data.due_date or task_group.due_date
             task_group.save()
         except Exception as e:
             logging.error(e)
@@ -179,6 +194,7 @@ class Info(APIView):
                 status=task_group.status,
                 title=task_group.title,
                 created_at=task_group.created_at,
+                due_date=task_group.due_date,
             ).model_dump(),
             status=201,
         )
@@ -224,6 +240,7 @@ class Info(APIView):
                 status=task_group.status,
                 title=task_group.title,
                 created_at=task_group.created_at,
+                due_date=task_group.due_date,
                 permission=member_role,
             ).model_dump(),
             status=200,
