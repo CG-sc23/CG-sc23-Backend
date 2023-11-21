@@ -3,36 +3,6 @@ from tasks.models import Task, TaskGroup
 
 
 # Register your models here.
-@admin.register(TaskGroup)
-class TaskGroupAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "milestone",
-        "title",
-        "tags",
-        "status",
-        "created_at",
-        "due_date",
-    )
-    list_filter = ("milestone", "status")
-    ordering = ("id", "created_at", "milestone", "status")
-    fieldsets = (
-        (
-            None,
-            {
-                "fields": (
-                    "milestone",
-                    "title",
-                    "tags",
-                    "status",
-                    "created_at",
-                    "due_date",
-                )
-            },
-        ),
-    )
-
-
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = (

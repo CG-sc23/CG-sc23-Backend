@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "common",
     "external_histories",
     "tasks",
+    "task_groups",
     "milestones",
     "projects",
     "resources",
