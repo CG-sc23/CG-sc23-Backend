@@ -294,8 +294,10 @@ class Info(APIView):
         for member in project_members:
             project_member_data = {
                 "id": member.user.id,
+                "email": member.user.email,
                 "name": member.user.name,
                 "profile_image_link": member.user.profile_image_link,
+                "profile_image_updated_at": member.user.profile_image_updated_at,
             }
 
             project_member_datas.append(project_member_data)
