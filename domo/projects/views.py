@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 from datetime import datetime, timezone
 
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
@@ -548,6 +549,61 @@ class AllInfo(APIView):
         project_datas = []
 
         for project in projects:
+            project_members = ProjectMember.objects.filter(project=project)
+
+            project_member_datas = []
+
+            for member in project_members:
+                project_member_data = {
+                    "id": member.user.id,
+                    "name": member.user.name,
+                    "email": member.user.email,
+                    "profile_image_link": member.user.profile_image_link,
+                    "profile_image_updated_at": member.user.profile_image_updated_at,
+                }
+
+                project_member_datas.append(project_member_data)
+
+            project_data = {
+                "id": project.id,
+                "title": project.title,
+                "status": project.status,
+                "created_at": project.created_at,
+                "due_date": project.due_date,
+                "thumbnail_image": project.thumbnail_image,
+                "short_description": project.short_description,
+                "members": project_member_datas,
+            }
+
+            project_datas.append(project_data)
+
+        return JsonResponse(
+            GetProjectAllResponse(
+                success=True, count=len(project_datas), projects=project_datas
+            ).model_dump(),
+            status=200,
+        )
+
+
+class Recommend(APIView):
+    def recommend_project(self, projects):
+        all_project = []
+
+        for project in projects:
+            all_project.append(project)
+
+        recommended_project = random.sample(all_project, 6)
+
+        return recommended_project
+
+    def get(self, request):
+        projects = Project.objects.all()
+
+        recommended_project = self.recommend_project(projects)
+
+        project_datas = []
+
+        for project in recommended_project:
             project_members = ProjectMember.objects.filter(project=project)
 
             project_member_datas = []
