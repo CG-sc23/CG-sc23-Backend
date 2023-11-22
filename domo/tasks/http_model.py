@@ -46,3 +46,9 @@ class GetTaskResponse(BaseModel):
     members: list
     is_public: bool
     permission: str
+
+
+class GetTaskAllResponse(BaseModel):
+    success: bool
+    total_count: int
+    tasks: list

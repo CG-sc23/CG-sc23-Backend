@@ -15,6 +15,7 @@ from task_groups.models import TaskGroup
 from tasks.http_model import (
     CreateTaskRequest,
     CreateTaskResponse,
+    GetTaskAllResponse,
     GetTaskResponse,
     ModifyTaskRequest,
 )
@@ -318,6 +319,54 @@ class Info(APIView):
                 members=project_member_datas,
                 is_public=task.is_public,
                 permission=member_role,
+            ).model_dump(),
+            status=200,
+        )
+
+
+class Page(APIView):
+    def get(self, request, page_idx):
+        all_task = Task.objects.filter(is_public=True).order_by("-created_at")
+        tasks_response = []
+
+        for i in range((page_idx - 1) * 6, page_idx * 6):
+            if i >= len(all_task):
+                break
+            task = all_task[i]
+            task_group = task.task_group
+            milestone = task_group.milestone
+            project = milestone.project
+
+            created_data = {
+                "id": task.owner.id,
+                "name": task.owner.name,
+                "profile_image_link": task.owner.profile_image_link,
+                "profile_image_updated_at": task.owner.profile_image_updated_at,
+            }
+
+            project_data = {"id": project.id, "title": project.title}
+            milestone_data = {"id": milestone.id, "subject": milestone.subject}
+            task_group_data = {"id": task_group.id, "title": task_group.title}
+
+            tasks_response.append(
+                {
+                    "task": {
+                        "id": task.id,
+                        "project": project_data,
+                        "milestone": milestone_data,
+                        "task_group": task_group_data,
+                        "owner": created_data,
+                        "title": task.title,
+                        "description": task.description,
+                        "description_resource_links": task.description_resource_links,
+                        "created_at": task.created_at,
+                        "tags": task.tags,
+                    }
+                }
+            )
+        return JsonResponse(
+            GetTaskAllResponse(
+                success=True, total_count=len(all_task), tasks=tasks_response
             ).model_dump(),
             status=200,
         )
