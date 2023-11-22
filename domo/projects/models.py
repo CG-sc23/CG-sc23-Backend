@@ -9,8 +9,8 @@ class Project(models.Model):
         User,
         on_delete=models.CASCADE,
     )
-    # READY, IN_PROGRESS, COMPLETED, TERMINATED
-    status = models.CharField(max_length=20, default="READY")
+    # IN_PROGRESS, COMPLETED, TERMINATED
+    status = models.CharField(max_length=20, default="IN_PROGRESS")
 
     title = models.CharField(max_length=50)
     short_description = models.TextField(null=True, blank=True)
