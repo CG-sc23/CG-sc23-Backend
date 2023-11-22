@@ -191,9 +191,11 @@ class Info(APIView):
                 status=400,
             )
 
-        request_data.due_date = request_data.due_date.replace(
-            hour=14, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc
-        )
+        if request_data.due_date:
+            request_data.due_date = request_data.due_date.replace(
+                hour=14, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc
+            )
+
         if thumbnail_image:
             s3_handler = GeneralHandler("resource")
             if not s3_handler.check_resource_links(request_data.thumbnail_image):
