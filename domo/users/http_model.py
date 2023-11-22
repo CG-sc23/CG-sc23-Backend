@@ -68,3 +68,9 @@ class ReplyProjectInviteRequest(BaseModel):
     project_id: int
     inviter_email: EmailStr
     accept: bool
+
+
+class GetUserRecommendResponse(BaseModel):
+    success: bool
+    count: int
+    users: list[dict]
