@@ -7,4 +7,9 @@ urlpatterns = [
         task.Info.as_view(),
         name="task_info",
     ),
+    path(
+        "v1/page/<int:page_idx>",
+        task.Page.as_view(),
+        name="task_info_all",
+    ),
 ]
