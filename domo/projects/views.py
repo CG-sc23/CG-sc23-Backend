@@ -414,12 +414,17 @@ class Invite(APIView):
             else:
                 try:
                     invitee_id = User.objects.get(email=invitee_email).id
-                    ProjectInvite(
+                    if not ProjectInvite.objects.filter(
                         project_id=project_id,
                         inviter_id=request.user.id,
                         invitee_id=invitee_id,
-                        created_at=datetime.now(tz=timezone.utc),
-                    ).save()
+                    ).exists():
+                        ProjectInvite(
+                            project_id=project_id,
+                            inviter_id=request.user.id,
+                            invitee_id=invitee_id,
+                            created_at=datetime.now(tz=timezone.utc),
+                        ).save()
                 except Exception as e:
                     logging.error(e)
                     return JsonResponse(
