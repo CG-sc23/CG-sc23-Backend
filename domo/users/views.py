@@ -8,7 +8,7 @@ from common.tasks import update_github_history
 from django.db.transaction import atomic
 from django.http import JsonResponse
 from external_histories.models import GithubStatus
-from projects.http_model import GetAllProjectResponse, ReplyProjectInviteRequest
+from projects.http_model import GetAllProjectResponse
 from projects.models import Project, ProjectInvite, ProjectMember, User
 from pydantic import ValidationError
 from resources.models import S3ResourceReferenceCheck
@@ -22,6 +22,7 @@ from users.http_model import (
     GetUserInfoResponse,
     GetUserPublicDetailInfoResponse,
     ModifyUserDetailInfoRequest,
+    ReplyProjectInviteRequest,
 )
 
 
@@ -283,12 +284,12 @@ class Invitee(APIView):
 
     def post(self, request):
         project_id = request.data.get("project_id")
-        inviter_id = request.data.get("inviter_id")
+        inviter_email = request.data.get("inviter_email")
         accept = request.data.get("accept")
 
         data_dict = {
             "project_id": project_id,
-            "inviter_id": inviter_id,
+            "inviter_email": inviter_email,
             "accept": accept,
         }
 
@@ -304,7 +305,7 @@ class Invitee(APIView):
 
         if not ProjectInvite.objects.filter(
             project_id=request_data.project_id,
-            inviter_id=request_data.inviter_id,
+            inviter__email=request_data.inviter_email,
             invitee=request.user,
         ).exists():
             return JsonResponse(
@@ -321,15 +322,13 @@ class Invitee(APIView):
                 role="MEMBER",
                 created_at=datetime.now(tz=timezone.utc),
             )
-            ProjectInvite.objects.get(
+            ProjectInvite.objects.filter(
                 project_id=request_data.project_id,
-                inviter_id=request_data.inviter_id,
                 invitee=request.user,
             ).delete()
         else:
-            ProjectInvite.objects.get(
+            ProjectInvite.objects.filter(
                 project_id=request_data.project_id,
-                inviter_id=request_data.inviter_id,
                 invitee=request.user,
             ).delete()
 

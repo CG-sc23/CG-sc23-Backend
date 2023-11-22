@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class ModifyUserInfoRequest(BaseModel):
@@ -62,3 +62,9 @@ class GetSearchResponse(BaseModel):
 class GetProjectInviteResponse(BaseModel):
     success: bool
     result: list[dict]
+
+
+class ReplyProjectInviteRequest(BaseModel):
+    project_id: int
+    inviter_email: EmailStr
+    accept: bool
