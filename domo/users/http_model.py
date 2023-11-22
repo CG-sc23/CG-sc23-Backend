@@ -52,3 +52,8 @@ class GetUserPublicDetailInfoResponse(BaseModel):
     grade: Optional[int] = None
     like: Optional[int] = None
     rating: Optional[float] = None
+
+
+class GetSearchResponse(BaseModel):
+    success: bool
+    result: list[dict]

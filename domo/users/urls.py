@@ -37,4 +37,9 @@ urlpatterns = [
         user.Invitee.as_view(),
         name="user_inviter_reply",
     ),
+    path(
+        "v1/search",
+        user.Search.as_view(),
+        name="user_search",
+    ),
 ]

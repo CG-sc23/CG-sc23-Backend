@@ -16,6 +16,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from users.http_model import (
+    GetSearchResponse,
     GetUserDetailInfoResponse,
     GetUserInfoResponse,
     GetUserPublicDetailInfoResponse,
@@ -351,3 +352,33 @@ class Invitee(APIView):
             )
 
         return JsonResponse(response_list, status=200, safe=False)
+
+
+class Search(APIView):
+    def get(self, request):
+        email = request.GET.get("email")
+        if not email:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+        users = User.objects.filter(email__istartswith=email)
+
+        result = []
+        for user in users:
+            result.append(
+                {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": user.name,
+                    "profile_image_link": user.profile_image_link,
+                    "profile_image_updated_at": user.profile_image_updated_at,
+                }
+            )
+        result = GetSearchResponse(success=True, result=result)
+        return JsonResponse(
+            result.model_dump(),
+            status=200,
+        )
