@@ -16,6 +16,7 @@ from task_groups.http_model import (
     ModifyTaskGroupRequest,
 )
 from task_groups.models import TaskGroup
+from tasks.models import Task
 
 
 @atomic
@@ -212,6 +213,18 @@ class Info(APIView):
                 status=404,
             )
 
+        tasks = Task.objects.filter(task_group=task_group)
+
+        task_datas = []
+
+        for task in tasks:
+            task_data = {
+                "id": task.id,
+                "title": task.title,
+            }
+
+            task_datas.append(task_data)
+
         milestone = task_group.milestone
         project = milestone.project
 
@@ -236,6 +249,7 @@ class Info(APIView):
                 task_group_id=task_group.id,
                 project=project_data,
                 milestone=milestone_data,
+                tasks=task_datas,
                 created_by=created_data,
                 status=task_group.status,
                 title=task_group.title,

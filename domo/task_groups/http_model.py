@@ -29,6 +29,7 @@ class GetTaskGroupResponse(BaseModel):
     task_group_id: int
     project: dict
     milestone: dict
+    tasks: list
     created_by: dict
     title: str
     status: str
