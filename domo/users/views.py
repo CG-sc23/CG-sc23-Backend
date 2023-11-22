@@ -268,7 +268,7 @@ class Inviter(APIView):
             response_list.append(
                 {
                     "project_id": invite_project.project.id,
-                    "invitee_id": invite_project.invitee.id,
+                    "invitee_email": invite_project.invitee.email,
                     "created_at": invite_project.created_at,
                 }
             )
@@ -348,7 +348,7 @@ class Invitee(APIView):
             response_list.append(
                 {
                     "project_id": invite_project.project.id,
-                    "inviter_id": invite_project.inviter.id,
+                    "inviter_email": invite_project.inviter.email,
                     "created_at": invite_project.created_at,
                 }
             )
