@@ -350,18 +350,16 @@ class Page(APIView):
 
             tasks_response.append(
                 {
-                    "task": {
-                        "id": task.id,
-                        "project": project_data,
-                        "milestone": milestone_data,
-                        "task_group": task_group_data,
-                        "owner": created_data,
-                        "title": task.title,
-                        "description": task.description,
-                        "description_resource_links": task.description_resource_links,
-                        "created_at": task.created_at,
-                        "tags": task.tags,
-                    }
+                    "id": task.id,
+                    "project": project_data,
+                    "milestone": milestone_data,
+                    "task_group": task_group_data,
+                    "owner": created_data,
+                    "title": task.title,
+                    "description": task.description,
+                    "description_resource_links": task.description_resource_links,
+                    "created_at": task.created_at,
+                    "tags": task.tags,
                 }
             )
         return JsonResponse(
