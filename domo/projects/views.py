@@ -542,6 +542,7 @@ class AllInfo(APIView):
                 "title": project.title,
                 "status": project.status,
                 "created_at": project.created_at,
+                "due_date": project.due_date,
                 "thumbnail_image": project.thumbnail_image,
                 "short_description": project.short_description,
                 "members": project_member_datas,
