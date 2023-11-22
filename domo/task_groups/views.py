@@ -36,8 +36,8 @@ def create_new_task_group(request_user, request_milestone, request_data):
 class Info(APIView):
     authentication_classes = [TokenAuthentication]
 
-    def post(self, request):
-        milestone_id = request.GET.get("milestone-id")
+    def post(self, request, request_id):
+        milestone_id = request_id
         title = request.data.get("title")
         due_date = request.data.get("due_date", None)
 
@@ -114,8 +114,8 @@ class Info(APIView):
             status=201,
         )
 
-    def put(self, request):
-        task_group_id = request.GET.get("task-group-id")
+    def put(self, request, request_id):
+        task_group_id = request_id
 
         try:
             task_group = TaskGroup.objects.get(id=task_group_id)
@@ -201,8 +201,8 @@ class Info(APIView):
             status=201,
         )
 
-    def get(self, request):
-        task_group_id = request.GET.get("task-group-id")
+    def get(self, request, request_id):
+        task_group_id = request_id
 
         try:
             task_group = TaskGroup.objects.get(id=task_group_id)
