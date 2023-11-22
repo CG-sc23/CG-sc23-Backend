@@ -52,6 +52,12 @@ class GetProjectResponse(BaseModel):
     permission: str
 
 
+class GetProjectAllResponse(BaseModel):
+    success: bool
+    count: int
+    projects: list
+
+
 class GetAllProjectResponse(BaseModel):
     success: bool
     count: int
