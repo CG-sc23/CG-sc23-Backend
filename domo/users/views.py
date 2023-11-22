@@ -1,4 +1,5 @@
 import json
+import random
 from datetime import datetime, timezone
 
 from common.const import ReturnCode
@@ -21,6 +22,7 @@ from users.http_model import (
     GetUserDetailInfoResponse,
     GetUserInfoResponse,
     GetUserPublicDetailInfoResponse,
+    GetUserRecommendResponse,
     ModifyUserDetailInfoRequest,
     ReplyProjectInviteRequest,
 )
@@ -379,6 +381,50 @@ class Search(APIView):
                 }
             )
         result = GetSearchResponse(success=True, result=result)
+        return JsonResponse(
+            result.model_dump(),
+            status=200,
+        )
+
+
+class Recommend(APIView):
+    def recommend_user(self, users):
+        all_user = []
+
+        for user in users:
+            all_user.append(user)
+
+        count = 6
+
+        if len(all_user) < 6:
+            count = len(all_user)
+
+        recommended_user = random.sample(all_user, count)
+
+        return recommended_user
+
+    def get(self, request):
+        users = User.objects.filter(is_staff=False)
+
+        recommended_users = self.recommend_user(users)
+
+        user_datas = []
+
+        for user in recommended_users:
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "profile_image_link": user.profile_image_link,
+                "profile_image_updated_at": user.profile_image_updated_at,
+                "short_description": user.short_description,
+            }
+
+            user_datas.append(user_data)
+
+        result = GetUserRecommendResponse(
+            success=True, count=len(user_datas), users=user_datas
+        )
         return JsonResponse(
             result.model_dump(),
             status=200,
