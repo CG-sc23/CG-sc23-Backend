@@ -20,7 +20,7 @@ from projects.http_model import (
     MakeProjectInviteResponse,
     ModifyProjectRequest,
 )
-from projects.models import Project, ProjectInvite, ProjectMember
+from projects.models import Project, ProjectInvite, ProjectJoinRequest, ProjectMember
 from pydantic import ValidationError
 from resources.models import S3ResourceReferenceCheck
 from rest_framework.authentication import TokenAuthentication
@@ -700,6 +700,53 @@ class Kick(APIView):
             return JsonResponse(
                 SimpleFailResponse(
                     success=False, reason="Error kicking member."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
+class JoinRequest(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id):
+        message = request.data.get("message")
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Project does not exist."
+                ).model_dump(),
+                status=404,
+            )
+
+        if ProjectMember.objects.filter(
+            project_id=project_id, user_id=request.user.id
+        ).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You are already in project."
+                ).model_dump(),
+                status=400,
+            )
+        try:
+            ProjectJoinRequest(
+                project=project,
+                user=request.user,
+                message=message,
+                created_at=datetime.now(tz=timezone.utc),
+            ).save()
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error requesting join."
                 ).model_dump(),
                 status=500,
             )

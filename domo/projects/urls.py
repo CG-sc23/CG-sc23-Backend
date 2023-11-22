@@ -37,5 +37,14 @@ urlpatterns = [
         project.Kick.as_view(),
         name="project_kick",
     ),
-    path("v1/recommend", project.Recommend.as_view(), name="project_recommend"),
+    path(
+        "v1/recommend",
+        project.Recommend.as_view(),
+        name="project_recommend",
+    ),
+    path(
+        "v1/<int:project_id>/join",
+        project.JoinRequest.as_view(),
+        name="project_milestone",
+    ),
 ]
