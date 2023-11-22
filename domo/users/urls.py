@@ -42,4 +42,9 @@ urlpatterns = [
         user.Search.as_view(),
         name="user_search",
     ),
+    path(
+        "v1/recommend",
+        user.Recommend.as_view(),
+        name="user_recommend",
+    ),
 ]
