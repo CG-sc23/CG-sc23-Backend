@@ -12,6 +12,7 @@ from projects.http_model import (
     ChangeRoleRequest,
     CreateProjectRequest,
     CreateProjectResponse,
+    GetJoinResponse,
     GetProjectAllResponse,
     GetProjectResponse,
     KickMemberRequest,
@@ -19,8 +20,9 @@ from projects.http_model import (
     MakeProjectInviteRequest,
     MakeProjectInviteResponse,
     ModifyProjectRequest,
+    ReplyJoinRequestModel,
 )
-from projects.models import Project, ProjectInvite, ProjectMember
+from projects.models import Project, ProjectInvite, ProjectJoinRequest, ProjectMember
 from pydantic import ValidationError
 from resources.models import S3ResourceReferenceCheck
 from rest_framework.authentication import TokenAuthentication
@@ -703,6 +705,147 @@ class Kick(APIView):
                 ).model_dump(),
                 status=500,
             )
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
+class MakeJoinRequest(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            user = ProjectMember.objects.get(project_id=project_id, user=request.user)
+            if user.role == "MEMBER":
+                raise ProjectMember.DoesNotExist
+        except ProjectMember.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=403,
+            )
+
+        join_requests = ProjectJoinRequest.objects.filter(project_id=project_id)
+        join_request_datas = []
+
+        for join_request in join_requests:
+            join_request_data = {
+                "id": join_request.id,
+                "user": {
+                    "id": join_request.user.id,
+                    "name": join_request.user.name,
+                    "email": join_request.user.email,
+                    "profile_image_link": join_request.user.profile_image_link,
+                    "profile_image_updated_at": join_request.user.profile_image_updated_at,
+                },
+                "message": join_request.message,
+                "created_at": join_request.created_at,
+            }
+            join_request_datas.append(join_request_data)
+
+        return JsonResponse(
+            GetJoinResponse(success=True, result=join_request_datas).model_dump(),
+            status=200,
+        )
+
+    def post(self, request, project_id):
+        message = request.data.get("message")
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Project does not exist."
+                ).model_dump(),
+                status=404,
+            )
+
+        if ProjectMember.objects.filter(
+            project_id=project_id, user_id=request.user.id
+        ).exists():
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You are already in project."
+                ).model_dump(),
+                status=400,
+            )
+        try:
+            if not ProjectJoinRequest.objects.filter(
+                project_id=project_id, user_id=request.user.id
+            ).exists():
+                ProjectJoinRequest(
+                    project=project,
+                    user=request.user,
+                    message=message,
+                    created_at=datetime.now(tz=timezone.utc),
+                ).save()
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error requesting join."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
+class ReplyJoinRequest(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        join_request_id = request.data.get("join_request_id")
+        accept = request.data.get("accept")
+
+        data_dict = {
+            "join_request_id": join_request_id,
+            "accept": accept,
+        }
+
+        try:
+            request_data = ReplyJoinRequestModel(**data_dict)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            join_request_obj = ProjectJoinRequest.objects.get(
+                id=request_data.join_request_id
+            )
+            user = ProjectMember.objects.get(
+                project=join_request_obj.project, user=request.user
+            )
+            if user.role == "MEMBER":
+                raise ProjectMember.DoesNotExist
+        except (ProjectJoinRequest.DoesNotExist, ProjectMember.DoesNotExist):
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=403,
+            )
+
+        if request_data.accept:
+            ProjectMember.objects.create(
+                project=join_request_obj.project,
+                user=join_request_obj.user,
+                role="MEMBER",
+                created_at=datetime.now(tz=timezone.utc),
+            )
+        join_request_obj.delete()
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),

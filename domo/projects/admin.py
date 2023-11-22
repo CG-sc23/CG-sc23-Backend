@@ -1,5 +1,5 @@
 from django.contrib import admin
-from projects.models import Project, ProjectInvite, ProjectMember
+from projects.models import Project, ProjectInvite, ProjectJoinRequest, ProjectMember
 
 
 # Register your models here.
@@ -72,6 +72,26 @@ class ProjectInviteAdmin(admin.ModelAdmin):
                     "project",
                     "inviter",
                     "invitee",
+                    "created_at",
+                )
+            },
+        ),
+    )
+
+
+@admin.register(ProjectJoinRequest)
+class ProjectJoinRequestAdmin(admin.ModelAdmin):
+    list_display = ("id", "project", "user", "message", "created_at")
+    list_filter = ("project", "user", "created_at")
+    ordering = ("id", "created_at")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "project",
+                    "user",
+                    "message",
                     "created_at",
                 )
             },

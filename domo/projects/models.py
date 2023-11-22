@@ -58,3 +58,17 @@ class ProjectMember(models.Model):
     # OWNER, MANAGER, MEMBER
     role = models.CharField(max_length=20)
     created_at = models.DateTimeField()
+
+
+class ProjectJoinRequest(models.Model):
+    id = models.AutoField(primary_key=True)
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    message = models.CharField(max_length=200)
+    created_at = models.DateTimeField()
