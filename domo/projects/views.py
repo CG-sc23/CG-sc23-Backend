@@ -592,7 +592,12 @@ class Recommend(APIView):
         for project in projects:
             all_project.append(project)
 
-        recommended_project = random.sample(all_project, 6)
+        count = 6
+
+        if len(all_project) < 6:
+            count = len(all_project)
+
+        recommended_project = random.sample(all_project, count)
 
         return recommended_project
 
