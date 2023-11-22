@@ -18,6 +18,11 @@ urlpatterns = [
         name="project_info",
     ),
     path(
+        "v1/info/all",
+        project.AllInfo.as_view(),
+        name="project_all_info",
+    ),
+    path(
         "v1/invite",
         project.Invite.as_view(),
         name="project_invite",
