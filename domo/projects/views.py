@@ -544,7 +544,7 @@ class Role(APIView):
 
 class AllInfo(APIView):
     def get(self, request):
-        projects = Project.objects.filter()
+        projects = Project.objects.filter().order_by("-created_at")
 
         project_datas = []
 
