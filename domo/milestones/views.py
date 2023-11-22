@@ -38,8 +38,8 @@ def create_new_milestone(request_user, request_project, request_data):
 class Info(APIView):
     authentication_classes = [TokenAuthentication]
 
-    def post(self, request):
-        project_id = request.GET.get("project-id")
+    def post(self, request, request_id):
+        project_id = request_id
         subject = request.data.get("subject")
         tags = request.data.get("tags", None)
         if tags:
@@ -118,8 +118,8 @@ class Info(APIView):
             status=201,
         )
 
-    def put(self, request):
-        milestone_id = request.GET.get("milestone-id")
+    def put(self, request, request_id):
+        milestone_id = request_id
 
         try:
             milestone = Milestone.objects.get(id=milestone_id)
@@ -211,8 +211,8 @@ class Info(APIView):
             status=201,
         )
 
-    def get(self, request):
-        milestone_id = request.GET.get("milestone-id")
+    def get(self, request, request_id):
+        milestone_id = request_id
 
         try:
             milestone = Milestone.objects.get(id=milestone_id)
