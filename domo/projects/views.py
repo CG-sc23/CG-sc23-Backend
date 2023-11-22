@@ -11,6 +11,7 @@ from projects.http_model import (
     ChangeRoleRequest,
     CreateProjectRequest,
     CreateProjectResponse,
+    GetProjectAllResponse,
     GetProjectResponse,
     MakeProjectInviteDetailResponse,
     MakeProjectInviteRequest,
@@ -512,5 +513,45 @@ class Role(APIView):
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
+class AllInfo(APIView):
+    def get(self, request):
+        projects = Project.objects.filter()
+
+        project_datas = []
+
+        for project in projects:
+            project_members = ProjectMember.objects.filter(project=project)
+
+            project_member_datas = []
+
+            for member in project_members:
+                project_member_data = {
+                    "id": member.user.id,
+                    "name": member.user.name,
+                    "profile_image_link": member.user.profile_image_link,
+                }
+
+                project_member_datas.append(project_member_data)
+
+            project_data = {
+                "id": project.id,
+                "title": project.title,
+                "status": project.status,
+                "created_at": project.created_at,
+                "thumbnail_image": project.thumbnail_image,
+                "short_description": project.short_description,
+                "members": project_member_datas,
+            }
+
+            project_datas.append(project_data)
+
+        return JsonResponse(
+            GetProjectAllResponse(
+                success=True, count=len(project_datas), projects=project_datas
+            ).model_dump(),
             status=200,
         )
