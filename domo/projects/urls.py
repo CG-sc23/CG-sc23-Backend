@@ -47,4 +47,9 @@ urlpatterns = [
         project.MakeJoinRequest.as_view(),
         name="project_join_request",
     ),
+    path(
+        "v1/join/reply",
+        project.ReplyJoinRequest.as_view(),
+        name="project_join_request_reply",
+    ),
 ]
