@@ -13,6 +13,7 @@ from projects.http_model import (
     CreateProjectResponse,
     GetProjectAllResponse,
     GetProjectResponse,
+    KickMemberRequest,
     MakeProjectInviteDetailResponse,
     MakeProjectInviteRequest,
     MakeProjectInviteResponse,
@@ -413,12 +414,17 @@ class Invite(APIView):
             else:
                 try:
                     invitee_id = User.objects.get(email=invitee_email).id
-                    ProjectInvite(
+                    if not ProjectInvite.objects.filter(
                         project_id=project_id,
                         inviter_id=request.user.id,
                         invitee_id=invitee_id,
-                        created_at=datetime.now(tz=timezone.utc),
-                    ).save()
+                    ).exists():
+                        ProjectInvite(
+                            project_id=project_id,
+                            inviter_id=request.user.id,
+                            invitee_id=invitee_id,
+                            created_at=datetime.now(tz=timezone.utc),
+                        ).save()
                 except Exception as e:
                     logging.error(e)
                     return JsonResponse(
@@ -574,5 +580,68 @@ class AllInfo(APIView):
             GetProjectAllResponse(
                 success=True, count=len(project_datas), projects=project_datas
             ).model_dump(),
+            status=200,
+        )
+
+
+class Kick(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, project_id):
+        user_email = request.data.get("user_email")
+
+        try:
+            request_data = KickMemberRequest(user_email=user_email)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            requester = ProjectMember.objects.get(
+                project_id=project_id, user=request.user
+            )
+            will_kick_member = ProjectMember.objects.get(
+                project_id=project_id, user__email=request_data.user_email
+            )
+        except ProjectMember.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason="Not Found.").model_dump(),
+                status=404,
+            )
+
+        if requester.role == "MEMBER":
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You must OWNER or MANAGER."
+                ).model_dump(),
+                status=403,
+            )
+
+        if will_kick_member.role == "OWNER":
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="You can't kick owner."
+                ).model_dump(),
+                status=403,
+            )
+
+        try:
+            will_kick_member.delete()
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error kicking member."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
             status=200,
         )

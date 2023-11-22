@@ -16,6 +16,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from users.http_model import (
+    GetProjectInviteResponse,
+    GetSearchResponse,
     GetUserDetailInfoResponse,
     GetUserInfoResponse,
     GetUserPublicDetailInfoResponse,
@@ -266,12 +268,13 @@ class Inviter(APIView):
             response_list.append(
                 {
                     "project_id": invite_project.project.id,
-                    "invitee_id": invite_project.invitee.id,
+                    "invitee_email": invite_project.invitee.email,
                     "created_at": invite_project.created_at,
                 }
             )
 
-        return JsonResponse(response_list, status=200, safe=False)
+        response = GetProjectInviteResponse(success=True, result=response_list)
+        return JsonResponse(response.model_dump(), status=200)
 
 
 class Invitee(APIView):
@@ -345,9 +348,39 @@ class Invitee(APIView):
             response_list.append(
                 {
                     "project_id": invite_project.project.id,
-                    "inviter_id": invite_project.inviter.id,
+                    "inviter_email": invite_project.inviter.email,
                     "created_at": invite_project.created_at,
                 }
             )
+        response = GetProjectInviteResponse(success=True, result=response_list)
+        return JsonResponse(response.model_dump(), status=200)
 
-        return JsonResponse(response_list, status=200, safe=False)
+
+class Search(APIView):
+    def get(self, request):
+        email = request.GET.get("email")
+        if not email:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+        users = User.objects.filter(email__istartswith=email)
+
+        result = []
+        for user in users:
+            result.append(
+                {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": user.name,
+                    "profile_image_link": user.profile_image_link,
+                    "profile_image_updated_at": user.profile_image_updated_at,
+                }
+            )
+        result = GetSearchResponse(success=True, result=result)
+        return JsonResponse(
+            result.model_dump(),
+            status=200,
+        )

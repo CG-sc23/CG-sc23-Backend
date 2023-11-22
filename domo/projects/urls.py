@@ -32,4 +32,9 @@ urlpatterns = [
         project.Role.as_view(),
         name="project_role",
     ),
+    path(
+        "v1/<int:project_id>/kick",
+        project.Kick.as_view(),
+        name="project_kick",
+    ),
 ]
