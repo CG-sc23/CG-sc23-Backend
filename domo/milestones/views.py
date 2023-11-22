@@ -108,7 +108,7 @@ class Info(APIView):
         return JsonResponse(
             CreateMilestoneResponse(
                 success=True,
-                milestone_id=new_milestone.id,
+                id=new_milestone.id,
                 status=new_milestone.status,
                 subject=new_milestone.subject,
                 tags=new_milestone.tags,
@@ -201,7 +201,7 @@ class Info(APIView):
         return JsonResponse(
             CreateMilestoneResponse(
                 success=True,
-                milestone_id=milestone.id,
+                id=milestone.id,
                 status=milestone.status,
                 subject=milestone.subject,
                 tags=milestone.tags,
@@ -275,7 +275,7 @@ class Info(APIView):
         return JsonResponse(
             GetMilestoneResponse(
                 success=True,
-                milestone_id=milestone.id,
+                id=milestone.id,
                 project=project_data,
                 created_by=created_data,
                 status=milestone.status,

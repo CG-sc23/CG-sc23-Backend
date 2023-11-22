@@ -25,7 +25,7 @@ class ModifyProjectRequest(BaseModel):
 
 class CreateProjectResponse(BaseModel):
     success: bool
-    project_id: int
+    id: int
     status: str
     title: str
     short_description: Optional[str] = None

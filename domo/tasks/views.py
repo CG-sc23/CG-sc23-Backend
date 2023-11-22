@@ -112,7 +112,7 @@ class Info(APIView):
         return JsonResponse(
             CreateTaskResponse(
                 success=True,
-                task_id=new_task.id,
+                id=new_task.id,
                 title=new_task.title,
                 description=new_task.description,
                 description_resource_links=new_task.description_resource_links,
@@ -306,7 +306,7 @@ class Info(APIView):
         return JsonResponse(
             GetTaskResponse(
                 success=True,
-                task_id=task.id,
+                id=task.id,
                 project=project_data,
                 milestone=milestone_data,
                 task_group=task_group_data,
