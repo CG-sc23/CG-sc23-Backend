@@ -243,7 +243,11 @@ class Info(APIView):
             "name": task_group.created_by.name,
         }
 
-        project_data = {"id": project.id, "title": project.title}
+        project_data = {
+            "id": project.id,
+            "title": project.title,
+            "thumbnail_image": project.thumbnail_image,
+        }
         milestone_data = {"id": milestone.id, "subject": milestone.subject}
 
         return JsonResponse(
