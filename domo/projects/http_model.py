@@ -93,3 +93,7 @@ class ReplyProjectInviteRequest(BaseModel):
 class ChangeRoleRequest(BaseModel):
     user_email: EmailStr
     role: str
+
+
+class KickMemberRequest(BaseModel):
+    user_email: EmailStr
