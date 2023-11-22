@@ -16,6 +16,8 @@ from projects.models import Project, ProjectMember
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
+from task_groups.models import TaskGroup
+from tasks.models import Task
 
 
 @atomic
@@ -235,7 +237,39 @@ class Info(APIView):
             "name": milestone.created_by.name,
         }
 
-        project_data = {"id": project.id, "title": project.title}
+        project_data = {
+            "id": project.id,
+            "title": project.title,
+            "thumbnail_image": project.thumbnail_image,
+        }
+
+        task_groups = TaskGroup.objects.filter(milestone=milestone)
+
+        task_group_datas = []
+
+        for task_group in task_groups:
+            tasks = Task.objects.filter(task_group=task_group)
+
+            task_datas = []
+
+            for task in tasks:
+                task_data = {
+                    "id": task.id,
+                    "title": task.title,
+                }
+
+                task_datas.append(task_data)
+
+            task_group_data = {
+                "id": task_group.id,
+                "title": task_group.title,
+                "status": task_group.status,
+                "created_at": task_group.created_at,
+                "due_date": task_group.due_date,
+                "tasks": task_datas,
+            }
+
+            task_group_datas.append(task_group_data)
 
         return JsonResponse(
             GetMilestoneResponse(
@@ -248,6 +282,7 @@ class Info(APIView):
                 tags=milestone.tags,
                 created_at=milestone.created_at,
                 due_date=milestone.due_date,
+                task_groups=task_group_datas,
                 permission=member_role,
             ).model_dump(),
             status=200,

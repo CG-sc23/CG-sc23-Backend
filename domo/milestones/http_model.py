@@ -37,4 +37,5 @@ class GetMilestoneResponse(BaseModel):
     status: str
     created_at: datetime
     due_date: Optional[datetime] = None
+    task_groups: list
     permission: str
