@@ -306,8 +306,10 @@ class PublicInfo(APIView):
 
         owner_data = {
             "id": project.owner.id,
+            "email": project.owner.email,
             "name": project.owner.name,
             "profile_image_link": project.owner.profile_image_link,
+            "profile_image_updated_at": project.owner.profile_image_updated_at,
         }
 
         milestones = Milestone.objects.filter(project_id=project.id)
@@ -315,11 +317,26 @@ class PublicInfo(APIView):
         for milestone in milestones:
             milestones_data.append(milestone.simple_info())
 
+        project_members = ProjectMember.objects.filter(project=project)
+
+        project_member_datas = []
+
+        for member in project_members:
+            project_member_data = {
+                "id": member.user.id,
+                "name": member.user.name,
+                "email": member.user.email,
+                "profile_image_link": member.user.profile_image_link,
+                "profile_image_updated_at": member.user.profile_image_updated_at,
+            }
+
+            project_member_datas.append(project_member_data)
+
         return JsonResponse(
             GetProjectResponse(
                 success=True,
                 owner=owner_data,
-                project_id=project.id,
+                id=project.id,
                 status=project.status,
                 title=project.title,
                 short_description=project.short_description,
@@ -329,6 +346,7 @@ class PublicInfo(APIView):
                 due_date=project.due_date,
                 thumbnail_image=project.thumbnail_image,
                 milestones=milestones_data,
+                members=project_member_datas,
                 permission=member_role,
             ).model_dump(),
             status=200,

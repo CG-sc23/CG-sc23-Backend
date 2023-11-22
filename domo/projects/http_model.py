@@ -38,7 +38,7 @@ class CreateProjectResponse(BaseModel):
 
 class GetProjectResponse(BaseModel):
     success: bool
-    project_id: int
+    id: int
     owner: dict
     status: str
     title: str
@@ -49,6 +49,7 @@ class GetProjectResponse(BaseModel):
     due_date: Optional[datetime] = None
     thumbnail_image: Optional[str] = None
     milestones: Optional[list] = None
+    members: list
     permission: str
 
 
