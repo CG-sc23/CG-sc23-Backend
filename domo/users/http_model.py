@@ -57,3 +57,8 @@ class GetUserPublicDetailInfoResponse(BaseModel):
 class GetSearchResponse(BaseModel):
     success: bool
     result: list[dict]
+
+
+class GetProjectInviteResponse(BaseModel):
+    success: bool
+    result: list[dict]

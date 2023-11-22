@@ -16,6 +16,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from users.http_model import (
+    GetProjectInviteResponse,
     GetSearchResponse,
     GetUserDetailInfoResponse,
     GetUserInfoResponse,
@@ -272,7 +273,8 @@ class Inviter(APIView):
                 }
             )
 
-        return JsonResponse(response_list, status=200, safe=False)
+        response = GetProjectInviteResponse(success=True, result=response_list)
+        return JsonResponse(response.model_dump(), status=200)
 
 
 class Invitee(APIView):
@@ -350,8 +352,8 @@ class Invitee(APIView):
                     "created_at": invite_project.created_at,
                 }
             )
-
-        return JsonResponse(response_list, status=200, safe=False)
+        response = GetProjectInviteResponse(success=True, result=response_list)
+        return JsonResponse(response.model_dump(), status=200)
 
 
 class Search(APIView):
