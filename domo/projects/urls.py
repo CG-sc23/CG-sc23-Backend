@@ -44,7 +44,7 @@ urlpatterns = [
     ),
     path(
         "v1/<int:project_id>/join",
-        project.JoinRequest.as_view(),
+        project.MakeJoinRequest.as_view(),
         name="project_join_request",
     ),
 ]

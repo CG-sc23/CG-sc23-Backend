@@ -20,6 +20,7 @@ from projects.http_model import (
     MakeProjectInviteRequest,
     MakeProjectInviteResponse,
     ModifyProjectRequest,
+    ReplyJoinRequestModel,
 )
 from projects.models import Project, ProjectInvite, ProjectJoinRequest, ProjectMember
 from pydantic import ValidationError
@@ -711,7 +712,7 @@ class Kick(APIView):
         )
 
 
-class JoinRequest(APIView):
+class MakeJoinRequest(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -773,12 +774,15 @@ class JoinRequest(APIView):
                 status=400,
             )
         try:
-            ProjectJoinRequest(
-                project=project,
-                user=request.user,
-                message=message,
-                created_at=datetime.now(tz=timezone.utc),
-            ).save()
+            if not ProjectJoinRequest.objects.filter(
+                project_id=project_id, user_id=request.user.id
+            ).exists():
+                ProjectJoinRequest(
+                    project=project,
+                    user=request.user,
+                    message=message,
+                    created_at=datetime.now(tz=timezone.utc),
+                ).save()
         except Exception as e:
             logging.error(e)
             return JsonResponse(
@@ -787,6 +791,61 @@ class JoinRequest(APIView):
                 ).model_dump(),
                 status=500,
             )
+
+        return JsonResponse(
+            SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
+class ReplyJoinRequest(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        join_request_id = request.data.get("join_request_id")
+        accept = request.data.get("accept")
+
+        data_dict = {
+            "join_request_id": join_request_id,
+            "accept": accept,
+        }
+
+        try:
+            request_data = ReplyJoinRequestModel(**data_dict)
+        except ValidationError:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=400,
+            )
+
+        try:
+            join_request_obj = ProjectJoinRequest.objects.get(
+                id=request_data.join_request_id
+            )
+            user = ProjectMember.objects.get(
+                project=join_request_obj.project, user=request.user
+            )
+            if user.role == "MEMBER":
+                raise ProjectMember.DoesNotExist
+        except (ProjectJoinRequest.DoesNotExist, ProjectMember.DoesNotExist):
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=403,
+            )
+
+        if request_data.accept:
+            ProjectMember.objects.create(
+                project=join_request_obj.project,
+                user=join_request_obj.user,
+                role="MEMBER",
+                created_at=datetime.now(tz=timezone.utc),
+            )
+        join_request_obj.delete()
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),

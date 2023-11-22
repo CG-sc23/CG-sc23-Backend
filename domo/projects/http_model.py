@@ -96,3 +96,8 @@ class KickMemberRequest(BaseModel):
 class GetJoinResponse(BaseModel):
     success: bool
     result: list
+
+
+class ReplyJoinRequestModel(BaseModel):
+    join_request_id: int
+    accept: bool
