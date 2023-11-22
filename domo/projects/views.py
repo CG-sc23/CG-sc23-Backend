@@ -12,6 +12,7 @@ from projects.http_model import (
     ChangeRoleRequest,
     CreateProjectRequest,
     CreateProjectResponse,
+    GetJoinResponse,
     GetProjectAllResponse,
     GetProjectResponse,
     KickMemberRequest,
@@ -713,6 +714,42 @@ class Kick(APIView):
 class JoinRequest(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            user = ProjectMember.objects.get(project_id=project_id, user=request.user)
+            if user.role == "MEMBER":
+                raise ProjectMember.DoesNotExist
+        except ProjectMember.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Invalid request."
+                ).model_dump(),
+                status=403,
+            )
+
+        join_requests = ProjectJoinRequest.objects.filter(project_id=project_id)
+        join_request_datas = []
+
+        for join_request in join_requests:
+            join_request_data = {
+                "id": join_request.id,
+                "user": {
+                    "id": join_request.user.id,
+                    "name": join_request.user.name,
+                    "email": join_request.user.email,
+                    "profile_image_link": join_request.user.profile_image_link,
+                    "profile_image_updated_at": join_request.user.profile_image_updated_at,
+                },
+                "message": join_request.message,
+                "created_at": join_request.created_at,
+            }
+            join_request_datas.append(join_request_data)
+
+        return JsonResponse(
+            GetJoinResponse(success=True, result=join_request_datas).model_dump(),
+            status=200,
+        )
 
     def post(self, request, project_id):
         message = request.data.get("message")

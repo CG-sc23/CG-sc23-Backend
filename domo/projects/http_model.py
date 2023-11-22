@@ -91,3 +91,8 @@ class ChangeRoleRequest(BaseModel):
 
 class KickMemberRequest(BaseModel):
     user_email: EmailStr
+
+
+class GetJoinResponse(BaseModel):
+    success: bool
+    result: list
