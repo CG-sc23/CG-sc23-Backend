@@ -221,6 +221,8 @@ class Info(APIView):
             task_data = {
                 "id": task.id,
                 "title": task.title,
+                "tags": task.tags,
+                "created_at": task.created_at,
             }
 
             task_datas.append(task_data)
