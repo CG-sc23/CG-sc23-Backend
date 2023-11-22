@@ -532,7 +532,9 @@ class AllInfo(APIView):
                 project_member_data = {
                     "id": member.user.id,
                     "name": member.user.name,
+                    "email": member.user.email,
                     "profile_image_link": member.user.profile_image_link,
+                    "profile_image_updated_at": member.user.profile_image_updated_at,
                 }
 
                 project_member_datas.append(project_member_data)
