@@ -287,6 +287,19 @@ class Info(APIView):
 
         task_group_data = {"id": task_group.id, "title": task_group.title}
 
+        project_members = ProjectMember.objects.filter(project=project)
+
+        project_member_datas = []
+
+        for member in project_members:
+            project_member_data = {
+                "id": member.user.id,
+                "name": member.user.name,
+                "profile_image_link": member.user.profile_image_link,
+            }
+
+            project_member_datas.append(project_member_data)
+
         return JsonResponse(
             GetTaskResponse(
                 success=True,
@@ -300,6 +313,7 @@ class Info(APIView):
                 description_resource_links=task.description_resource_links,
                 created_at=task.created_at,
                 tags=task.tags,
+                members=project_member_datas,
                 is_public=task.is_public,
                 permission=member_role,
             ).model_dump(),

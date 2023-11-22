@@ -43,5 +43,6 @@ class GetTaskResponse(BaseModel):
     description_resource_links: Optional[str] = None
     created_at: datetime
     tags: Optional[list[str]] = None
+    members: list
     is_public: bool
     permission: str
