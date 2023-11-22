@@ -12,7 +12,7 @@ class CreateMilestoneRequest(BaseModel):
 
 class CreateMilestoneResponse(BaseModel):
     success: bool
-    milestone_id: int
+    id: int
     subject: str
     tags: Optional[list[str]] = None
     status: str
@@ -29,7 +29,7 @@ class ModifyMilestoneRequest(BaseModel):
 
 class GetMilestoneResponse(BaseModel):
     success: bool
-    milestone_id: int
+    id: int
     project: dict
     created_by: dict
     subject: str

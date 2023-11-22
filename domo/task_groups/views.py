@@ -105,7 +105,7 @@ class Info(APIView):
         return JsonResponse(
             CreateTaskGroupResponse(
                 success=True,
-                task_group_id=new_task_group.id,
+                id=new_task_group.id,
                 status=new_task_group.status,
                 title=new_task_group.title,
                 created_at=new_task_group.created_at,
@@ -192,7 +192,7 @@ class Info(APIView):
         return JsonResponse(
             CreateTaskGroupResponse(
                 success=True,
-                task_group_id=task_group.id,
+                id=task_group.id,
                 status=task_group.status,
                 title=task_group.title,
                 created_at=task_group.created_at,
@@ -249,7 +249,7 @@ class Info(APIView):
         return JsonResponse(
             GetTaskGroupResponse(
                 success=True,
-                task_group_id=task_group.id,
+                id=task_group.id,
                 project=project_data,
                 milestone=milestone_data,
                 tasks=task_datas,

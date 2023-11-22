@@ -22,7 +22,7 @@ class ModifyTaskRequest(BaseModel):
 
 class CreateTaskResponse(BaseModel):
     success: bool
-    task_id: int
+    id: int
     title: str
     description: Optional[str] = None
     description_resource_links: Optional[str] = None
@@ -33,7 +33,7 @@ class CreateTaskResponse(BaseModel):
 
 class GetTaskResponse(BaseModel):
     success: bool
-    task_id: int
+    id: int
     project: dict
     milestone: dict
     task_group: dict

@@ -116,7 +116,7 @@ class Info(APIView):
         return JsonResponse(
             CreateProjectResponse(
                 success=True,
-                project_id=new_project.id,
+                id=new_project.id,
                 status=new_project.status,
                 title=new_project.title,
                 short_description=new_project.short_description,
@@ -273,7 +273,7 @@ class Info(APIView):
         return JsonResponse(
             CreateProjectResponse(
                 success=True,
-                project_id=project.id,
+                id=project.id,
                 status=project.status,
                 title=project.title,
                 short_description=project.short_description,

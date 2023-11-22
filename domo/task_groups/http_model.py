@@ -11,7 +11,7 @@ class CreateTaskGroupRequest(BaseModel):
 
 class CreateTaskGroupResponse(BaseModel):
     success: bool
-    task_group_id: int
+    id: int
     title: str
     status: str
     created_at: datetime
@@ -26,7 +26,7 @@ class ModifyTaskGroupRequest(BaseModel):
 
 class GetTaskGroupResponse(BaseModel):
     success: bool
-    task_group_id: int
+    id: int
     project: dict
     milestone: dict
     tasks: list
