@@ -146,7 +146,7 @@ class DetailInfo(APIView):
 
         if request_data.profile_image_link is None:
             pass
-        elif request_data.profile_image_link == "":
+        elif request_data.profile_image_link == "" and request.user.profile_image_link:
             profile_image_modifier.remove_resource(request.user.profile_image_link)
         else:
             if not profile_image_modifier.check_resource_links(
@@ -159,7 +159,10 @@ class DetailInfo(APIView):
                     ).model_dump(),
                     status=400,
                 )
-            if request_data.profile_image_link != request.user.profile_image_link:
+            if (
+                request.user.profile_image_link
+                and request_data.profile_image_link != request.user.profile_image_link
+            ):
                 profile_image_modifier.remove_resource(request.user.profile_image_link)
 
         if (
