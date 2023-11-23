@@ -214,7 +214,7 @@ class Info(APIView):
                 status=404,
             )
 
-        tasks = Task.objects.filter(task_group=task_group)
+        tasks = Task.objects.filter(task_group=task_group, is_public=True)
 
         task_datas = []
 
