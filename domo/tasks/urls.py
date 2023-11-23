@@ -3,7 +3,7 @@ from tasks import views as task
 
 urlpatterns = [
     path(
-        "v1",
+        "v1/<int:request_id>",
         task.Info.as_view(),
         name="task_info",
     ),

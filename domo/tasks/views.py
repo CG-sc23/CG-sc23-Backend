@@ -42,8 +42,8 @@ def create_new_task(request_user, request_task_group, request_data):
 class Info(APIView):
     authentication_classes = [TokenAuthentication]
 
-    def post(self, request):
-        task_group_id = request.GET.get("task-group-id")
+    def post(self, request, request_id):
+        task_group_id = request_id
         title = request.data.get("title")
         description = request.data.get("description", None)
         description_resource_links = request.data.get(
@@ -144,8 +144,8 @@ class Info(APIView):
             status=201,
         )
 
-    def put(self, request):
-        task_id = request.GET.get("task-id")
+    def put(self, request, request_id):
+        task_id = request_id
         try:
             task = Task.objects.get(id=task_id)
         except Task.DoesNotExist:
@@ -267,8 +267,8 @@ class Info(APIView):
             status=201,
         )
 
-    def get(self, request):
-        task_id = request.GET.get("task-id")
+    def get(self, request, request_id):
+        task_id = request_id
         try:
             task = Task.objects.get(id=task_id)
         except Task.DoesNotExist:
