@@ -140,7 +140,6 @@ class Info(APIView):
             CreateProjectResponse(
                 success=True,
                 id=new_project.id,
-                project_id=new_project.id,
                 status=new_project.status,
                 title=new_project.title,
                 short_description=new_project.short_description,
