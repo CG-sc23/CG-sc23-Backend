@@ -25,7 +25,7 @@ class CreateTaskResponse(BaseModel):
     id: int
     title: str
     description: Optional[str] = None
-    description_resource_links: Optional[str] = None
+    description_resource_links: Optional[list[str]] = None
     created_at: datetime
     tags: Optional[list[str]] = None
     is_public: bool

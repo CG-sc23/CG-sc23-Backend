@@ -93,6 +93,27 @@ class Info(APIView):
             hour=14, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc
         )
 
+        if isinstance(request_data.description_resource_links, list):
+            s3_handler = GeneralHandler("resource")
+            if not s3_handler.check_resource_links(
+                request_data.description_resource_links
+            ):
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False,
+                        reason="Invalid request.",
+                    ).model_dump(),
+                    status=400,
+                )
+            for resource_link in request_data.description_resource_links:
+                try:
+                    S3ResourceReferenceCheck.objects.get(resource_link=resource_link)
+                except S3ResourceReferenceCheck.DoesNotExist:
+                    S3ResourceReferenceCheck.objects.create(
+                        resource_link=resource_link,
+                        owner=request.user,
+                    )
+
         if thumbnail_image:
             s3_handler = GeneralHandler("resource")
             if not s3_handler.check_resource_links(request_data.thumbnail_image):
