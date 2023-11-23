@@ -18,6 +18,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
     before_send=before_send,
+    before_send_transaction=before_send,
 )
 
 DEBUG = False
