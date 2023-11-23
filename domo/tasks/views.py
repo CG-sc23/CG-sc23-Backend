@@ -256,7 +256,7 @@ class Info(APIView):
         return JsonResponse(
             CreateTaskResponse(
                 success=True,
-                task_id=task.id,
+                id=task.id,
                 title=task.title,
                 description=task.description,
                 description_resource_links=task.description_resource_links,
