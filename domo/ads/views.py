@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import datetime, timezone
 
 from ads.http_model import CreateAdRequest
 from ads.models import AdsRequest
@@ -73,6 +74,7 @@ def google_cb(request):
             company_name=request_data.company_name,
             ads_purpose=request_data.ads_purpose,
             ads_file_link=request_data.ads_file_link,
+            created_at=datetime.now(tz=timezone.utc),
         )
     except Exception as e:
         logging.error(e)
