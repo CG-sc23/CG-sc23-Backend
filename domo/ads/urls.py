@@ -1,4 +1,4 @@
-from ads.views import google_cb
+from ads.views import ManageAds, google_cb
 from django.urls import path
 
 urlpatterns = [
