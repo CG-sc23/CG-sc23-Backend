@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from ads.http_model import CreateAdRequest
+from ads.http_model import CreateAdRequest, GetAllAdsLinkResponse, GetAllAdsResponse
 from ads.models import Ads
 from common.auth import IsStaff
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
@@ -93,6 +93,28 @@ def google_cb(request):
     )
 
 
+@api_view(["GET"])
+def get_all_active_ads_link(request):
+    try:
+        ads_requests = Ads.objects.filter(is_active=True)
+    except Exception as e:
+        logging.error(e)
+        return JsonResponse(
+            SimpleFailResponse(
+                success=False, reason="Error getting ads requests."
+            ).model_dump(),
+            status=500,
+        )
+
+    return JsonResponse(
+        GetAllAdsLinkResponse(
+            success=True,
+            file_links=[ads_request.ads_file_link for ads_request in ads_requests],
+        ).model_dump(),
+        status=200,
+    )
+
+
 class ManageAds(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsStaff]
@@ -110,7 +132,7 @@ class ManageAds(APIView):
             )
 
         return JsonResponse(
-            SimpleSuccessResponse(
+            GetAllAdsResponse(
                 success=True,
                 requests=[
                     {

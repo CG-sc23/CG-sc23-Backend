@@ -13,3 +13,8 @@ class CreateAdRequest(BaseModel):
 class GetAllAdsResponse(BaseModel):
     success: bool
     requests: list
+
+
+class GetAllAdsLinkResponse(BaseModel):
+    success: bool
+    file_links: list
