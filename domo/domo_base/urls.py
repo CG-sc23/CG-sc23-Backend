@@ -12,4 +12,5 @@ urlpatterns = [
     path("task-group/", include("task_groups.urls")),
     path("task/", include("tasks.urls")),
     path("ads/", include("ads.urls")),
+    path("report/", include("reports.urls")),
 ]

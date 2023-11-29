@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "resources",
     "users",
     "ads",
+    "reports",
 ]
 
 MIDDLEWARE = [
