@@ -5,6 +5,11 @@ urlpatterns = [
     path(
         "v1/<int:request_id>",
         report.Info.as_view(),
-        name="project_info",
+        name="report_info",
+    ),
+    path(
+        "v1/manage",
+        report.Manage.as_view(),
+        name="report_manage",
     ),
 ]
