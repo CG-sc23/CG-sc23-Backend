@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timezone
 
 from ads.http_model import CreateAdRequest
-from ads.models import AdsRequest
+from ads.models import Ads
 from common.auth import IsStaff
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from django.http import JsonResponse
@@ -67,7 +67,7 @@ def google_cb(request):
         )
 
     try:
-        AdsRequest.objects.create(
+        Ads.objects.create(
             requester_email=request_data.requester_email,
             requester_name=request_data.requester_name,
             company_email=request_data.company_email,
@@ -99,7 +99,7 @@ class ManageAds(APIView):
 
     def get(self, request):
         try:
-            ads_requests = AdsRequest.objects.all()
+            ads_requests = Ads.objects.all()
         except Exception as e:
             logging.error(e)
             return JsonResponse(

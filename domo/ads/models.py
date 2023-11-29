@@ -2,7 +2,7 @@ from django.db import models
 
 
 # Create your models here.
-class AdsRequest(models.Model):
+class Ads(models.Model):
     id = models.AutoField(primary_key=True)
 
     requester_email = models.CharField(max_length=100)
@@ -14,3 +14,7 @@ class AdsRequest(models.Model):
     ads_purpose = models.CharField(max_length=100)
 
     ads_file_link = models.TextField()
+
+    created_at = models.DateTimeField()
+
+    is_active = models.BooleanField(default=False)
