@@ -45,7 +45,7 @@ def google_cb(request):
         elif respond["title"] == "광고의 목적은 무엇인가요?":
             ads_purpose = respond["response"]
         elif respond["title"] == "광고로 게시할 사진을 올려주세요. (가로:세로 = 2:1)":
-            ads_file_link = respond["response"][0]
+            ads_file_link = f"https://drive.google.com/open?id={respond['response'][0]}"
 
     try:
         request_data = CreateAdRequest(
