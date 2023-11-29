@@ -11,4 +11,5 @@ urlpatterns = [
     path("resource/", include("resources.urls")),
     path("task-group/", include("task_groups.urls")),
     path("task/", include("tasks.urls")),
+    path("ads/", include("ads.urls")),
 ]
