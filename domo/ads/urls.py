@@ -5,11 +5,11 @@ urlpatterns = [
     path(
         "v1/google-cb",
         google_cb,
-        name="ads_google_cb",
+        name="google_cb",
     ),
     path(
         "v1/active",
         get_active_ad_link,
-        name="ads_get_all_active_link",
+        name="get_active_ad_link",
     ),
 ]

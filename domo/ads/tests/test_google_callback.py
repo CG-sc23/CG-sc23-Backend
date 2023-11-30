@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 class GoogleCallBackTest(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.url_google_cb = reverse("ads_google_cb")
+        self.url_google_cb = reverse("google_cb")
         self.google_script_id = os.getenv("GOOGLE_SCRIPT_ID")
         self.google_sent_data = {
             "formId": "SOME_FORM_ID",
