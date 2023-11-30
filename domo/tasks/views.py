@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from common.http_model import SimpleFailResponse
+from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from common.s3.handler import GeneralHandler
 from django.db.transaction import atomic
 from django.http import JsonResponse
@@ -344,6 +344,58 @@ class Info(APIView):
                 members=project_member_datas,
                 is_public=task.is_public,
                 permission=member_role,
+            ).model_dump(),
+            status=200,
+        )
+
+    def delete(self, request, request_id):
+        task_id = request_id
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Can't find Task."
+                ).model_dump(),
+                status=404,
+            )
+
+        try:
+            user = request.user
+            if user != task.owner:
+                raise PermissionError
+        except:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Permission error"
+                ).model_dump(),
+                status=403,
+            )
+
+        task_description_resource_links = task.description_resource_links
+        if task_description_resource_links:
+            s3_handler = GeneralHandler("resource")
+            for resource_link in task_description_resource_links:
+                ref_check_obj = S3ResourceReferenceCheck.objects.get(
+                    resource_link=resource_link
+                )
+                ref_check_obj.delete()
+                s3_handler.remove_resource(resource_link)
+
+        try:
+            task.delete()
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error deleting task."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(
+                success=True,
             ).model_dump(),
             status=200,
         )
