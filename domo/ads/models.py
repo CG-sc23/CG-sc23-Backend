@@ -2,7 +2,7 @@ from django.db import models
 
 
 # Create your models here.
-class Ads(models.Model):
+class Ad(models.Model):
     id = models.AutoField(primary_key=True)
 
     requester_email = models.CharField(max_length=100)
@@ -11,9 +11,12 @@ class Ads(models.Model):
     company_email = models.CharField(max_length=100)
     company_name = models.CharField(max_length=30)
 
-    ads_purpose = models.CharField(max_length=100)
+    purpose = models.CharField(max_length=100)
 
-    ads_file_link = models.TextField()
+    file_link = models.TextField()
+
+    initial_exposure_count = models.IntegerField(null=True, blank=True)
+    remaining_exposure_count = models.IntegerField(null=True, blank=True)
 
     created_at = models.DateTimeField()
 

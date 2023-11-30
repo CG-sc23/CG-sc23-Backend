@@ -1,4 +1,4 @@
-from ads.views import ManageAds, get_all_active_ads_link, google_cb
+from ads.views import ManageAds, get_active_ad_link, google_cb
 from django.urls import path
 
 urlpatterns = [
@@ -9,7 +9,7 @@ urlpatterns = [
     ),
     path(
         "v1/active",
-        get_all_active_ads_link,
+        get_active_ad_link,
         name="ads_get_all_active_link",
     ),
 ]
