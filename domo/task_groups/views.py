@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timezone
 
-from common.http_model import SimpleFailResponse
+from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from django.db.transaction import atomic
 from django.http import JsonResponse
 from milestones.models import Milestone
@@ -263,6 +263,60 @@ class Info(APIView):
                 created_at=task_group.created_at,
                 due_date=task_group.due_date,
                 permission=member_role,
+            ).model_dump(),
+            status=200,
+        )
+
+    def delete(self, request, request_id):
+        task_group_id = request_id
+
+        try:
+            task_group = TaskGroup.objects.get(id=task_group_id)
+        except TaskGroup.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Task group not found"
+                ).model_dump(),
+                status=404,
+            )
+
+        milestone = task_group.milestone
+        project = milestone.project
+
+        try:
+            member_role = ProjectMember.objects.get(
+                project=project, user=request.user
+            ).role
+        except:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Permission error"
+                ).model_dump(),
+                status=403,
+            )
+
+        if member_role == "MEMBER":
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="User must OWNER or MANAGER"
+                ).model_dump(),
+                status=403,
+            )
+
+        try:
+            task_group.delete()
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error deleting task group."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(
+                success=True,
             ).model_dump(),
             status=200,
         )
