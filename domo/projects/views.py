@@ -2,11 +2,13 @@ import json
 import logging
 import random
 from datetime import datetime, timezone
+from operator import itemgetter
 
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from common.s3.handler import GeneralHandler
 from django.db.transaction import atomic
 from django.http import JsonResponse
+from external_histories.models import UserStack
 from milestones.models import Milestone
 from projects.http_model import (
     ChangeRoleRequest,
@@ -700,7 +702,9 @@ class AllInfo(APIView):
 
 
 class Recommend(APIView):
-    def recommend_project(self, projects):
+    authentication_classes = [TokenAuthentication]
+
+    def recommend_project_public(self, projects):
         all_project = []
 
         for project in projects:
@@ -715,10 +719,48 @@ class Recommend(APIView):
 
         return recommended_project
 
+    def recommend_project(self, projects, request_user):
+        stacks = UserStack.objects.filter(user=request_user)
+
+        user_stacks_sum = 0
+        for stack in stacks:
+            user_stacks_sum += stack.code_amount
+
+        similarity = []
+
+        for project in projects:
+            project_members = ProjectMember.objects.filter(project=project)
+
+            stacks_avg = 0
+
+            for member in project_members:
+                stacks = UserStack.objects.filter(user=member.user)
+
+                for stack in stacks:
+                    stacks_avg += stack.code_amount
+
+            stacks_avg /= project_members.count()
+            ratio = abs(user_stacks_sum - stacks_avg)
+            similarity.append({"project": project, "ratio": ratio})
+
+        sorted_data = sorted(similarity, key=itemgetter("ratio"))
+
+        recommended_project = []
+
+        for data in sorted_data:
+            if len(recommended_project) >= 6:
+                break
+            recommended_project.append(data["project"])
+
+        return recommended_project
+
     def get(self, request):
         projects = Project.objects.all()
 
-        recommended_project = self.recommend_project(projects)
+        try:
+            recommended_project = self.recommend_project(projects, request.user)
+        except:
+            recommended_project = self.recommend_project_public(projects)
 
         project_datas = []
 
