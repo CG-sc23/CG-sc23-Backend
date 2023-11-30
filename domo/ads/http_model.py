@@ -15,6 +15,6 @@ class GetAllAdsResponse(BaseModel):
     requests: list
 
 
-class GetAllAdsLinkResponse(BaseModel):
+class GetAdLinkResponse(BaseModel):
     success: bool
-    file_links: list
+    file_link: str
