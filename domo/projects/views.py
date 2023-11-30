@@ -32,6 +32,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from task_groups.models import TaskGroup
 from tasks.models import Task
+from users.http_model import GetUserRecommendResponse
 from users.models import User
 
 
@@ -701,7 +702,87 @@ class AllInfo(APIView):
         )
 
 
-class Recommend(APIView):
+class RecommendUserForProject(APIView):
+    def recommend_user(self, users, request_project):
+        all_user = []
+
+        for user in users:
+            all_user.append(user)
+
+        project_members = ProjectMember.objects.filter(project=request_project)
+
+        stacks_avg = 0
+
+        for member in project_members:
+            stacks = UserStack.objects.filter(user=member.user)
+
+            for stack in stacks:
+                stacks_avg += stack.code_amount
+
+        stacks_avg /= project_members.count()
+
+        similarity = []
+
+        for user in all_user:
+            stacks = UserStack.objects.filter(user=user)
+
+            user_stacks_sum = 0
+            for stack in stacks:
+                user_stacks_sum += stack.code_amount
+
+            ratio = abs(user_stacks_sum - stacks_avg)
+            similarity.append({"user": user, "ratio": ratio})
+
+        sorted_data = sorted(similarity, key=itemgetter("ratio"))
+
+        recommended_user = []
+
+        for data in sorted_data:
+            if len(recommended_user) >= 6:
+                break
+            recommended_user.append(data["user"])
+
+        return recommended_user
+
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Can't find project."
+                ).model_dump(),
+                status=404,
+            )
+
+        users = User.objects.filter(is_staff=False)
+
+        recommended_users = self.recommend_user(users, project)
+
+        user_datas = []
+
+        for user in recommended_users:
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "profile_image_link": user.profile_image_link,
+                "profile_image_updated_at": user.profile_image_updated_at,
+                "short_description": user.short_description,
+            }
+
+            user_datas.append(user_data)
+
+        result = GetUserRecommendResponse(
+            success=True, count=len(user_datas), users=user_datas
+        )
+        return JsonResponse(
+            result.model_dump(),
+            status=200,
+        )
+
+
+class RecommendProject(APIView):
     authentication_classes = [TokenAuthentication]
 
     def recommend_project_public(self, projects):

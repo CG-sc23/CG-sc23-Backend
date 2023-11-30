@@ -39,8 +39,13 @@ urlpatterns = [
     ),
     path(
         "v1/recommend",
-        project.Recommend.as_view(),
+        project.RecommendProject.as_view(),
         name="project_recommend",
+    ),
+    path(
+        "v1/recommend/<int:project_id>",
+        project.RecommendUserForProject.as_view(),
+        name="user_recommend_for_project",
     ),
     path(
         "v1/<int:project_id>/join",
