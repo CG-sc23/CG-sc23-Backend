@@ -949,6 +949,14 @@ class ReplyJoinRequest(APIView):
             )
 
         if request_data.accept:
+            if ProjectMember.objects.filter(
+                project=join_request_obj.project, user=join_request_obj.user
+            ).exists():
+                return JsonResponse(
+                    SimpleSuccessResponse(success=True).model_dump(),
+                    status=200,
+                )
+
             ProjectMember.objects.create(
                 project=join_request_obj.project,
                 user=join_request_obj.user,

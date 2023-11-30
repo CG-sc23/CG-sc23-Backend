@@ -59,6 +59,14 @@ class ProjectMember(models.Model):
     role = models.CharField(max_length=20)
     created_at = models.DateTimeField()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["project", "user"],
+                name="project_user_unique",
+            ),
+        ]
+
 
 class ProjectJoinRequest(models.Model):
     id = models.AutoField(primary_key=True)
