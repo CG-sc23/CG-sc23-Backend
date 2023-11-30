@@ -362,18 +362,30 @@ class Invitee(APIView):
 
 class Search(APIView):
     def get(self, request):
-        email = request.GET.get("email")
-        if not email:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Invalid request."
-                ).model_dump(),
-                status=400,
-            )
-        users = User.objects.filter(email__istartswith=email)
+        request_data = request.GET.get("request-data")
+        users_email = User.objects.filter(email__istartswith=request_data)
+
+        users_name = User.objects.filter(name__istartswith=request_data)
 
         result = []
-        for user in users:
+        for user in users_email:
+            result.append(
+                {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": user.name,
+                    "profile_image_link": user.profile_image_link,
+                    "profile_image_updated_at": user.profile_image_updated_at,
+                }
+            )
+
+        for user in users_name:
+            flag = True
+            for check in result:
+                if check.get("id") == user.id:
+                    flag = False
+            if not flag:
+                continue
             result.append(
                 {
                     "id": user.id,
