@@ -764,7 +764,7 @@ class Kick(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, project_id):
-        user_email = request.data.get("user_email")
+        user_email = request.GET.get("user_email")
 
         try:
             request_data = KickMemberRequest(user_email=user_email)
