@@ -6,6 +6,7 @@ from common.const import ReturnCode
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from common.s3.handler import GeneralHandler
 from common.tasks import update_github_history
+from django.db.models import Q
 from django.db.transaction import atomic
 from django.http import JsonResponse
 from external_histories.models import GithubStatus
@@ -362,15 +363,10 @@ class Invitee(APIView):
 
 class Search(APIView):
     def get(self, request):
-        email = request.GET.get("email")
-        if not email:
-            return JsonResponse(
-                SimpleFailResponse(
-                    success=False, reason="Invalid request."
-                ).model_dump(),
-                status=400,
-            )
-        users = User.objects.filter(email__istartswith=email)
+        request_data = request.GET.get("request-data")
+        users = User.objects.filter(
+            Q(email__istartswith=request_data) | Q(name__istartswith=request_data)
+        ).distinct()
 
         result = []
         for user in users:
@@ -383,6 +379,7 @@ class Search(APIView):
                     "profile_image_updated_at": user.profile_image_updated_at,
                 }
             )
+
         result = GetSearchResponse(success=True, result=result)
         return JsonResponse(
             result.model_dump(),
