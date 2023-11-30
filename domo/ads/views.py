@@ -2,10 +2,11 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from ads.http_model import CreateAdRequest, GetAllAdsLinkResponse, GetAllAdsResponse
-from ads.models import Ads
+from ads.http_model import CreateAdRequest, GetAdLinkResponse, GetAllAdsResponse
+from ads.models import Ad
 from common.auth import IsStaff
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
+from django.db.transaction import atomic
 from django.http import JsonResponse
 from pydantic import ValidationError
 from rest_framework.authentication import TokenAuthentication
@@ -67,7 +68,7 @@ def google_cb(request):
         )
 
     try:
-        Ads.objects.create(
+        Ad.objects.create(
             requester_email=request_data.requester_email,
             requester_name=request_data.requester_name,
             company_email=request_data.company_email,
@@ -93,23 +94,53 @@ def google_cb(request):
     )
 
 
+@atomic
 @api_view(["GET"])
-def get_all_active_ads_link(request):
+def get_active_ad_link(request):
     try:
-        ads_requests = Ads.objects.filter(is_active=True)
+        ads_count = Ad.objects.filter(is_active=True).count()
+        if ads_count == 0:
+            return JsonResponse(
+                GetAdLinkResponse(success=True, file_link="").model_dump(),
+                status=200,
+            )
+
+        idx_obj = Ad.objects.get(
+            is_active=False,
+            requester_email="RR",
+            requester_name="RR",
+            company_email="RR",
+            company_name="RR",
+            purpose="RR",
+        )
+
+        # inital_exposure_count를 idx로 사용
+        curr_idx = idx_obj.initial_exposure_count
+
+        idx_obj.initial_exposure_count = (curr_idx + 1) % ads_count
+        idx_obj.save()
+
+        ads = Ad.objects.filter(
+            is_active=True, remaining_exposure_count__gt=0
+        ).order_by("-remaining_exposure_count")
+
+        will_be_exposed_ad = ads[curr_idx]
+        will_be_exposed_ad.remaining_exposure_count -= 1
+        if will_be_exposed_ad.remaining_exposure_count == 0:
+            will_be_exposed_ad.is_active = False
+        will_be_exposed_ad.save()
+
     except Exception as e:
         logging.error(e)
         return JsonResponse(
-            SimpleFailResponse(
-                success=False, reason="Error getting ads requests."
-            ).model_dump(),
+            SimpleFailResponse(success=False, reason="Error getting Ad.").model_dump(),
             status=500,
         )
 
     return JsonResponse(
-        GetAllAdsLinkResponse(
+        GetAdLinkResponse(
             success=True,
-            file_links=[ads_request.ads_file_link for ads_request in ads_requests],
+            file_link=will_be_exposed_ad.file_link,
         ).model_dump(),
         status=200,
     )
