@@ -304,6 +304,15 @@ class Info(APIView):
             )
 
         try:
+            tasks_cnt = Task.objects.filter(task_group=task_group).count()
+            if tasks_cnt > 0:
+                return JsonResponse(
+                    SimpleFailResponse(
+                        success=False,
+                        reason="This task group has tasks. Please delete all tasks.",
+                    ).model_dump(),
+                    status=400,
+                )
             task_group.delete()
         except Exception as e:
             logging.error(e)

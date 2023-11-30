@@ -28,6 +28,8 @@ from resources.models import S3ResourceReferenceCheck
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from task_groups.models import TaskGroup
+from tasks.models import Task
 from users.models import User
 
 
@@ -336,6 +338,29 @@ class Info(APIView):
                     success=False, reason="User must OWNER"
                 ).model_dump(),
                 status=403,
+            )
+
+        try:
+            milestones = Milestone.objects.filter(project_id=project.id)
+            for milestone in milestones:
+                task_groups = TaskGroup.objects.filter(milestone_id=milestone.id)
+                for task_group in task_groups:
+                    tasks_cnt = Task.objects.filter(task_group_id=task_group.id).count()
+                    if tasks_cnt > 0:
+                        return JsonResponse(
+                            SimpleFailResponse(
+                                success=False,
+                                reason="This project has tasks. Please delete all tasks.",
+                            ).model_dump(),
+                            status=400,
+                        )
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error deleting project."
+                ).model_dump(),
+                status=500,
             )
 
         try:

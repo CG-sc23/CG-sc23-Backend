@@ -325,6 +325,17 @@ class Info(APIView):
             )
 
         try:
+            task_groups = TaskGroup.objects.filter(milestone=milestone)
+            for task_group in task_groups:
+                tasks_cnt = Task.objects.filter(task_group=task_group).count()
+                if tasks_cnt > 0:
+                    return JsonResponse(
+                        SimpleFailResponse(
+                            success=False,
+                            reason="This milestone has tasks. Please delete all tasks.",
+                        ).model_dump(),
+                        status=400,
+                    )
             milestone.delete()
         except Exception as e:
             logging.error(e)
