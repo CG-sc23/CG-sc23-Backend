@@ -134,6 +134,14 @@ def get_active_ad_link(request):
             will_be_exposed_ad.is_active = False
         will_be_exposed_ad.save()
 
+    except IndexError:
+        curr_idx = 0
+        will_be_exposed_ad = ads[curr_idx]
+        will_be_exposed_ad.remaining_exposure_count -= 1
+        if will_be_exposed_ad.remaining_exposure_count == 0:
+            will_be_exposed_ad.is_active = False
+        will_be_exposed_ad.save()
+
     except Exception as e:
         logging.error(e)
         return JsonResponse(
