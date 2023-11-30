@@ -2,11 +2,13 @@ import json
 import logging
 import random
 from datetime import datetime, timezone
+from operator import itemgetter
 
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from common.s3.handler import GeneralHandler
 from django.db.transaction import atomic
 from django.http import JsonResponse
+from external_histories.models import UserStack
 from milestones.models import Milestone
 from projects.http_model import (
     ChangeRoleRequest,
@@ -30,6 +32,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from task_groups.models import TaskGroup
 from tasks.models import Task
+from users.http_model import GetUserRecommendResponse
 from users.models import User
 
 
@@ -699,8 +702,90 @@ class AllInfo(APIView):
         )
 
 
-class Recommend(APIView):
-    def recommend_project(self, projects):
+class RecommendUserForProject(APIView):
+    def recommend_user(self, users, request_project):
+        all_user = []
+
+        for user in users:
+            all_user.append(user)
+
+        project_members = ProjectMember.objects.filter(project=request_project)
+
+        stacks_avg = 0
+
+        for member in project_members:
+            stacks = UserStack.objects.filter(user=member.user)
+
+            for stack in stacks:
+                stacks_avg += stack.code_amount
+
+        stacks_avg /= project_members.count()
+
+        similarity = []
+
+        for user in all_user:
+            stacks = UserStack.objects.filter(user=user)
+
+            user_stacks_sum = 0
+            for stack in stacks:
+                user_stacks_sum += stack.code_amount
+
+            ratio = abs(user_stacks_sum - stacks_avg)
+            similarity.append({"user": user, "ratio": ratio})
+
+        sorted_data = sorted(similarity, key=itemgetter("ratio"))
+
+        recommended_user = []
+
+        for data in sorted_data:
+            if len(recommended_user) >= 6:
+                break
+            recommended_user.append(data["user"])
+
+        return recommended_user
+
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Can't find project."
+                ).model_dump(),
+                status=404,
+            )
+
+        users = User.objects.filter(is_staff=False)
+
+        recommended_users = self.recommend_user(users, project)
+
+        user_datas = []
+
+        for user in recommended_users:
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "profile_image_link": user.profile_image_link,
+                "profile_image_updated_at": user.profile_image_updated_at,
+                "short_description": user.short_description,
+            }
+
+            user_datas.append(user_data)
+
+        result = GetUserRecommendResponse(
+            success=True, count=len(user_datas), users=user_datas
+        )
+        return JsonResponse(
+            result.model_dump(),
+            status=200,
+        )
+
+
+class RecommendProject(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def recommend_project_public(self, projects):
         all_project = []
 
         for project in projects:
@@ -715,10 +800,48 @@ class Recommend(APIView):
 
         return recommended_project
 
+    def recommend_project(self, projects, request_user):
+        stacks = UserStack.objects.filter(user=request_user)
+
+        user_stacks_sum = 0
+        for stack in stacks:
+            user_stacks_sum += stack.code_amount
+
+        similarity = []
+
+        for project in projects:
+            project_members = ProjectMember.objects.filter(project=project)
+
+            stacks_avg = 0
+
+            for member in project_members:
+                stacks = UserStack.objects.filter(user=member.user)
+
+                for stack in stacks:
+                    stacks_avg += stack.code_amount
+
+            stacks_avg /= project_members.count()
+            ratio = abs(user_stacks_sum - stacks_avg)
+            similarity.append({"project": project, "ratio": ratio})
+
+        sorted_data = sorted(similarity, key=itemgetter("ratio"))
+
+        recommended_project = []
+
+        for data in sorted_data:
+            if len(recommended_project) >= 6:
+                break
+            recommended_project.append(data["project"])
+
+        return recommended_project
+
     def get(self, request):
         projects = Project.objects.all()
 
-        recommended_project = self.recommend_project(projects)
+        try:
+            recommended_project = self.recommend_project(projects, request.user)
+        except:
+            recommended_project = self.recommend_project_public(projects)
 
         project_datas = []
 
