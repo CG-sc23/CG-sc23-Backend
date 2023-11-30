@@ -98,7 +98,11 @@ def google_cb(request):
 @api_view(["GET"])
 def get_active_ad_link(request):
     try:
-        ads_count = Ad.objects.filter(is_active=True).count()
+        ads_count = Ad.objects.filter(
+            is_active=True,
+            initial_exposure_count__isnull=False,
+            remaining_exposure_count__isnull=False,
+        ).count()
         if ads_count == 0:
             return JsonResponse(
                 GetAdLinkResponse(success=True, file_link="").model_dump(),
@@ -122,7 +126,7 @@ def get_active_ad_link(request):
 
         ads = Ad.objects.filter(
             is_active=True, remaining_exposure_count__gt=0
-        ).order_by("-remaining_exposure_count")
+        ).order_by("-remaining_exposure_count", "created_at")
 
         will_be_exposed_ad = ads[curr_idx]
         will_be_exposed_ad.remaining_exposure_count -= 1
