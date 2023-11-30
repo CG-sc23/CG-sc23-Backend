@@ -28,6 +28,8 @@ from resources.models import S3ResourceReferenceCheck
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from task_groups.models import TaskGroup
+from tasks.models import Task
 from users.models import User
 
 
@@ -305,6 +307,93 @@ class Info(APIView):
                 created_at=project.created_at,
                 due_date=project.due_date,
                 thumbnail_image=project.thumbnail_image,
+            ).model_dump(),
+            status=200,
+        )
+
+    def delete(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Can't find project."
+                ).model_dump(),
+                status=404,
+            )
+
+        try:
+            member_role = ProjectMember.objects.get(
+                project=project, user=request.user
+            ).role
+        except ProjectMember.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(success=False, reason="Not found").model_dump(),
+                status=404,
+            )
+
+        if member_role != "OWNER":
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="User must OWNER"
+                ).model_dump(),
+                status=403,
+            )
+
+        try:
+            milestones = Milestone.objects.filter(project_id=project.id)
+            for milestone in milestones:
+                task_groups = TaskGroup.objects.filter(milestone_id=milestone.id)
+                for task_group in task_groups:
+                    tasks_cnt = Task.objects.filter(task_group_id=task_group.id).count()
+                    if tasks_cnt > 0:
+                        return JsonResponse(
+                            SimpleFailResponse(
+                                success=False,
+                                reason="This project has tasks. Please delete all tasks.",
+                            ).model_dump(),
+                            status=400,
+                        )
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error deleting project."
+                ).model_dump(),
+                status=500,
+            )
+
+        try:
+            s3_handler = GeneralHandler("resource")
+            project_description_resource_links = project.description_resource_links
+            if project_description_resource_links:
+                for resource_link in project_description_resource_links:
+                    ref_check_obj = S3ResourceReferenceCheck.objects.get(
+                        resource_link=resource_link
+                    )
+                    ref_check_obj.delete()
+                    s3_handler.remove_resource(resource_link)
+            if project.thumbnail_image:
+                ref_check_obj = S3ResourceReferenceCheck.objects.get(
+                    resource_link=project.thumbnail_image
+                )
+                ref_check_obj.delete()
+                s3_handler.remove_resource(project.thumbnail_image)
+
+            project.delete()
+
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Error deleting project."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            SimpleSuccessResponse(
+                success=True,
             ).model_dump(),
             status=200,
         )
