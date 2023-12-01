@@ -243,12 +243,19 @@ class PublicDetailInfo(APIView):
 
 
 class ProjectInfo(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="User does not exist."
+                ).model_dump(),
+                status=404,
+            )
 
-    def get(self, request):
         project_list = Project.objects.filter(
-            projectmember__user=request.user,
+            projectmember__user=user,
         ).order_by("created_at")
 
         projects = []

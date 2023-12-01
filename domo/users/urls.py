@@ -28,7 +28,7 @@ urlpatterns = [
         name="user_inviter",
     ),
     path(
-        "v1/projects",
+        "v1/projects/<int:user_id>",
         user.ProjectInfo.as_view(),
         name="user_project_info",
     ),
