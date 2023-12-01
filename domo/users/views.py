@@ -274,7 +274,7 @@ class ProjectInfo(APIView):
                     "profile_image_updated_at": member.user.profile_image_updated_at,
                 }
                 project_member_datas.append(project_member_data)
-            project_dict["members"] = project_member_datas
+            project_dict["project"]["members"] = project_member_datas
             projects.append(project_dict)
 
         response = GetAllProjectResponse(
