@@ -73,6 +73,7 @@ jobs:
       - name: Run Django tests
         working-directory: domo
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DOMO_DJANGO_SECRET_KEY: 'SECRETKEY-FOR-TEST'
           DOMO_DB_NAME: postgres
           DOMO_DB_USER: postgres
