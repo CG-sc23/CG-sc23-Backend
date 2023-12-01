@@ -23,7 +23,13 @@ class Project(models.Model):
     def detail(self):
         return {
             "id": self.id,
-            "owner": self.owner.id,
+            "owner": {
+                "id": self.owner.id,
+                "name": self.owner.name,
+                "email": self.owner.email,
+                "profile_image_link": self.owner.profile_image_link,
+                "profile_image_updated_at": self.owner.profile_image_updated_at,
+            },
             "status": self.status,
             "title": self.title,
             "short_description": self.short_description,
