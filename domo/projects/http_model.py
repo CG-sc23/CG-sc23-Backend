@@ -101,3 +101,9 @@ class GetJoinResponse(BaseModel):
 class ReplyJoinRequestModel(BaseModel):
     join_request_id: int
     accept: bool
+
+
+class MilestoneGPTResponse(BaseModel):
+    success: Optional[bool] = None
+    title: str
+    tags: list[str]
