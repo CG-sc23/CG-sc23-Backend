@@ -13,6 +13,11 @@ urlpatterns = [
         name="project_info_id",
     ),
     path(
+        "v1/<int:project_id>/milestone-gpt",
+        project.MakeMilestoneByGPT.as_view(),
+        name="project_make_milestone_gpt",
+    ),
+    path(
         "v1/info/<int:project_id>",
         project.PublicInfo.as_view(),
         name="project_info",
