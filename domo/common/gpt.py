@@ -37,8 +37,8 @@ class MilestoneGPT(GPT):
                 f"title은 무조건 한글로 대답해야 한다. tag는 기술 용어의 경우 일반적으로 영어로 사용되는 경우만 허용한다.\n"
                 f"다음은 출력할 형식이다. 이 json 형식을 따라야 하고 따를 수 없는 경우(입력 형식 INVALID 또는 정해진 형식을 따를 수 없는 상황)에는"
                 f"'CANT_UNDERSTAND' 문자열을 출력한다.\n"
-                "'response': {'title': 'string', 'tags': ['tag1', 'tag2', 'tag3', 'tag4', 'tag5' \
-                , 'tag6', 'tag7', 'tag8', 'tag9', 'tag10']}\n\n"
+                '{"title": "string", "tags": ["tag1", "tag2", "tag3", "tag4", "tag5" \
+                , "tag6", "tag7", "tag8", "tag9", "tag10"]}\n\n'
                 f"즉, 'CANT_UNDERSTAND' 문자열이나 위에 정의된 출력 형식을 준수하여야 한다. 이외는 허용하지 않는다.",
             },
             {"role": "user", "content": self.query},
