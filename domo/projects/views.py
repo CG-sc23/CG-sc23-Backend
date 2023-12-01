@@ -4,6 +4,7 @@ import random
 from datetime import datetime, timezone
 from operator import itemgetter
 
+from common.gpt import MilestoneGPT
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
 from common.s3.handler import GeneralHandler
 from django.db.transaction import atomic
@@ -21,6 +22,7 @@ from projects.http_model import (
     MakeProjectInviteDetailResponse,
     MakeProjectInviteRequest,
     MakeProjectInviteResponse,
+    MilestoneGPTResponse,
     ModifyProjectRequest,
     ReplyJoinRequestModel,
 )
@@ -1090,5 +1092,65 @@ class ReplyJoinRequest(APIView):
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
+class MakeMilestoneByGPT(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="Project does not exist."
+                ).model_dump(),
+                status=404,
+            )
+
+        try:
+            member = ProjectMember.objects.get(project=project, user=request.user)
+            if member.role == "MEMBER":
+                raise ProjectMember.DoesNotExist
+        except ProjectMember.DoesNotExist:
+            raise PermissionError
+
+        gpt_query = {"project_description": project.description}
+        exist_milestones = Milestone.objects.filter(project=project)
+        if not exist_milestones:
+            gpt_query["milestones"] = []
+        else:
+            gpt_query["milestones"] = [
+                {"title": milestone.subject, "tags": milestone.tags}
+                for milestone in exist_milestones
+            ]
+
+        raw_gpt_result = MilestoneGPT(json.dumps(gpt_query)).get_response()
+
+        try:
+            if raw_gpt_result in ["'CANT_UNDERSTAND'", "CANT_UNDERSTAND"]:
+                raise ValidationError
+            json_data = json.loads(raw_gpt_result)
+            gpt_result = MilestoneGPTResponse(
+                title=json_data["title"], tags=json_data["tags"]
+            )
+        except Exception as e:
+            logging.error(e)
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="GPT response is invalid."
+                ).model_dump(),
+                status=500,
+            )
+
+        return JsonResponse(
+            MilestoneGPTResponse(
+                success=True,
+                title=gpt_result.title,
+                tags=gpt_result.tags,
+            ).model_dump(),
             status=200,
         )
