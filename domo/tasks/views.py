@@ -417,6 +417,7 @@ class Page(APIView):
             created_data = {
                 "id": task.owner.id,
                 "name": task.owner.name,
+                "email": task.owner.email,
                 "profile_image_link": task.owner.profile_image_link,
                 "profile_image_updated_at": task.owner.profile_image_updated_at,
             }
