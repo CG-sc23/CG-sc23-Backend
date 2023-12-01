@@ -260,7 +260,22 @@ class ProjectInfo(APIView):
 
         projects = []
         for project in project_list:
-            projects.append(project.detail())
+            project_dict = {"project": project.detail()}
+
+            project_members = ProjectMember.objects.filter(project=project)
+            project_member_datas = []
+
+            for member in project_members:
+                project_member_data = {
+                    "id": member.user.id,
+                    "name": member.user.name,
+                    "email": member.user.email,
+                    "profile_image_link": member.user.profile_image_link,
+                    "profile_image_updated_at": member.user.profile_image_updated_at,
+                }
+                project_member_datas.append(project_member_data)
+            project_dict["members"] = project_member_datas
+            projects.append(project_dict)
 
         response = GetAllProjectResponse(
             success=True, count=len(projects), projects=projects
