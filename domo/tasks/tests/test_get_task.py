@@ -13,7 +13,6 @@ from users.models import User
 
 class GetTaskTest(TestCase):
     def setUp(self):
-        self.maxDiff = None
         self.client = APIClient()
         self.created_at = datetime.now(tz=timezone.utc)
 
