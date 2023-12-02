@@ -406,7 +406,7 @@ class Page(APIView):
         all_task = Task.objects.filter(is_public=True).order_by("-created_at")
         tasks_response = []
 
-        for i in range((page_idx - 1) * 10, page_idx * 10):
+        for i in range((page_idx - 1) * 5, page_idx * 5):
             if i >= len(all_task):
                 break
             task = all_task[i]
