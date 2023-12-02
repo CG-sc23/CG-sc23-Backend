@@ -57,7 +57,7 @@ class ModifyTaskGroupTest(TestCase):
             due_date=self.created_at,
         )
 
-        self.url_task_group_url = reverse("task_group_info", args=[self.task_group.id])
+        self.url_task_group = reverse("task_group_info", args=[self.task_group.id])
 
         self.expected_response = {
             "success": True,
@@ -77,7 +77,7 @@ class ModifyTaskGroupTest(TestCase):
     def test_success(self):
         # Given: 태스크 그룹
         # When: 사용자가 태스크 그룹 정보를 수정할 때
-        url = self.url_task_group_url
+        url = self.url_task_group
         response = self.client.put(url, data={"title": "MODIFIED Test Task Group"})
 
         # Then: 응답 코드는 201이고 수정된 태스크 그룹 정보를 반환한다.

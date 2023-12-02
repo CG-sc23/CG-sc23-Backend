@@ -57,7 +57,7 @@ class DeleteTaskGroupTest(TestCase):
             due_date=self.created_at,
         )
 
-        self.url_task_group_url = reverse("task_group_info", args=[self.task_group.id])
+        self.url_task_group = reverse("task_group_info", args=[self.task_group.id])
 
     def api_authentication(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
@@ -68,7 +68,7 @@ class DeleteTaskGroupTest(TestCase):
     def test_success(self):
         # Given: 태스크 그룹
         # When: 사용자가 태스크 그룹을 삭제할 때
-        url = self.url_task_group_url
+        url = self.url_task_group
         response = self.client.delete(url)
 
         # Then: 응답 코드는 200이고 태스크 그룹을 삭제한다.
@@ -92,7 +92,7 @@ class DeleteTaskGroupTest(TestCase):
         self.project_member.save()
 
         # When: 참가자가 마일스톤을 삭제하려고 시도할 때
-        url = self.url_task_group_url
+        url = self.url_task_group
         response = self.client.delete(url)
 
         # Then: 응답 코드는 403이다.

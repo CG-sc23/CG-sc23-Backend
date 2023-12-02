@@ -57,7 +57,7 @@ class GetTaskGroupTest(TestCase):
             due_date=self.created_at,
         )
 
-        self.url_task_group_url = reverse("task_group_info", args=[self.task_group.id])
+        self.url_task_group = reverse("task_group_info", args=[self.task_group.id])
 
         self.expected_response = {
             "success": True,
@@ -92,7 +92,7 @@ class GetTaskGroupTest(TestCase):
     def test_success(self):
         # Given: 태스크 그룹
         # When: 사용자가 태스크 그룹을 조회할 때
-        url = self.url_task_group_url
+        url = self.url_task_group
         response = self.client.get(url)
 
         # Then: 응답 코드는 200이고 태스크 그룹을 반환한다.

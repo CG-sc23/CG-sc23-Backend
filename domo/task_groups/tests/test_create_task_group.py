@@ -46,7 +46,7 @@ class CreateTaskGroupTest(TestCase):
             due_date=self.created_at,
         )
 
-        self.url_task_group_url = reverse("task_group_info", args=[self.milestone.id])
+        self.url_task_group = reverse("task_group_info", args=[self.milestone.id])
 
         self.task_group_payload = {
             "title": "Test Task Group",
@@ -71,7 +71,7 @@ class CreateTaskGroupTest(TestCase):
     def test_success(self):
         # Given: 마일스톤
         # When: 사용자가 마일스톤에 속할 태스크 그룹을 생성할 때
-        url = self.url_task_group_url
+        url = self.url_task_group
         response = self.client.post(url, self.task_group_payload)
 
         response.json()["id"] = 1
@@ -88,7 +88,7 @@ class CreateTaskGroupTest(TestCase):
         self.project_member.save()
 
         # When: 참가자가 마일스톤을 생성하려고 시도할 때
-        url = self.url_task_group_url
+        url = self.url_task_group
         response = self.client.post(url, self.task_group_payload)
 
         # Then: 응답 코드는 403이다.
