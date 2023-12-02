@@ -25,7 +25,7 @@ urlpatterns = [
     path(
         "v1/invitee",
         user.Invitee.as_view(),
-        name="user_inviter",
+        name="user_invitee",
     ),
     path(
         "v1/projects/<int:user_id>",
@@ -35,7 +35,7 @@ urlpatterns = [
     path(
         "v1/invitee/reply",
         user.Invitee.as_view(),
-        name="user_inviter_reply",
+        name="user_invitee_reply",
     ),
     path(
         "v1/search",
