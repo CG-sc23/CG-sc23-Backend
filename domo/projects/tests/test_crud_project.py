@@ -246,6 +246,41 @@ class GetProjectTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), self.expected_response)
 
+    def test_all_info_success(self):
+        # Given: 프로젝트
+        # When: 사용자가 모든 프로젝트 정보를 요청할 때
+        url = reverse("project_all_info")
+        response = self.client.get(url)
+
+        expected_response = {
+            "success": True,
+            "count": 1,
+            "projects": [
+                {
+                    "id": self.project.id,
+                    "title": "Test Project",
+                    "status": "IN_PROGRESS",
+                    "created_at": self.time_check_v,
+                    "due_date": self.time_check_v,
+                    "thumbnail_image": "thumbnail image link",
+                    "short_description": "Test short description",
+                    "members": [
+                        {
+                            "email": self.user.email,
+                            "id": self.user.id,
+                            "name": self.user.name,
+                            "profile_image_link": None,
+                            "profile_image_updated_at": None,
+                        }
+                    ],
+                }
+            ],
+        }
+
+        # Then: 응답 코드는 200이고 모든 프로젝트의 정보를 반환한다.
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), expected_response)
+
 
 class DeleteProjectTest(TestCase):
     def setUp(self):
