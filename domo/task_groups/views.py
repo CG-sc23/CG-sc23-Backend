@@ -154,7 +154,7 @@ class Info(APIView):
         status = request.data.get("status")
         due_date = request.data.get("due_date")
         if not status:
-            status = milestone.status
+            status = task_group.status
 
         try:
             request_data = ModifyTaskGroupRequest(
