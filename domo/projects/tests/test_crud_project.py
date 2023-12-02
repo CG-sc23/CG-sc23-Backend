@@ -103,6 +103,12 @@ class ModifyProjectTest(TestCase):
             thumbnail_image="thumbnail image link",
             status="IN_PROGRESS",
         )
+        self.user.s3resourcereferencecheck_set.create(
+            resource_link="Link1",
+        )
+        self.user.s3resourcereferencecheck_set.create(
+            resource_link="Link2",
+        )
         self.project_member = ProjectMember.objects.create(
             project=self.project,
             user=self.user,
@@ -115,6 +121,7 @@ class ModifyProjectTest(TestCase):
 
         self.project_payload = {
             "title": "MODIFIED Test Project",
+            "description_resource_links": '["Link2", "Link3"]',
         }
 
         self.expected_response = {
@@ -124,7 +131,7 @@ class ModifyProjectTest(TestCase):
             "title": "MODIFIED Test Project",
             "short_description": "Test short description",
             "description": "Test description",
-            "description_resource_links": ["Link1", "Link2"],
+            "description_resource_links": ["Link2", "Link3"],
             "created_at": self.time_check_v,
             "due_date": self.time_check_v,
             "thumbnail_image": "thumbnail image link",
@@ -139,7 +146,8 @@ class ModifyProjectTest(TestCase):
         User.objects.all().delete()
 
     @patch.object(GeneralHandler, "check_resource_links")
-    def test_success(self, mock_s3_handler):
+    @patch.object(GeneralHandler, "remove_resource")
+    def test_success(self, _, mock_s3_handler):
         # Given: 사용자
         # When: 사용자가 프로젝트를 수정할 때
         mock_s3_handler.return_value = True
