@@ -77,3 +77,22 @@ class GetActiveAdLinkTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
         self.assertFalse(response.json()["file_link"] == "")
+
+    def test_ad_deactivate(self):
+        # Given: 노출 횟수가 1회 남은 광고가 존재할 때
+        ad_remaining_exposure_count_one = self.ad_info.copy()
+        ad_remaining_exposure_count_one["remaining_exposure_count"] = 1
+        ad_obj = Ad.objects.create(**ad_remaining_exposure_count_one)
+
+        # When: FrontEnd에서 요청이 오면
+        response = self.client.get(
+            self.url_get_ad_link,
+        )
+
+        # Then: 응답 코드는 200이고, 광고 자료 데이터가 반환된다.
+        # 그리고 광고의 남은 노출 횟수가 0이 되면서, 광고가 비활성화된다.
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        self.assertFalse(response.json()["file_link"] == "")
+        ad_obj.refresh_from_db()
+        self.assertFalse(ad_obj.is_active)

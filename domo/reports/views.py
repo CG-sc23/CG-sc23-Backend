@@ -68,7 +68,7 @@ class Info(APIView):
             logging.error(e)
             return JsonResponse(
                 SimpleFailResponse(
-                    success=False, reason="Error creating task."
+                    success=False, reason="Error creating report."
                 ).model_dump(),
                 status=500,
             )
