@@ -12,4 +12,5 @@ class CreateAdRequest(BaseModel):
 
 class GetAdLinkResponse(BaseModel):
     success: bool
+    site_link: str
     file_link: str

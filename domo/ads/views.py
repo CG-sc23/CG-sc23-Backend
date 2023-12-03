@@ -101,7 +101,11 @@ def get_active_ad_link(request):
         ).count()
         if ads_count == 0:
             return JsonResponse(
-                GetAdLinkResponse(success=True, file_link="").model_dump(),
+                GetAdLinkResponse(
+                    success=True,
+                    file_link="",
+                    site_link="",
+                ).model_dump(),
                 status=200,
             )
 
@@ -148,6 +152,7 @@ def get_active_ad_link(request):
     return JsonResponse(
         GetAdLinkResponse(
             success=True,
+            site_link=will_be_exposed_ad.site_link,
             file_link=will_be_exposed_ad.file_link,
         ).model_dump(),
         status=200,

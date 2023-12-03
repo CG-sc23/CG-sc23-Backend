@@ -13,6 +13,7 @@ class Ad(models.Model):
 
     purpose = models.CharField(max_length=100)
 
+    site_link = models.TextField(default="")
     file_link = models.TextField()
 
     initial_exposure_count = models.IntegerField(null=True, blank=True)
