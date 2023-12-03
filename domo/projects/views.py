@@ -757,7 +757,9 @@ class RecommendUserForProject(APIView):  # pragma: no cover
                 status=404,
             )
 
-        users = User.objects.filter(is_staff=False)
+        users = User.objects.filter(is_staff=False, is_active=True).exclude(
+            projectmember__project=project
+        )
 
         recommended_users = self.recommend_user(users, project)
 
@@ -838,11 +840,11 @@ class RecommendProject(APIView):  # pragma: no cover
         return recommended_project
 
     def get(self, request):
-        projects = Project.objects.all()
-
         try:
+            projects = Project.objects.exclude(projectmember__user=request.user)
             recommended_project = self.recommend_project(projects, request.user)
         except:
+            projects = Project.objects.all()
             recommended_project = self.recommend_project_public(projects)
 
         project_datas = []
