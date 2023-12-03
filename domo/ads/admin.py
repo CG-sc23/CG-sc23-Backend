@@ -14,6 +14,7 @@ class AdAdmin(admin.ModelAdmin):
         "company_email",
         "company_name",
         "purpose",
+        "site_link",
         "file_link",
         "created_at",
     )
@@ -32,6 +33,7 @@ class AdAdmin(admin.ModelAdmin):
                     "company_email",
                     "company_name",
                     "purpose",
+                    "site_link",
                     "file_link",
                     "created_at",
                 )
