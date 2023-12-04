@@ -704,7 +704,7 @@ class AllInfo(APIView):
         )
 
 
-class RecommendUserForProject(APIView):  # pragma: no cover
+class RecommendUserForProject(APIView):
     def recommend_user(self, users, request_project):
         all_user = []
 
@@ -786,7 +786,7 @@ class RecommendUserForProject(APIView):  # pragma: no cover
         )
 
 
-class RecommendProject(APIView):  # pragma: no cover
+class RecommendProject(APIView):
     authentication_classes = [TokenAuthentication]
 
     def recommend_project_public(self, projects):
