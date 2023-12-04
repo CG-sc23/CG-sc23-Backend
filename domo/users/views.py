@@ -426,7 +426,10 @@ class Recommend(APIView):
         return recommended_user
 
     def get(self, request):
-        users = User.objects.filter(is_staff=False)
+        try:
+            users = User.objects.filter(is_staff=False).exclude(id=request.user.id)
+        except User.DoesNotExist:
+            users = User.objects.filter(is_staff=False)
 
         recommended_users = self.recommend_user(users)
 
