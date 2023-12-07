@@ -19,3 +19,11 @@ class Report(models.Model):
 
     created_at = models.DateTimeField()
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "feed"],
+                name="owner_feed_unique",
+            ),
+        ]

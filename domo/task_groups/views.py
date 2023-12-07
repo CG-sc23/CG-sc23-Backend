@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timezone
 
 from common.http_model import SimpleFailResponse, SimpleSuccessResponse
+from django.db.models import Q
 from django.db.transaction import atomic
 from django.http import JsonResponse
 from milestones.models import Milestone
@@ -214,7 +215,12 @@ class Info(APIView):
                 status=404,
             )
 
-        tasks = Task.objects.filter(task_group=task_group, is_public=True)
+        try:
+            tasks = Task.objects.filter(task_group=task_group).filter(
+                Q(is_public=True) | Q(owner=request.user)
+            )
+        except TypeError:
+            tasks = Task.objects.filter(task_group=task_group, is_public=True)
 
         task_datas = []
 
