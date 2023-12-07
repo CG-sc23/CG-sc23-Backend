@@ -27,4 +27,9 @@ class Milestone(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
 
     def simple_info(self):
-        return {"id": self.id, "subject": self.subject, "tags": self.tags}
+        return {
+            "id": self.id,
+            "subject": self.subject,
+            "tags": self.tags,
+            "status": self.status,
+        }
