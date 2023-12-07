@@ -24,6 +24,7 @@ from users.http_model import (
     GetUserInfoResponse,
     GetUserPublicDetailInfoResponse,
     GetUserRecommendResponse,
+    GetUserTaskInfoResponse,
     ModifyUserDetailInfoRequest,
     ReplyProjectInviteRequest,
 )
@@ -205,6 +206,38 @@ class DetailInfo(APIView):
 
         return JsonResponse(
             SimpleSuccessResponse(success=True).model_dump(),
+            status=200,
+        )
+
+
+class TaskInfo(APIView):
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse(
+                SimpleFailResponse(
+                    success=False, reason="User does not exist."
+                ).model_dump(),
+                status=404,
+            )
+        try:
+            if request.user == user:
+                count = user.task_set.count()
+                tasks = [task.detail() for task in user.task_set.all()]
+            else:
+                raise TypeError
+        except TypeError:
+            count = user.task_set.filter(is_public=True).count()
+            tasks = [task.detail() for task in user.task_set.filter(is_public=True)]
+
+        response = GetUserTaskInfoResponse(
+            success=True,
+            count=count,
+            tasks=tasks,
+        )
+        return JsonResponse(
+            response.model_dump(),
             status=200,
         )
 
