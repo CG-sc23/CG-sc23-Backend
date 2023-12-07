@@ -18,6 +18,11 @@ urlpatterns = [
         name="user_public_detail_info",
     ),
     path(
+        "v1/<int:user_id>/tasks",
+        user.TaskInfo.as_view(),
+        name="user_task_info",
+    ),
+    path(
         "v1/inviter",
         user.Inviter.as_view(),
         name="user_inviter",

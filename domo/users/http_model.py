@@ -54,6 +54,12 @@ class GetUserPublicDetailInfoResponse(BaseModel):
     rating: Optional[float] = None
 
 
+class GetUserTaskInfoResponse(BaseModel):
+    success: bool
+    count: int
+    tasks: list[dict]
+
+
 class GetSearchResponse(BaseModel):
     success: bool
     result: list[dict]

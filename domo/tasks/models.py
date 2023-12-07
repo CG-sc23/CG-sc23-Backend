@@ -20,3 +20,13 @@ class Task(models.Model):
     created_at = models.DateTimeField()
 
     is_public = models.BooleanField(default=True)
+
+    def detail(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "tags": self.tags,
+            "created_at": self.created_at,
+            "is_public": self.is_public,
+        }
