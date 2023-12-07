@@ -386,9 +386,13 @@ class Invitee(APIView):
 class Search(APIView):
     def get(self, request):
         request_data = request.GET.get("request-data")
-        users = User.objects.filter(
-            Q(email__istartswith=request_data) | Q(name__istartswith=request_data)
-        ).distinct()
+        users = (
+            User.objects.filter(
+                Q(email__istartswith=request_data) | Q(name__istartswith=request_data)
+            )
+            .exclude(is_staff=True)
+            .distinct()
+        )
 
         result = []
         for user in users:
