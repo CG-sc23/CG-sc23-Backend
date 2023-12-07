@@ -27,9 +27,15 @@ class Milestone(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
 
     def simple_info(self):
+        task_groups = self.taskgroup_set.all()
+        task_group_statuses = []
+        for task_group in task_groups:
+            task_group_statuses.append({"status": task_group.status})
+
         return {
             "id": self.id,
             "subject": self.subject,
             "tags": self.tags,
             "status": self.status,
+            "task_groups": task_group_statuses,
         }
