@@ -241,7 +241,8 @@ class Info(APIView):
                 or task.description_resource_links
             )
             task.tags = request_data.tags or task.tags
-            task.is_public = request_data.is_public or task.is_public
+            if request_data.is_public is not None:
+                task.is_public = request_data.is_public
             task.save()
 
         except Exception as e:
