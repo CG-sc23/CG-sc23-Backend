@@ -19,8 +19,8 @@ class CreateTaskGroupResponse(BaseModel):
 
 
 class ModifyTaskGroupRequest(BaseModel):
-    title: str
-    status: str
+    title: Optional[str] = None
+    status: Optional[str] = None
     due_date: Optional[datetime] = None
 
 
