@@ -167,7 +167,7 @@ class Info(APIView):
                 ).model_dump(),
                 status=403,
             )
-
+        asdf = "asdf"
         title = request.data.get("title", None)
         description = request.data.get("description", None)
         description_resource_links = request.data.get(
